@@ -1,10 +1,13 @@
-import java.sql.Date;
-
 public class Product {
-    private long productID;
-    private int phoneNumber;
-    private String sellerName;
-    private Address sellerAddress;
-    private boolean verifiedStatus;
-    private Date sellerCreationDate;
+    private long     product_id;
+    private long     seller_id;
+
+    private String   product_name;
+    private float    product_price;
+    private String   product_type;
+
+    private float    average_rating;
+    private int      quantity_stocked;
+    private boolean  listed_status;
+    private String   description;
 }
