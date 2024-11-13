@@ -1,3 +1,4 @@
+package schemaobjects;
 import java.sql.Date;
 
 import enums.OrderStatus;

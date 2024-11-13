@@ -1,3 +1,4 @@
+package schemaobjects;
 public class Product {
     private long     product_id;
     private long     seller_id;
