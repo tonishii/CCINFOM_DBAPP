@@ -19,11 +19,10 @@ public class Driver {
             String username = "root"; // MySQL credentials
             String password = ""; // put ur password here
             Connection conn;
-            Class.forName("com.mysql.cj.jdbc.Driver");
             conn = DriverManager.getConnection(url, username, password);
             
             PreparedStatement pstmt = conn.prepareStatement("INSERT INTO sellers (seller_id, seller_name, seller_address, seller_verified_status,seller_phone_number, seller_creation_date) VALUES(?, ?, ?, ?, ?, ?)");
-            pstmt.setInt(1, 1);
+            pstmt.setInt(1, 1); 
             pstmt.setString(2, "john");
             pstmt.setString(3, "john");
             pstmt.setInt(4,1);

@@ -13,25 +13,17 @@
         <title>Register Seller Processing</title>
     </head>
     <body>
-        <form action="index.html">
-            <jsp:useBean id="account" class="schemaobjects.Seller" scope="session"/>
-            <%
-                String v_sName = request.getParameter("sName");
-                String v_sAddress = request.getParameter("sAddress");
-                String v_sPhone = request.getParameter("sPhone");
-                account.seller_name=v_sName;
-                account.seller_address=v_sAddress;
-                account.seller_phone_number=v_sPhone;
-                int status = account.signUp();
-                if (status!=0){
-            %>
-                    <h1>Registering Seller Successful</h1>
-            <%  } else {
-            %>
-                    <h1>Registering Seller Failed</h1>
-            <%  }
-            %>
-            <input type="submit" value="return to home menu">
-        </form>
+        <jsp:useBean id="sAccount" class="schemaobjects.Seller" scope="session"/>
+        <%
+            String v_sName = request.getParameter("sName");
+            String v_sAddress = request.getParameter("sAddress");
+            String v_sPhone = request.getParameter("sPhone");
+            sAccount.seller_name=v_sName;
+            sAccount.seller_address=v_sAddress;
+            sAccount.seller_phone_number=v_sPhone;
+            int id = sAccount.signUp();
+            session.setAttribute("sId", id);
+            response.sendRedirect("register_SellerResult.jsp");
+        %>
     </body>
 </html>
