@@ -41,7 +41,7 @@ public class Seller implements Account {
         try {
             String url= "jdbc:mysql://localhost:3306/mydb"; // table details
             String username = "root"; // MySQL credentials
-            String password = "guycool123"; // put ur password here lol
+            String password = ""; // put ur password here lol
             int id=0;
             Connection conn;
             Class.forName("com.mysql.cj.jdbc.Driver");
