@@ -10,11 +10,22 @@ Click nbfs://nbhost/SystemFileSystem/Templates/JSP_Servlet/Html.html to edit thi
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
     </head>
     <body>
-        <h3>Input ID:</h3>
-        <form> <!--action=".jsp"-->
+        <h3>Input Login Details:</h3>
+        <form action="accountLogin_processing.jsp"> <!--action=".jsp"-->
             <div>
-            <label for="accountId"> ID (number only pls):</label>
-            <input type="number" id="accountId" name="accountId" placeholder="123123123" required>
+                Select Account Type: <br>
+                <select id="accType" name="accType">
+                    <option value="1">User</option>
+                    <option value="2">Seller</option>
+                    <option value="3">Courier</option>
+                </select>
+            </div>
+            
+            <br>
+            
+            <div>
+                ID: <br>
+                <input type="number" id="accountId" name="accountId" placeholder="123123123" required>
             </div>
 
             <br>

@@ -9,11 +9,39 @@ public class Seller implements Account {
     public boolean seller_verified_status;
 
     @Override
+    public int login(int id){
+         try {
+            String url= "jdbc:mysql://localhost:3306/mydb"; // table details
+            String username = "root"; // MySQL credentials
+            String password = ""; // put ur password here lol
+            Connection conn;
+            Class.forName("com.mysql.cj.jdbc.Driver");
+            conn = DriverManager.getConnection(url, username, password);
+            
+            Statement statement = conn.createStatement();
+            String query = "select user_id from users";
+            
+            ResultSet result = statement.executeQuery(query);
+            
+            while (result.next()) {
+                if(id==result.getInt("user_id")){
+                    return 1;
+                }
+            }
+            return 0;
+            
+        } catch (Exception e){
+            System.out.println(e.getMessage());
+            return 0;
+        }
+    }
+    
+    @Override
     public int signUp() {
         try {
             String url= "jdbc:mysql://localhost:3306/mydb"; // table details
             String username = "root"; // MySQL credentials
-            String password = ""; // put ur password here lol
+            String password = "guycool123"; // put ur password here lol
             int id=0;
             Connection conn;
             Class.forName("com.mysql.cj.jdbc.Driver");
