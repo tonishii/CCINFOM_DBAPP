@@ -9,6 +9,15 @@ public class Courier implements Account {
     private String   courier_address;
     private boolean  courier_verified_status;
 
+//    public Courier(long courier_id, String courier_name, String courier_email_address, 
+//            String courier_address, boolean courier_verified_status) {
+//        this.courier_id = courier_id;
+//        this.courier_name = courier_name;
+//        this.courier_email_address = courier_email_address;
+//        this.courier_address = courier_address;
+//        this.courier_verified_status = courier_verified_status;
+//    }
+    
     @Override
     public void signUp(Scanner scn) {
         // Auto generate courierID
@@ -45,5 +54,42 @@ public class Courier implements Account {
                     break;
             }
         }
+    }
+    
+    public void setName(String courier_name) {
+        this.courier_name = courier_name;
+    }
+    
+    public void setEmailAddress(String courier_email_address) {
+        this.courier_email_address = courier_email_address;
+    }
+    
+    public void setAddress(String courier_address) {
+        this.courier_address = courier_address;
+    }
+    
+    public void updateStatus() {
+        // checking fields
+        this.courier_verified_status = true;
+    }
+    
+    public long getID() {
+        return this.courier_id;
+    }
+    
+    public String getName() {
+        return this.courier_name;
+    }
+    
+    public String getEmailAddress() {
+        return this.courier_email_address;
+    }
+    
+    public String getAddress() {
+        return this.courier_address;
+    }
+    
+    public boolean getStatus() {
+        return this.courier_verified_status;
     }
 }
