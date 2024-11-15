@@ -1,9 +1,9 @@
 package schemaobjects;
-import java.sql.Date;
+import java.sql.*;
 import java.util.Scanner;
 
 public class Seller implements Account {
-    private long    seller_id;
+    private int    seller_id;
     private String  seller_name;
     private String  seller_address;
     private String  seller_phone_number;
@@ -19,7 +19,38 @@ public class Seller implements Account {
 //        this.seller_creation_date = seller_creation_date;
 //        this.seller_verified_status = seller_verified_status;
 //    }
-    
+
+    @Override
+    public int login(Scanner scn){
+        System.out.print("Enter Account ID: ");
+        int id = Integer.parseInt(scn.nextLine());
+
+        try {
+            String url= "jdbc:mysql://localhost:3306/mydb"; // table details
+            String username = "root"; // MySQL credentials
+            String password = ""; // put ur password here lol
+            Connection conn;
+            Class.forName("com.mysql.cj.jdbc.Driver");
+            conn = DriverManager.getConnection(url, username, password);
+
+            Statement statement = conn.createStatement();
+            String query = "select user_id from users";
+
+            ResultSet result = statement.executeQuery(query);
+
+            while (result.next()) {
+                if(id==result.getInt("user_id")){
+                    return 1;
+                }
+            }
+            return 0;
+
+        } catch (Exception e){
+            System.out.println(e.getMessage());
+            return 0;
+        }
+    }
+
     @Override
     public void signUp(Scanner scn) {
         // Auto generate seller ID
@@ -38,6 +69,48 @@ public class Seller implements Account {
         seller_creation_date = new Date(ms);
 
         seller_verified_status = false;
+
+        try {
+            String url= "jdbc:mysql://localhost:3306/mydb"; // table details
+            String username = "root"; // MySQL credentials
+            String password = ""; // put ur password here lol
+
+            Connection conn;
+            Class.forName("com.mysql.cj.jdbc.Driver");
+            conn = DriverManager.getConnection(url, username, password);
+
+            PreparedStatement pstmt = conn.prepareStatement("SELECT MAX(seller_id) AS Id FROM mydb.sellers");
+            ResultSet myRs = pstmt.executeQuery();
+            while (myRs.next()) {
+                seller_id = myRs.getInt("Id");
+            }
+            if (seller_id==0){
+                pstmt = conn.prepareStatement("INSERT INTO sellers (seller_id, seller_name, seller_address, seller_verified_status,seller_phone_number, seller_creation_date) VALUES(?, ?, ?, ?, ?, ?)");
+                pstmt.setInt(1, 1);
+                pstmt.setString(2, seller_name);
+                pstmt.setString(3, seller_address);
+                pstmt.setBoolean(4,seller_verified_status);
+                pstmt.setString(5,seller_phone_number);
+                pstmt.setTimestamp(6,new java.sql.Timestamp(System.currentTimeMillis()));
+                pstmt.executeUpdate();
+            }
+            else{
+                pstmt = conn.prepareStatement("INSERT INTO sellers (seller_id, seller_name, seller_address, seller_verified_status,seller_phone_number, seller_creation_date) VALUES(?, ?, ?, ?, ?, ?)");
+                pstmt.setInt(1, seller_id+1);
+                pstmt.setString(2, seller_name);
+                pstmt.setString(3, seller_address);
+                pstmt.setBoolean(4,seller_verified_status);
+                pstmt.setString(5,seller_phone_number);
+                pstmt.setTimestamp(6,new java.sql.Timestamp(System.currentTimeMillis()));
+                pstmt.executeUpdate();
+            }
+
+            pstmt.close();
+            conn.close();
+
+        } catch (Exception e){
+            System.out.println(e.getMessage());
+        }
     }
 
     @Override
@@ -82,7 +155,7 @@ public class Seller implements Account {
         this.seller_verified_status = true;
     }
     
-    public long getID() {
+    public int getID() {
         return this.seller_id;
     }
     

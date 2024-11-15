@@ -48,9 +48,13 @@ public class Driver {
         Account account = selectAccountType(scn);
 
         if (isLogin == true) {
-            System.out.print("Enter username: ");
-            String id = scn.nextLine();
-
+            int login_status = account.login(scn);
+            if (login_status==1){
+                System.out.println("good");
+            }
+            else{
+                System.out.println("bad");
+            }
             // account =            GET THE ACCOUNT FROM THE DB USING ID
         } else {
             // Create a new account based on the account
