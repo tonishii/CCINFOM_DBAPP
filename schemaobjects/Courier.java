@@ -100,54 +100,125 @@ public class Courier implements Account {
             "Select option: ");
 
             switch (scn.nextLine().trim()) {
-                case "1":
-                    break;
-                case "2":
-                    break;
-                case "3":
-                    break;
-                case "4":
+                case "1" -> showOngoingOrders(conn);
+
+                case "2" -> {
+
+                }
+
+                case "3" -> {
+                    boolean goBack = true;
+                    while (goBack) {
+                        System.out.printf("Courier Details:\n[1] Name: %s\n[2] Email Address: %s\n[3] Address %s\n[4] Go back",
+                                courier_name, courier_email_address, courier_email_address);
+                        System.out.print("Enter option to edit: ");
+
+                        switch (scn.nextLine()) {
+                            case "1":
+                                System.out.print("Enter new courier name: ");
+                                this.courier_name = scn.nextLine();
+                                break;
+                            case "2":
+                                System.out.print("Enter new email address: ");
+                                this.courier_email_address = scn.nextLine();
+                                break;
+                            case "3":
+                                System.out.print("Enter new courier address: ");
+                                this.courier_address = scn.nextLine();
+                                break;
+                            case "4":
+                                goBack = false;
+                            default:
+                                System.out.print("Error: Enter valid option.");
+                        }
+                    }
+                }
+                case "4" -> {
                     return;
-                default:
-                    break;
+                }
+
+                default -> {
+                    System.out.println("Error: Enter valid option.");
+                }
             }
         }
     }
-    
-    public void setName(String courier_name) {
-        this.courier_name = courier_name;
+
+    public void showOngoingOrders(Connection conn) {
+        try {
+            String orderQuery =
+            """
+            SELECT order_id, user_id, purchase_date, total_price, order_status, receive_date
+            FROM orders
+            WHERE courier_id = ? AND order_status NOT IN ('Completed', 'Delivered');
+            """;
+
+            String returnQuery =
+            """
+            SELECT r.order_id, r.product_id, r.return_reason, r.return_description, r.return_date, r.return_status
+            FROM returns r
+            WHERE r.courier_id = ?;
+            """;
+
+            PreparedStatement ordersStmt = conn.prepareStatement(orderQuery);
+            ordersStmt.setInt(1, this.courier_id);
+            ResultSet ordersResultSet = ordersStmt.executeQuery();
+
+            PreparedStatement returnsStmt = conn.prepareStatement(returnQuery);
+            returnsStmt.setInt(1, this.courier_id);
+            ResultSet returnsResultSet = returnsStmt.executeQuery();
+
+            System.out.println("Ongoing Orders:");
+            System.out.println("Order ID | User ID | Purchase Date | Total Price | Order Status | Receive Date");
+            while (ordersResultSet.next()) {
+                int orderId = ordersResultSet.getInt("order_id");
+                int userId = ordersResultSet.getInt("user_id");
+                Date purchaseDate = ordersResultSet.getDate("purchase_date");
+                float totalPrice = ordersResultSet.getFloat("total_price");
+                String orderStatus = ordersResultSet.getString("order_status");
+                Date receiveDate = ordersResultSet.getDate("receive_date");
+
+                System.out.printf("%d | %d | %s | %f | %s | %s\n",
+                orderId, userId, purchaseDate, totalPrice, orderStatus, receiveDate);
+            }
+
+            System.out.println("\nOngoing Returns:");
+            System.out.println("Order ID | Product ID | Return Reason | Return Description | Return Date | Return Status");
+            while (returnsResultSet.next()) {
+                int orderId = returnsResultSet.getInt("order_id");
+                int productId = returnsResultSet.getInt("product_id");
+                String returnReason = returnsResultSet.getString("return_reason");
+                String returnDescription = returnsResultSet.getString("return_description");
+                Date returnDate = returnsResultSet.getDate("return_date");
+                String returnStatus = returnsResultSet.getString("return_status");
+
+                System.out.printf("%d | %d | %s | %s | %s | %s\n",
+                orderId, productId, returnReason, returnDescription, returnDate, returnStatus);
+            }
+
+        } catch (Exception e) {
+            System.err.println("Error: " + e.getMessage());
+        }
     }
-    
-    public void setEmailAddress(String courier_email_address) {
-        this.courier_email_address = courier_email_address;
-    }
-    
-    public void setAddress(String courier_address) {
-        this.courier_address = courier_address;
-    }
-    
+
     public void updateStatus() {
         // checking fields
         this.courier_verified_status = true;
     }
+
+    public void setName(String courier_name) { this.courier_name = courier_name; }
     
-    public int getID() {
-        return this.courier_id;
-    }
+    public void setEmailAddress(String courier_email_address) { this.courier_email_address = courier_email_address; }
     
-    public String getName() {
-        return this.courier_name;
-    }
+    public void setAddress(String courier_address) { this.courier_address = courier_address; }
     
-    public String getEmailAddress() {
-        return this.courier_email_address;
-    }
+    public int getID() { return this.courier_id; }
     
-    public String getAddress() {
-        return this.courier_address;
-    }
+    public String getName() { return this.courier_name; }
     
-    public boolean getStatus() {
-        return this.courier_verified_status;
-    }
+    public String getEmailAddress() { return this.courier_email_address; }
+    
+    public String getAddress() { return this.courier_address; }
+    
+    public boolean getStatus() { return this.courier_verified_status; }
 }

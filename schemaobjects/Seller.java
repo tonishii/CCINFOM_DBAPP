@@ -128,8 +128,7 @@ public class Seller implements Account {
 
                 case "5": // Exit
                     return;
-                default:
-                    break;
+                default: System.out.println("Error: Enter valid option.");
             }
         }
     }
