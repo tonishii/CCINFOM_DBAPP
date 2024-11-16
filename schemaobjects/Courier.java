@@ -209,6 +209,38 @@ public class Courier implements Account {
         this.courier_verified_status = true;
     }
 
+    public static int assignCourier(Connection conn) {
+        try {
+            String query = """
+                SELECT courier_pendings.courier_id, SUM(order_count) AS total_orders
+                FROM (
+                    SELECT o.courier_id, COUNT(o.order_id) AS order_count
+                    FROM orders o
+                    LEFT JOIN `returns` r ON r.courier_id = o.courier_id
+                    GROUP BY o.courier_id
+                    UNION
+                    SELECT r.courier_id, COUNT(r.order_id) AS order_count
+                    FROM `returns` r
+                    RIGHT JOIN orders o ON r.courier_id = o.courier_id
+                    GROUP BY r.courier_id
+                ) courier_pendings
+                GROUP BY courier_pendings.courier_id
+                ORDER BY total_orders ASC
+                LIMIT 1;
+                           """;
+            // very much not yet tested
+
+            PreparedStatement ps = conn.prepareStatement(query);
+            ResultSet rs = ps.executeQuery();
+            rs.next();
+
+            return rs.getInt("courier_pendings.courier_id");
+        } catch (Exception e) {
+            System.out.println("Error in assigning courier: " + e);
+        }
+        return -1;
+    }
+    
     public void setName(String courier_name) { this.courier_name = courier_name; }
     public void setEmailAddress(String courier_email_address) { this.courier_email_address = courier_email_address; }
     public void setAddress(String courier_address) { this.courier_address = courier_address; }
