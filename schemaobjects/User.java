@@ -112,6 +112,8 @@ public class User implements Account {
 
     @Override
     public void displayView(Scanner scn, Connection conn) {
+        ArrayList<OrderContent> shoppingCart = new ArrayList<>();
+
         while (true) {
             System.out.print(
             "[1] Shopping\n" +
@@ -126,9 +128,10 @@ public class User implements Account {
 
             switch (scn.nextLine().trim()) {
                 case "1":
-                    browseOptions(scn, conn);   // THIS RETURNS A LIST OF ORDER CONTENTS AKA SHOPPING CART
+                    shoppingCart.addAll(browseOptions(scn, conn));   // THIS RETURNS A LIST OF ORDER CONTENTS AKA SHOPPING CART
                     break;
                 case "2":
+                    viewShoppingCart(scn, shoppingCart);
                     break;
                 case "3":
                     break;
@@ -199,7 +202,7 @@ public class User implements Account {
                             scn.nextLine();
 
                             if (orderQuantity <= selectedProduct.getQuantity()) {
-                                shoppingCart.add(new OrderContent(selectedProductId, orderQuantity));
+                                shoppingCart.add(new OrderContent(selectedProductId, selectedProduct.getName(),orderQuantity, selectedProduct.getPrice()));
                                 break;
                             } else {
                                 System.out.println("Error: Only " + selectedProduct.getQuantity() + " are in stock");
@@ -223,24 +226,25 @@ public class User implements Account {
         ArrayList<Integer> sellerIDList = new ArrayList<>();
 
         String query = """
-        SELECT seller_id,
+        SELECT products.seller_id, sellers.seller_name,
         COUNT(*) AS product_count,
-        SUM(quantity_stocked) AS total_quantity
+        SUM(products.quantity_stocked) AS total_quantity
         FROM products
-        GROUP BY seller_id;
+        LEFT JOIN sellers ON products.seller_id = sellers.seller_id
+        GROUP BY products.seller_id;
         """;
 
         PreparedStatement pstmt = conn.prepareStatement(query);
         ResultSet resultSet = pstmt.executeQuery();
 
-        System.out.println("Seller ID | Product Count | Total Quantity");
+        System.out.println("Seller ID | Seller Name | Product Count | Total Quantity");
 
         while (resultSet.next()) {
             int sellerId = resultSet.getInt("seller_id");
+            String sellerName = resultSet.getString("seller_name");
             int productCount = resultSet.getInt("product_count");
             int totalQuantity = resultSet.getInt("total_quantity");
-            System.out.println(sellerId + " | " + productCount + " | " + totalQuantity);
-
+            System.out.printf("%d | %s | %d | %d\n", sellerId, sellerName, productCount, totalQuantity);
             sellerIDList.add(sellerId);
         }
 
@@ -344,6 +348,58 @@ public class User implements Account {
             resultSet.getString("description")
             ));
         }
+    }
+
+    public void viewShoppingCart(Scanner sc, ArrayList<OrderContent> cart) {
+        do {
+            if(cart.isEmpty()) {
+                System.out.println("Cart Empty. Returning...");
+                return;
+            }
+            System.out.println("Product ID | Product Name | Quantity | Total Price");
+            for(OrderContent product : cart) {
+                System.out.printf("%d | %s | %d | Php %.2f\n", product.getProductID(), product.getProductName(), product.getQuantity(), (product.getPriceEach()*product.getQuantity()) );
+            }
+            System.out.print("""
+                 Options:
+                      [1] Edit Quantity
+                      [2] Remove Product
+                      [3] Exit
+                 Select Option: \s"""
+            );
+            try {
+                int option = Integer.parseInt(sc.nextLine());
+                assert (option > 0 && option <= 3);
+                if(option == 3)
+                    return;
+                System.out.printf("Enter Product ID %s: ", option == 1 ? "to edit" : "to remove");
+                int productID = Integer.parseInt(sc.nextLine());
+                OrderContent product = cart.stream().filter(o -> o.getProductID() == productID).findFirst().orElse(null);
+                if(option == 1) {
+                    System.out.print("Enter desired quantity: ");
+                    int qty = Integer.parseInt(sc.nextLine());
+                    assert qty >= 0;
+                    if(qty > 0) {
+                        cart.get(cart.indexOf(product)).setQuantity(qty);
+                        System.out.println("Product quantity edited.");
+                    }
+                    else {
+                        cart.remove(product);
+                        System.out.println("Product removed due to zero quantity.");
+                    }
+                }
+                else {
+                    cart.remove(product);
+                    System.out.println("Product removed.");
+                }
+            }
+            catch (Exception e) {
+                System.out.println("Error: Invalid Input");
+            }
+            finally {
+                System.out.print("Do you wish to continue? (y/n): ");
+            }
+        } while(sc.nextLine().trim().equals("y"));
     }
 
     public void updateStatus() {

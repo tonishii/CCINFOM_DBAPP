@@ -14,7 +14,6 @@ public class MainMenu extends JFrame {
     private JButton signup;
     private JButton exit;
 
-
     private JPanel connPanel;
     private JLabel userText;
     private JLabel passText;
@@ -72,7 +71,7 @@ public class MainMenu extends JFrame {
         this.setVisible(true);
     }
 
-    private boolean showOptions() {
+    public void showOptions() {
         this.setTitle("Main Menu");
         this.setSize(500,500);
         this.setLayout(new BorderLayout(10,10));
@@ -103,7 +102,6 @@ public class MainMenu extends JFrame {
 
         this.add(menu);
         this.remove(connPanel);
-        return true;
     }
 
     public JButton getSubmit() {
