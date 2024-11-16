@@ -35,6 +35,7 @@ public class Seller implements Account {
                 this.seller_phone_number = result.getString("seller_phone_number");
                 this.seller_creation_date = result.getDate("seller_creation_date");
 
+                System.out.println("Welcome! " + seller_name);
                 return true; // Login successful
             }
 
@@ -59,11 +60,12 @@ public class Seller implements Account {
         seller_verified_status = false;
 
         try {
-            String query = """
-                INSERT INTO sellers (seller_id, seller_name, seller_address, seller_verified_status, seller_phone_number, seller_creation_date)
-                SELECT IFNULL(MAX(seller_id), 0) + 1, ?, ?, ?, ?, ?
-                FROM sellers
-                """;
+            String query =
+            """
+            INSERT INTO sellers (seller_id, seller_name, seller_address, seller_verified_status, seller_phone_number, seller_creation_date)
+            SELECT IFNULL(MAX(seller_id), 0) + 1, ?, ?, ?, ?, ?
+            FROM sellers
+            """;
 
             try (PreparedStatement pstmt = conn.prepareStatement(query)) {
                 pstmt.setString(1, seller_name);
@@ -75,7 +77,7 @@ public class Seller implements Account {
                 pstmt.executeUpdate();
             }
 
-            System.out.println("Seller account created successfully!");
+            System.out.println("Welcome! " + seller_name);
 
         } catch (Exception e) {
             System.out.println("Error during seller sign-up: " + e.getMessage());

@@ -43,6 +43,7 @@ public class User implements Account {
                 this.user_firstname = result.getString("user_firstname");
                 this.user_lastname = result.getString("user_lastname");
 
+                System.out.println("Welcome! " + user_name);
                 return true; // Login successful
             }
 
@@ -55,9 +56,6 @@ public class User implements Account {
 
     @Override
     public void signUp(Scanner scn, Connection conn) {
-        // Auto generate user ID
-        user_id = 0;
-
         System.out.print("Enter user account name: ");
         user_name  = scn.nextLine();
 
@@ -73,44 +71,31 @@ public class User implements Account {
         System.out.print("Enter phone number:  ");
         user_phone_number = scn.nextLine();
 
-        long ms = System.currentTimeMillis();
-        user_creation_date = new Date(ms);
-        
+        user_creation_date = new Date(System.currentTimeMillis());
         user_verified_status = false;
 
         try {
-            PreparedStatement pstmt = conn.prepareStatement("SELECT MAX(user_id) AS Id FROM mydb.users");
-            ResultSet myRs = pstmt.executeQuery();
-            while (myRs.next()) {
-                user_id = myRs.getInt("Id");
-            }
-            if (user_id==0){
-                pstmt = conn.prepareStatement("INSERT INTO users (user_id, user_name, user_phone_number, user_address, user_verified_status, user_creation_date, user_firstname, user_lastname) "
-                        + "VALUES(?, ?, ?, ?, ?, ?, ?, ?)");
-                pstmt.setInt(1, 1);
-                pstmt.setString(2, user_name);
-                pstmt.setString(3, user_phone_number);
-                pstmt.setString(4, user_address);
-                pstmt.setBoolean(5, user_verified_status);
-                pstmt.setTimestamp(6, new java.sql.Timestamp(System.currentTimeMillis()));
-                pstmt.setString(7, user_firstname);
-                pstmt.setString(8, user_lastname);
-                pstmt.executeUpdate();
-            } else {
-                pstmt = conn.prepareStatement("INSERT INTO users (user_id, user_name, user_phone_number, user_address, user_verified_status, user_creation_date, user_firstname, user_lastname) "
-                        + "VALUES(?, ?, ?, ?, ?, ?, ?, ?)");
-                pstmt.setInt(1, user_id+1);
-                pstmt.setString(2, user_name);
-                pstmt.setString(3, user_phone_number);
-                pstmt.setString(4, user_address);
-                pstmt.setBoolean(5, user_verified_status);
-                pstmt.setTimestamp(6, new java.sql.Timestamp(System.currentTimeMillis()));
-                pstmt.setString(7, user_firstname);
-                pstmt.setString(8, user_lastname);
+            String query =
+            """
+            INSERT INTO users (user_id, user_name, user_phone_number, user_address, user_verified_status, user_creation_date, user_firstname, user_lastname)
+            SELECT IFNULL(MAX(user_id), 0) + 1, ?, ?, ?, ?, ?, ?, ?
+            FROM users
+            """;
+
+            try (PreparedStatement pstmt = conn.prepareStatement(query)) {
+                pstmt.setString(1, user_name);
+                pstmt.setString(2, user_phone_number);
+                pstmt.setString(3, user_address);
+                pstmt.setBoolean(4, user_verified_status);
+                pstmt.setTimestamp(5, new java.sql.Timestamp(user_creation_date.getTime()));
+                pstmt.setString(6, user_firstname);
+                pstmt.setString(7, user_lastname);
+
                 pstmt.executeUpdate();
             }
 
-            pstmt.close();
+            System.out.println("Welcome! " + user_name);
+
         } catch (Exception e){
             System.out.println(e.getMessage());
         }

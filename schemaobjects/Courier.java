@@ -32,6 +32,7 @@ public class Courier implements Account {
                 this.courier_address = result.getString("courier_address");
                 this.courier_verified_status = result.getBoolean("courier_verified_status");
 
+                System.out.println("Welcome! " + courier_name);
                 return true; // Login successful
             }
 
@@ -44,9 +45,6 @@ public class Courier implements Account {
 
     @Override
     public void signUp(Scanner scn, Connection conn) {
-        // Auto generate courierID
-        courier_id = 0;
-
         System.out.print("Enter courier name: ");
         courier_name = scn.nextLine();
 
@@ -59,31 +57,24 @@ public class Courier implements Account {
         courier_verified_status = false;
 
         try {
-            PreparedStatement pstmt = conn.prepareStatement("SELECT MAX(courier_id) AS Id FROM mydb.couriers");
-            ResultSet myRs = pstmt.executeQuery();
-            while (myRs.next()) {
-                courier_id = myRs.getInt("Id");
-            }
-            if (courier_id==0){
-                pstmt = conn.prepareStatement("INSERT INTO couriers (courier_id, courier_name, courier_email_address, courier_address, courier_verified_status) VALUES(?, ?, ?, ?, ?)");
-                pstmt.setInt(1, 1);
-                pstmt.setString(2, courier_name);
-                pstmt.setString(3, courier_email_address);
-                pstmt.setString(4, courier_address);
-                pstmt.setBoolean(5, courier_verified_status);
-                pstmt.executeUpdate();
-            }
-            else{
-                pstmt = conn.prepareStatement("INSERT INTO couriers (courier_id, courier_name, courier_email_address, courier_address, courier_verified_status) VALUES(?, ?, ?, ?, ?)");
-                pstmt.setInt(1, courier_id+1);
-                pstmt.setString(2, courier_name);
-                pstmt.setString(3, courier_email_address);
-                pstmt.setString(4, courier_address);
-                pstmt.setBoolean(5, courier_verified_status);
+            String query =
+            """
+            INSERT INTO couriers (courier_id, courier_name, courier_email_address, courier_address, courier_verified_status)
+            SELECT IFNULL(MAX(courier_id), 0) + 1, ?, ?, ?, ?
+            FROM couriers
+            """;
+
+            try (PreparedStatement pstmt = conn.prepareStatement(query)) {
+                pstmt.setString(1, courier_name);
+                pstmt.setString(2, courier_email_address);
+                pstmt.setString(3, courier_address);
+                pstmt.setBoolean(4, courier_verified_status);
+
                 pstmt.executeUpdate();
             }
 
-            pstmt.close();
+            System.out.println("Welcome! " + courier_name);
+
         } catch (Exception e){
             System.out.println(e.getMessage());
         }
