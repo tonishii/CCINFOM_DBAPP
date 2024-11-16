@@ -4,16 +4,16 @@ import java.sql.Date;
 import enums.OrderStatus;
 
 public class Order {
-    private long        order_id;
-    private long        user_id;
-    private long        courier_id;
+    private int        order_id;
+    private int        user_id;
+    private int        courier_id;
 
     private Date        purchase_date;
     private float       total_price;
     private OrderStatus order_status;
     private Date        receive_date;
     
-    public Order(long user_id) {
+    public Order(int user_id) {
         this.user_id = user_id;
         // sql to generate order id and calculate for courier id
         long ms = System.currentTimeMillis();
@@ -24,13 +24,13 @@ public class Order {
     public void setReceiveDate(Date date) {
         this.receive_date = date;
     }
-    public long getOrderID() {
+    public int getOrderID() {
         return this.order_id;
     }
-    public long getUserID() {
+    public int getUserID() {
         return this.user_id;
     }
-    public long getCourierID() {
+    public int getCourierID() {
         return this.courier_id;
     }
     public Date getPurchaseDate() {

@@ -82,8 +82,8 @@ public class Product {
     public void setType(String product_type) { this.product_type = product_type; }
     public void setQuantity(int quantity_stocked) { this.quantity_stocked = quantity_stocked; }
     public void setDescription(String description) { this.description = description; }
-    public long getProductID() { return this.product_id; }
-    public long getSellerID() { return this.seller_id; }
+    public int getProductID() { return this.product_id; }
+    public int getSellerID() { return this.seller_id; }
     public String getName() { return this.product_name; }
     public float getPrice() { return this.product_price; }
     public String getType() { return this.product_type; }

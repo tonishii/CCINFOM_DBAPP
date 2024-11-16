@@ -1,6 +1,8 @@
 package schemaobjects;
 import java.sql.*;
 import java.util.Scanner;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -127,12 +129,140 @@ public class Seller implements Account {
                     product.updateListedStatus();
                     System.out.print("Enter product description: ");
                     product.setDescription(scn.nextLine());
-
+                    
                     product.sendToDB(conn);
                     break;
                 case "2":
+                    try {
+                        String query = 
+                        "SELECT product_id, product_name, product_price, product_type, average_rating, quantity_stocked, listed_status, description " +
+                        "FROM products " +
+                        "WHERE seller_id = ?";
+                    
+                        PreparedStatement pstmt = conn.prepareStatement(query);
+                        pstmt.setInt(1, this.seller_id);
+                        ResultSet resultSet = pstmt.executeQuery();
+                        
+                        System.out.println("Product ID | Product Name | Product Price | Product Type | Avg. Rating | Quantity | Listed? | Description");
+                        
+                        while (resultSet.next()) {
+                            System.out.printf("%d | %s | %f | %s | %f | %d | %b | %s\n", resultSet.getInt("product_id"), resultSet.getString("product_name"),
+                                    resultSet.getFloat("product_price"), resultSet.getString("product_type"), resultSet.getFloat("average_rating"),
+                                    resultSet.getInt("quantity_stocked"), resultSet.getBoolean("listed_status"), resultSet.getString("description"));
+                            
+                        }
+                        
+                        System.out.print("Enter product ID: ");
+                        int id = scn.nextInt();
+                        scn.nextLine();
+                        
+                        query = "SELECT product_name, product_price, product_type, average_rating, quantity_stocked, listed_status, description " +
+                        "FROM products " +
+                        "WHERE product_id = ?";
+                        
+                        pstmt = conn.prepareStatement(query);
+                        pstmt.setInt(1, id);
+                        resultSet = pstmt.executeQuery();
+                        
+                        resultSet.next();
+                        product = new Product(id, this.seller_id, resultSet.getString("product_name"),
+                                    resultSet.getFloat("product_price"), resultSet.getString("product_type"), resultSet.getFloat("average_rating"),
+                                    resultSet.getInt("quantity_stocked"), resultSet.getBoolean("listed_status"), resultSet.getString("description"));
+                        
+                        System.out.println("Which field to edit?\n[1] Product Name\n[2] Product Price\n[3] Product Type");
+                        System.out.print("[4] Quantity\n[5] Description\nChoice: ");
+                        
+                        switch (scn.nextLine().trim()) {
+                            case "1":
+                                System.out.print("Enter product name: ");
+                                product.setName(scn.nextLine());
+                                break;
+                            case "2":
+                                System.out.print("Enter product price: ");
+                                product.setPrice(scn.nextFloat());
+                                scn.nextLine();
+                                break;
+                            case "3":
+                                System.out.print("Enter product type: ");
+                                product.setType(scn.nextLine());
+                                break;
+                            case "4":
+                                System.out.print("Enter product quantity: ");
+                                product.setQuantity(scn.nextInt());
+                                scn.nextLine();
+                                product.updateListedStatus();
+                                break;
+                            case "5":
+                                System.out.print("Enter product description: ");
+                                product.setDescription(scn.nextLine());
+                                break;
+                            default: System.out.println("Invalid input.");
+                        }
+                        
+                        query = "REPLACE INTO products(product_id, seller_id, product_name, product_price, product_type, average_rating, quantity_stocked, listed_status, description) "
+                                + "VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?)";
+                        pstmt = conn.prepareStatement(query);
+                        pstmt.setInt(1, product.getProductID());
+                        pstmt.setInt(2, product.getSellerID());
+                        pstmt.setString(3, product.getName());
+                        pstmt.setFloat(4, product.getPrice());
+                        pstmt.setString(5, product.getType());
+                        pstmt.setFloat(6, product.getRating());
+                        pstmt.setInt(7, product.getQuantity());
+                        pstmt.setBoolean(8, product.isListed());
+                        pstmt.setString(9, product.getDescription());
+                        
+                        pstmt.executeUpdate();
+                        
+                    } catch (Exception e) {
+                        System.out.println("Error during product editing: " + e.getMessage());
+                    }
                     break;
                 case "3":
+                    System.out.print("\n[GENERATE REPORT]\n[1] Sales Report\n[2] Credibility Report\n[3] Product Popularity Report\nChoice: ");
+                    switch (scn.nextLine().trim()) {
+                        case "1":
+                            break;
+                        case "2":
+                            break;
+                        case "3":
+                            try {
+                                int month, year;
+                            
+                                System.out.print("Enter month: ");
+                                month = scn.nextInt();
+                                scn.nextLine();
+                                System.out.print("Enter year: ");
+                                year = scn.nextInt();
+                                scn.nextLine();
+                                
+                                String query = "SELECT p.product_name, SUM(oc.item_quantity) AS amt_sold, p.average_rating " +
+                                                "FROM order_contents oc " +
+                                                "JOIN orders o ON oc.order_id = o.order_id " +
+                                                "JOIN products p ON oc.product_id = p.product_id " +
+                                                "WHERE YEAR(o.purchase_date) = ? " +
+                                                "AND MONTH(o.purchase_date) = ? " +
+                                                "AND p.seller_id = ? " +
+                                                "GROUP BY p.product_name, p.average_rating " +
+                                                "ORDER BY p.average_rating DESC, p.product_name";
+
+                                PreparedStatement ps = conn.prepareStatement(query);
+                                ps.setInt(1, year);
+                                ps.setInt(2, month);
+                                ps.setInt(3, this.seller_id);
+                                ResultSet rs = ps.executeQuery();
+                                
+                                System.out.println("Product Name | Units Sold | Average Rating");
+                                int rank = 1;
+                                while (rs.next()) {
+                                    System.out.println("[RANK " + rank + "]\t" + rs.getString("p.product_name") + " | " + rs.getInt("amt_sold") + " | " + rs.getFloat("p.average_rating"));
+                                }
+                            } catch (Exception e) {
+                                System.out.println("Error during report generation: " + e);
+                            }
+                            break;
+                        default: System.out.println("Invalid input.");
+                    }
                     break;
                 case "4":
                     break;
