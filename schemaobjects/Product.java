@@ -16,7 +16,20 @@ public class Product {
     private int      quantity_stocked;
     private boolean  listed_status;
     private String   description;
-    
+
+    public Product(int product_id, int seller_id, String product_name, float product_price, String product_type,
+                   float average_rating, int quantity_stocked, boolean listed_status, String description) {
+        this.product_id = product_id;
+        this.seller_id = seller_id;
+        this.product_name = product_name;
+        this.product_price = product_price;
+        this.product_type = product_type;
+        this.average_rating = average_rating;
+        this.quantity_stocked = quantity_stocked;
+        this.listed_status = listed_status;
+        this.description = description;
+    }
+
     public Product() {
         average_rating = 0.0f;
     }
@@ -46,76 +59,50 @@ public class Product {
         }
     }
 
-    // idk if need setters for the IDs pero i placed them jic
-    public void setProductID(int product_id) {
-        this.product_id = product_id;
+    public void printForUser() {
+        System.out.printf("%d | %s | %f | %d | %s | %s\n",
+        product_id, product_name, product_price, quantity_stocked,
+        listed_status ? "Yes" : "No",
+        description != null ? description : "N/A");
     }
-    
-    public void setSellerID(int seller_id) {
-        this.seller_id = seller_id;
-    }
-    
-    public void setName(String product_name) {
-        this.product_name = product_name;
-    }
-    
-    public void setPrice(float product_price) {
-        this.product_price = product_price;
-    }
-    
-    public void setType(String product_type) {
-        this.product_type = product_type; 
-    }
-    
+
     public void updateAveRating() {
-        
+
     }
-    
-    public void setQuantity(int quantity_stocked) {
-        this.quantity_stocked = quantity_stocked;
-    }
-    
+
     public void updateListedStatus() {
         this.listed_status = this.quantity_stocked != 0;
     }
+
+    public void setProductID(int product_id) { this.product_id = product_id; }
     
-    public void setDescription(String description) {
-        this.description = description;
-    }
+    public void setSellerID(int seller_id) { this.seller_id = seller_id; }
     
-    public long getProductID() {
-        return this.product_id;
-    }
+    public void setName(String product_name) { this.product_name = product_name; }
     
-    public long getSellerID() {
-        return this.seller_id;
-    }
+    public void setPrice(float product_price) { this.product_price = product_price; }
     
-    public String getName() {
-        return this.product_name;
-    }
+    public void setType(String product_type) { this.product_type = product_type; }
     
-    public float getPrice() {
-        return this.product_price;
-    }
+    public void setQuantity(int quantity_stocked) { this.quantity_stocked = quantity_stocked; }
     
-    public String getType() {
-        return this.product_type;
-    }
+    public void setDescription(String description) { this.description = description; }
     
-    public float getRating() {
-        return this.average_rating;
-    }
+    public long getProductID() { return this.product_id; }
     
-    public int getQuantity() {
-        return this.quantity_stocked;
-    }
+    public long getSellerID() { return this.seller_id; }
     
-    public boolean isListed() {
-        return this.listed_status;
-    }
+    public String getName() { return this.product_name; }
     
-    public String getDescription() {
-        return this.description;
-    }
+    public float getPrice() { return this.product_price; }
+    
+    public String getType() { return this.product_type; }
+    
+    public float getRating() { return this.average_rating; }
+    
+    public int getQuantity() { return this.quantity_stocked; }
+    
+    public boolean isListed() { return this.listed_status; }
+    
+    public String getDescription() { return this.description; }
 }

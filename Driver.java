@@ -36,10 +36,10 @@ public class Driver {
             String url = "jdbc:mysql://localhost:3306/mydb";
 
             System.out.print("Enter your username: ");
-            String username = scn.nextLine();
+            String username = scn.nextLine().trim();
 
             System.out.print("Enter your password: ");
-            String password = scn.nextLine();
+            String password = scn.nextLine().trim();
 
             Connection conn;
             Class.forName("com.mysql.cj.jdbc.Driver");

@@ -46,56 +46,42 @@ public class Seller implements Account {
 
     @Override
     public void signUp(Scanner scn, Connection conn) {
-        // Auto generate seller ID
-        seller_id = 0;
-
         System.out.print("Enter seller name: ");
-        seller_name  = scn.nextLine();
+        seller_name = scn.nextLine();
 
-        System.out.print("Enter seller address:  ");
+        System.out.print("Enter seller address: ");
         seller_address = scn.nextLine();
 
-        System.out.print("Enter phone number:  ");
+        System.out.print("Enter phone number: ");
         seller_phone_number = scn.nextLine();
 
-        long ms = System.currentTimeMillis();
-        seller_creation_date = new Date(ms);
-
+        seller_creation_date = new Date(System.currentTimeMillis());
         seller_verified_status = false;
 
         try {
-            PreparedStatement pstmt = conn.prepareStatement("SELECT MAX(seller_id) AS Id FROM mydb.sellers");
-            ResultSet myRs = pstmt.executeQuery();
+            String query = """
+                INSERT INTO sellers (seller_id, seller_name, seller_address, seller_verified_status, seller_phone_number, seller_creation_date)
+                SELECT IFNULL(MAX(seller_id), 0) + 1, ?, ?, ?, ?, ?
+                FROM sellers
+                """;
 
-            while (myRs.next()) {
-                seller_id = myRs.getInt("Id");
-            }
+            try (PreparedStatement pstmt = conn.prepareStatement(query)) {
+                pstmt.setString(1, seller_name);
+                pstmt.setString(2, seller_address);
+                pstmt.setBoolean(3, seller_verified_status);
+                pstmt.setString(4, seller_phone_number);
+                pstmt.setTimestamp(5, new java.sql.Timestamp(seller_creation_date.getTime()));
 
-            if (seller_id == 0){
-                pstmt = conn.prepareStatement("INSERT INTO sellers (seller_id, seller_name, seller_address, seller_verified_status,seller_phone_number, seller_creation_date) VALUES(?, ?, ?, ?, ?, ?)");
-                pstmt.setInt(1, 1);
-                pstmt.setString(2, seller_name);
-                pstmt.setString(3, seller_address);
-                pstmt.setBoolean(4,seller_verified_status);
-                pstmt.setString(5,seller_phone_number);
-                pstmt.setTimestamp(6,new java.sql.Timestamp(System.currentTimeMillis()));
-                pstmt.executeUpdate();
-            } else {
-                pstmt = conn.prepareStatement("INSERT INTO sellers (seller_id, seller_name, seller_address, seller_verified_status,seller_phone_number, seller_creation_date) VALUES(?, ?, ?, ?, ?, ?)");
-                pstmt.setInt(1, seller_id+1);
-                pstmt.setString(2, seller_name);
-                pstmt.setString(3, seller_address);
-                pstmt.setBoolean(4,seller_verified_status);
-                pstmt.setString(5,seller_phone_number);
-                pstmt.setTimestamp(6,new java.sql.Timestamp(System.currentTimeMillis()));
                 pstmt.executeUpdate();
             }
-            pstmt.close();
 
-        } catch (Exception e){
-            System.out.println(e.getMessage());
+            System.out.println("Seller account created successfully!");
+
+        } catch (Exception e) {
+            System.out.println("Error during seller sign-up: " + e.getMessage());
         }
     }
+
 
     @Override
     public void displayView(Scanner scn, Connection conn) {

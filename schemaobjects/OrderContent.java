@@ -1,9 +1,10 @@
 package schemaobjects;
+
 public class OrderContent {
-    private long product_id;
+    private int product_id;
     private int  quantity;
     
-    public OrderContent(long product_id, int quantity) {
+    public OrderContent(int product_id, int quantity) {
         this.product_id = product_id;
         this.quantity = quantity;
     }
@@ -12,7 +13,7 @@ public class OrderContent {
         this.quantity = quantity;
     }
     
-    public long getProductID() {
+    public int getProductID() {
         return this.product_id;
     }
     
