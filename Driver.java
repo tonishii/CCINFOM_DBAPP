@@ -1,4 +1,6 @@
 
+import java.sql.Connection;
+import java.sql.DriverManager;
 import java.util.Scanner;
 
 import schemaobjects.Account;
@@ -29,40 +31,64 @@ public class Driver {
         Scanner scn = new Scanner(System.in);
         boolean isLogin = false;
 
-        outerLoop:
-        while(true) {
-            System.out.print(
-            "[1] Login\n" +
-            "[2] Sign up\n" +
-            "Select option: ");
+        try {
 
-            switch (scn.nextLine().trim()) {
-                case "1": isLogin = true;
-                case "2":
-                    break outerLoop;
-                default:
-                System.out.println("Error: Enter valid option.");
+            String url = "jdbc:mysql://localhost:3306/mydb";
+
+            System.out.print("Enter your username: ");
+            String username = scn.nextLine();
+
+            System.out.print("Enter your password: ");
+            String password = scn.nextLine();
+
+            Connection conn;
+            Class.forName("com.mysql.cj.jdbc.Driver");
+
+            // Establish connection to the db
+            conn = DriverManager.getConnection(url, username, password);
+
+            outerLoop:
+            while (true) {
+                System.out.print(
+                "[1] Login\n" +
+                "[2] Sign up\n" +
+                "Select option: ");
+
+                switch (scn.nextLine().trim()) {
+                    case "1":
+                        isLogin = true;
+                    case "2":
+                        break outerLoop;
+                    default:
+                        System.out.println("Error: Enter valid option.");
+                }
             }
+
+            Account account = selectAccountType(scn);
+
+            if (isLogin) {
+                while (true) {
+                    if (account.login(scn, conn)) {
+                        // successful login
+                        break;
+                    } else {
+                        System.out.println("HELLO THERE");
+                        // give option to go back
+                        // just do this in gui im too tired for this shi
+                    }
+                }
+            } else {
+                // Create a new account based on the account
+                account.signUp(scn, conn);
+            }
+
+            account.displayView(scn, conn);
+            System.out.println("Exiting...");
+            scn.close();
+            conn.close();
+
+        } catch (Exception e) {
+            System.out.println("Error: ");
         }
-
-        Account account = selectAccountType(scn);
-
-        if (isLogin == true) {
-            int login_status = account.login(scn);
-            if (login_status==1){
-                System.out.println("good");
-            }
-            else{
-                System.out.println("bad");
-            }
-            // account =            GET THE ACCOUNT FROM THE DB USING ID
-        } else {
-            // Create a new account based on the account
-            account.signUp(scn);
-        }
-
-        account.displayView(scn);
-        System.out.println("Exiting...");
-        scn.close();
     }
 }

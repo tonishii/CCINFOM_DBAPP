@@ -1,9 +1,12 @@
 package schemaobjects;
-import java.sql.*;
+
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 
 public class Product {
-    private long     product_id;
-    private long     seller_id;
+    private int     product_id;
+    private int     seller_id;
 
     private String   product_name;
     private float    product_price;
@@ -14,20 +17,41 @@ public class Product {
     private boolean  listed_status;
     private String   description;
     
-    public Product(long seller_id, String product_name, float product_price, String product_type) {
-        this.seller_id = seller_id;
-        this.product_name = product_name;
-        this.product_price = product_price;
-        this.product_type = product_type;
-        // sql to initialize product id
+    public Product() {
+        average_rating = 0.0f;
     }
-    
+
+    public void sendToDB(Connection conn) {
+        try {
+            String query = """
+                INSERT INTO products (product_id, seller_id, product_name, product_price, product_type, average_rating, quantity_stocked, listed_status, description)
+                SELECT IFNULL(MAX(product_id), 0) + 1, ?, ?, ?, ?, ?, ?, ?, ?
+                FROM products
+                """;
+
+            try (PreparedStatement pstmt = conn.prepareStatement(query)) {
+                pstmt.setInt(1, seller_id);
+                pstmt.setString(2, product_name);
+                pstmt.setFloat(3, product_price);
+                pstmt.setString(4, product_type);
+                pstmt.setFloat(5, average_rating);
+                pstmt.setInt(6, quantity_stocked);
+                pstmt.setBoolean(7, listed_status);
+                pstmt.setString(8, description);
+
+                pstmt.executeUpdate();
+            }
+        } catch (Exception e) {
+            System.out.println("Error while sending to DB: " + e.getMessage());
+        }
+    }
+
     // idk if need setters for the IDs pero i placed them jic
-    public void setProductID(long product_id) {
+    public void setProductID(int product_id) {
         this.product_id = product_id;
     }
     
-    public void setSellerID(long seller_id) {
+    public void setSellerID(int seller_id) {
         this.seller_id = seller_id;
     }
     
@@ -43,7 +67,7 @@ public class Product {
         this.product_type = product_type; 
     }
     
-    public void updateRating() {
+    public void updateAveRating() {
         
     }
     
@@ -52,10 +76,7 @@ public class Product {
     }
     
     public void updateListedStatus() {
-        if (this.quantity_stocked == 0)
-            this.listed_status = false;
-        else
-            this.listed_status = true;
+        this.listed_status = this.quantity_stocked != 0;
     }
     
     public void setDescription(String description) {

@@ -13,51 +13,46 @@ public class User implements Account {
     private Date    user_creation_date;
     private boolean user_verified_status;
 
-//    public User(long user_id, String user_name, String user_firstname, String user_lastname, String user_address, 
-//            String user_phone_number, Date user_creation_date, boolean user_verified_status) {
-//        this.user_id = user_id;
-//        this.user_name = user_name;
-//        this.user_firstname = user_firstname;
-//        this.user_lastname = user_lastname;
-//        this.user_address = user_address;
-//        this.user_phone_number = user_phone_number;
-//        this.user_creation_date = user_creation_date;
-//        this.user_verified_status = user_verified_status;
-//    }
-
     @Override
-    public int login(Scanner scn){
-        System.out.print("Enter Account ID: ");
+    public boolean login(Scanner scn, Connection conn) {
+        System.out.print("Enter User Account ID: ");
         int id = Integer.parseInt(scn.nextLine());
 
+        // SQL query to fetch the user by user_id
+        String query =
+        "SELECT user_id, user_name, user_phone_number, user_address, user_verified_status, user_creation_date, user_firstname, user_lastname " +
+        "FROM users WHERE user_id = ?";
+
         try {
-            String url= "jdbc:mysql://localhost:3306/mydb"; // table details
-            String username = "root"; // MySQL credentials
-            String password = ""; // put ur password here lol
-            Connection conn;
-            Class.forName("com.mysql.cj.jdbc.Driver");
-            conn = DriverManager.getConnection(url, username, password);
+            PreparedStatement pstmt = conn.prepareStatement(query);
+            pstmt.setInt(1, id);
 
-            Statement statement = conn.createStatement();
-            String query = "select user_id from users";
+            // Execute the query
+            ResultSet result = pstmt.executeQuery();
 
-            ResultSet result = statement.executeQuery(query);
+            if (result.next()) {
+                // Retrieve user details (if needed, you can populate class attributes here)
+                this.user_id = result.getInt("user_id");
+                this.user_name = result.getString("user_name");
+                this.user_phone_number = result.getString("user_phone_number");
+                this.user_address = result.getString("user_address");
+                this.user_verified_status = result.getBoolean("user_verified_status");
+                this.user_creation_date = result.getDate("user_creation_date");
+                this.user_firstname = result.getString("user_firstname");
+                this.user_lastname = result.getString("user_lastname");
 
-            while (result.next()) {
-                if(id==result.getInt("user_id")){
-                    return 1;
-                }
+                return true; // Login successful
             }
-            return 0;
 
-        } catch (Exception e){
-            System.out.println(e.getMessage());
-            return 0;
+        } catch (Exception e) {
+            System.out.println("Error during user login: " + e.getMessage());
         }
+
+        return false; // Login failed
     }
 
     @Override
-    public void signUp(Scanner scn) {
+    public void signUp(Scanner scn, Connection conn) {
         // Auto generate user ID
         user_id = 0;
 
@@ -82,14 +77,6 @@ public class User implements Account {
         user_verified_status = false;
 
         try {
-            String url= "jdbc:mysql://localhost:3306/mydb"; // table details
-            String username = "root"; // MySQL credentials
-            String password = ""; // put ur password here lol
-
-            Connection conn;
-            Class.forName("com.mysql.cj.jdbc.Driver");
-            conn = DriverManager.getConnection(url, username, password);
-
             PreparedStatement pstmt = conn.prepareStatement("SELECT MAX(user_id) AS Id FROM mydb.users");
             ResultSet myRs = pstmt.executeQuery();
             while (myRs.next()) {
@@ -107,8 +94,7 @@ public class User implements Account {
                 pstmt.setString(7, user_firstname);
                 pstmt.setString(8, user_lastname);
                 pstmt.executeUpdate();
-            }
-            else{
+            } else {
                 pstmt = conn.prepareStatement("INSERT INTO users (user_id, user_name, user_phone_number, user_address, user_verified_status, user_creation_date, user_firstname, user_lastname) "
                         + "VALUES(?, ?, ?, ?, ?, ?, ?, ?)");
                 pstmt.setInt(1, user_id+1);
@@ -123,15 +109,13 @@ public class User implements Account {
             }
 
             pstmt.close();
-            conn.close();
-
         } catch (Exception e){
             System.out.println(e.getMessage());
         }
     }
 
     @Override
-    public void displayView(Scanner scn) {
+    public void displayView(Scanner scn, Connection conn) {
         while (true) {
             System.out.print(
             "[1] Shopping (Anthony)\n" +
@@ -141,6 +125,7 @@ public class User implements Account {
             "[5] Purchase History\n" +
             "[6] Rate a Product\n" +
             "[7] Edit Account\n" +
+            "[8] Exit\n" +
             "Select option: ");
 
             switch (scn.nextLine().trim()) {
@@ -152,6 +137,14 @@ public class User implements Account {
                     break;
                 case "4":
                     break;
+                case "5":
+                    break;
+                case "6":
+                    break;
+                case "7":
+                    break;
+                case "8":
+                    return;
                 default:
                     break;
             }

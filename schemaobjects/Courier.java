@@ -10,50 +10,42 @@ public class Courier implements Account {
     private String   courier_address;
     private boolean  courier_verified_status;
 
-//    public Courier(long courier_id, String courier_name, String courier_email_address, 
-//            String courier_address, boolean courier_verified_status) {
-//        this.courier_id = courier_id;
-//        this.courier_name = courier_name;
-//        this.courier_email_address = courier_email_address;
-//        this.courier_address = courier_address;
-//        this.courier_verified_status = courier_verified_status;
-//    }
-
     @Override
-    public int login(Scanner scn){
-        System.out.print("Enter Account ID: ");
+    public boolean login(Scanner scn, Connection conn) {
+        System.out.print("Enter Courier Account ID: ");
         int id = Integer.parseInt(scn.nextLine());
 
+        String query =
+        "SELECT courier_id, courier_name, courier_email_address, courier_address, courier_verified_status " +
+        "FROM couriers WHERE courier_id = ?";
+
         try {
-            String url= "jdbc:mysql://localhost:3306/mydb"; // table details
-            String username = "root"; // MySQL credentials
-            String password = ""; // put ur password here lol
-            Connection conn;
-            Class.forName("com.mysql.cj.jdbc.Driver");
-            conn = DriverManager.getConnection(url, username, password);
+            PreparedStatement pstmt = conn.prepareStatement(query);
+            pstmt.setInt(1, id);
 
-            Statement statement = conn.createStatement();
-            String query = "select user_id from users";
+            // Execute the query
+            ResultSet result = pstmt.executeQuery();
+            if (result.next()) {
+                this.courier_id = result.getInt("courier_id");
+                this.courier_name = result.getString("courier_name");
+                this.courier_email_address = result.getString("courier_email_address");
+                this.courier_address = result.getString("courier_address");
+                this.courier_verified_status = result.getBoolean("courier_verified_status");
 
-            ResultSet result = statement.executeQuery(query);
-
-            while (result.next()) {
-                if(id==result.getInt("user_id")){
-                    return 1;
-                }
+                return true; // Login successful
             }
-            return 0;
 
-        } catch (Exception e){
-            System.out.println(e.getMessage());
-            return 0;
+        } catch (Exception e) {
+            System.out.println("Error during courier login: " + e.getMessage());
         }
+
+        return false; // Login failed
     }
 
     @Override
-    public void signUp(Scanner scn) {
+    public void signUp(Scanner scn, Connection conn) {
         // Auto generate courierID
-        courier_id=0;
+        courier_id = 0;
 
         System.out.print("Enter courier name: ");
         courier_name = scn.nextLine();
@@ -67,14 +59,6 @@ public class Courier implements Account {
         courier_verified_status = false;
 
         try {
-            String url= "jdbc:mysql://localhost:3306/mydb"; // table details
-            String username = "root"; // MySQL credentials
-            String password = ""; // put ur password here lol
-
-            Connection conn;
-            Class.forName("com.mysql.cj.jdbc.Driver");
-            conn = DriverManager.getConnection(url, username, password);
-
             PreparedStatement pstmt = conn.prepareStatement("SELECT MAX(courier_id) AS Id FROM mydb.couriers");
             ResultSet myRs = pstmt.executeQuery();
             while (myRs.next()) {
@@ -100,20 +84,19 @@ public class Courier implements Account {
             }
 
             pstmt.close();
-            conn.close();
-
         } catch (Exception e){
             System.out.println(e.getMessage());
         }
     }
 
     @Override
-    public void displayView(Scanner scn) {
+    public void displayView(Scanner scn, Connection conn) {
         while (true) {
             System.out.print(
             "[1] Ongoing Orders\n" +
             "[2] Generate Activity Report\n" +
             "[3] Edit Account\n" +
+            "[4] Exit\n" +
             "Select option: ");
 
             switch (scn.nextLine().trim()) {
@@ -123,6 +106,8 @@ public class Courier implements Account {
                     break;
                 case "3":
                     break;
+                case "4":
+                    return;
                 default:
                     break;
             }
