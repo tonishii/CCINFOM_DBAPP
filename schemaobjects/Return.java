@@ -28,27 +28,21 @@ public class Return {
     public long getOrderID() {
         return this.order_id;
     }
-    
     public long getProductID() {
         return this.product_id;
     }
-    
     public long getCourierID() {
         return this.courier_id;
     }
-    
     public ReturnReason getReason() {
         return this.return_reason;
     }
-    
     public String getDescription() {
         return this.return_description;
     }
-    
     public Date getDate() {
         return this.return_date;
     }
-    
     public ReturnStatus getStatus() {
         return this.return_status;
     }

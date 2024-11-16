@@ -12,11 +12,9 @@ public class OrderContent {
     public void setQuantity(int quantity) {
         this.quantity = quantity;
     }
-    
     public int getProductID() {
         return this.product_id;
     }
-    
     public int getQuantity() {
         return this.quantity;
     }

@@ -74,35 +74,20 @@ public class Product {
         this.listed_status = this.quantity_stocked != 0;
     }
 
-    public void setProductID(int product_id) { this.product_id = product_id; }
-    
-    public void setSellerID(int seller_id) { this.seller_id = seller_id; }
-    
-    public void setName(String product_name) { this.product_name = product_name; }
-    
-    public void setPrice(float product_price) { this.product_price = product_price; }
-    
-    public void setType(String product_type) { this.product_type = product_type; }
-    
-    public void setQuantity(int quantity_stocked) { this.quantity_stocked = quantity_stocked; }
-    
-    public void setDescription(String description) { this.description = description; }
-    
-    public long getProductID() { return this.product_id; }
-    
-    public long getSellerID() { return this.seller_id; }
-    
-    public String getName() { return this.product_name; }
-    
-    public float getPrice() { return this.product_price; }
-    
-    public String getType() { return this.product_type; }
-    
-    public float getRating() { return this.average_rating; }
-    
-    public int getQuantity() { return this.quantity_stocked; }
-    
     public boolean isListed() { return this.listed_status; }
-    
+    public void setProductID(int product_id) { this.product_id = product_id; }
+    public void setSellerID(int seller_id) { this.seller_id = seller_id; }
+    public void setName(String product_name) { this.product_name = product_name; }
+    public void setPrice(float product_price) { this.product_price = product_price; }
+    public void setType(String product_type) { this.product_type = product_type; }
+    public void setQuantity(int quantity_stocked) { this.quantity_stocked = quantity_stocked; }
+    public void setDescription(String description) { this.description = description; }
+    public long getProductID() { return this.product_id; }
+    public long getSellerID() { return this.seller_id; }
+    public String getName() { return this.product_name; }
+    public float getPrice() { return this.product_price; }
+    public String getType() { return this.product_type; }
+    public float getRating() { return this.average_rating; }
+    public int getQuantity() { return this.quantity_stocked; }
     public String getDescription() { return this.description; }
 }

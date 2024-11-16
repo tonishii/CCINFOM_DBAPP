@@ -134,44 +134,36 @@ public class Seller implements Account {
             }
         }
     }
-    
-    public void setName(String seller_name) {
-        this.seller_name = seller_name;
-    }
-    
-    public void setAddress(String seller_address) {
-        this.seller_address = seller_address;
-    }
-    
-    public void setPhoneNumber(String seller_phone_number) {
-        this.seller_phone_number = seller_phone_number;
-    }
-    
+
     public void updateStatus() {
         // checking fields
         this.seller_verified_status = true;
     }
-    
+
+    public void setName(String seller_name) {
+        this.seller_name = seller_name;
+    }
+    public void setAddress(String seller_address) {
+        this.seller_address = seller_address;
+    }
+    public void setPhoneNumber(String seller_phone_number) {
+        this.seller_phone_number = seller_phone_number;
+    }
     public int getID() {
         return this.seller_id;
     }
-    
     public String getName() {
         return this.seller_name;
     }
-    
     public String getAddress() {
         return this.seller_address;
     }
-    
     public String getPhoneNumber() {
         return this.seller_phone_number;
     }
-    
     public Date getCreationDate() {
         return this.seller_creation_date;
     }
-    
     public boolean getStatus() {
         return this.seller_verified_status;
     }

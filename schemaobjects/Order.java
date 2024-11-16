@@ -24,31 +24,24 @@ public class Order {
     public void setReceiveDate(Date date) {
         this.receive_date = date;
     }
-    
     public long getOrderID() {
         return this.order_id;
     }
-    
     public long getUserID() {
         return this.user_id;
     }
-    
     public long getCourierID() {
         return this.courier_id;
     }
-    
     public Date getPurchaseDate() {
         return this.purchase_date;
     }
-    
     public float getTotalPrice() {
         return this.total_price;
     }
-    
     public OrderStatus getStatus() {
         return this.order_status;
     }
-    
     public Date getReceiveDate() {
         return this.receive_date;
     }

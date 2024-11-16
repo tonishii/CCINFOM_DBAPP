@@ -84,11 +84,12 @@ public class Courier implements Account {
     public void displayView(Scanner scn, Connection conn) {
         while (true) {
             System.out.print(
-            "[1] Ongoing Orders\n" +
-            "[2] Generate Activity Report\n" +
-            "[3] Edit Account\n" +
-            "[4] Exit\n" +
-            "Select option: ");
+            """
+            [1] Ongoing Orders
+            [2] Generate Activity Report
+            [3] Edit Account
+            [4] Exit
+            Select option:\s""");
 
             switch (scn.nextLine().trim()) {
                 case "1" -> showOngoingOrders(conn);
@@ -128,9 +129,7 @@ public class Courier implements Account {
                     return;
                 }
 
-                default -> {
-                    System.out.println("Error: Enter valid option.");
-                }
+                default -> System.out.println("Error: Enter valid option.");
             }
         }
     }
@@ -198,18 +197,11 @@ public class Courier implements Account {
     }
 
     public void setName(String courier_name) { this.courier_name = courier_name; }
-    
     public void setEmailAddress(String courier_email_address) { this.courier_email_address = courier_email_address; }
-    
     public void setAddress(String courier_address) { this.courier_address = courier_address; }
-    
     public int getID() { return this.courier_id; }
-    
     public String getName() { return this.courier_name; }
-    
     public String getEmailAddress() { return this.courier_email_address; }
-    
     public String getAddress() { return this.courier_address; }
-    
     public boolean getStatus() { return this.courier_verified_status; }
 }
