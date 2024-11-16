@@ -148,8 +148,7 @@ public class User implements Account {
                     break;
                 case "8":
                     return;
-                default:
-                    break;
+                default: System.out.println("Error: Enter valid option.");
             }
         }
     }
