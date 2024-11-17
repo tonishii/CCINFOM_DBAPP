@@ -1,4 +1,5 @@
 package schemaobjects;
+import java.awt.*;
 import java.util.ArrayList;
 import java.util.Objects;
 import java.util.Scanner;
@@ -367,6 +368,8 @@ public class User implements Account {
     }
 
     public void viewShoppingCart(Scanner scn, ArrayList<OrderContent> cart, Connection conn) {
+        boolean isCheckout = false;
+        label :
         do {
             if (cart.isEmpty()) {
                 System.out.println("Cart Empty. Returning...");
@@ -401,17 +404,34 @@ public class User implements Account {
                                 .findFirst()
                                 .orElse(null);
 
-                        System.out.print("Enter desired quantity: ");
+                        assert product != null;
+                        String query = """
+                        SELECT quantity_stocked
+                        FROM products
+                        WHERE product_id = ?
+                        """;
+                        PreparedStatement ps = conn.prepareStatement(query);
+                        ps.setInt(1, product.getProductID());
+                        ResultSet rs = ps.executeQuery();
+                        int maxQty = 0;
+
+                        if (rs.next()) {
+                            maxQty = rs.getInt("quantity_stocked");
+                        }
+
+                        System.out.printf("Enter desired quantity (Between 0 and %d): ", maxQty);
                         int qty = Integer.parseInt(scn.nextLine());
 
-                        assert qty >= 0;
-                        if (qty > 0) {
-                            cart.get(cart.indexOf(product)).setQuantity(qty);
-                            System.out.println("Product quantity edited.");
-                        } else {
-                            cart.remove(product);
-                            System.out.println("Product removed due to zero quantity.");
+                        if (qty >= 0 && qty <= maxQty) {
+                            if (qty > 0) {
+                                cart.get(cart.indexOf(product)).setQuantity(qty);
+                                System.out.println("Product quantity edited.");
+                            } else {
+                                cart.remove(product);
+                                System.out.println("Product removed due to zero quantity.");
+                            }
                         }
+                        else System.out.println("Error: Invalid quantity.");
                     }
                     case 2 -> {
                         System.out.print("Enter Product ID to remove: ");
@@ -434,7 +454,8 @@ public class User implements Account {
                         if (scn.nextLine().trim().equalsIgnoreCase("y")) {
                             Order.generateOrder(this.user_id, conn, cart, totalPrice);
                             cart.clear();
-                            return;
+                            isCheckout = true;
+                            break label;
                         }
                         else System.out.println("Checkout aborted. Returning...");
                     }
@@ -446,7 +467,10 @@ public class User implements Account {
             catch (Exception e) {
                 System.out.println("Error: Invalid Input");
             } finally {
-                System.out.print("Do you wish to continue? (y/n): ");
+                if(isCheckout)
+                    System.out.println("Checkout successful. Returning to menu...");
+                else
+                    System.out.print("Do you wish to continue? (y/n): ");
             }
 
         } while(scn.nextLine().trim().equalsIgnoreCase("y"));
