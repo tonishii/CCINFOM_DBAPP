@@ -234,12 +234,62 @@ public class Seller implements Account {
                     }
                 }
                 case "3" -> {
-                    System.out.print("\n[GENERATE REPORT]\n[1] Sales Report\n[2] Credibility Report\n[3] Product Popularity Report\nChoice: ");
+                    System.out.print("\n[GENERATE REPORT]\n" +
+                                     "[1] Sales Report\n" +
+                                     "[2] Credibility Report\n" +
+                                     "[3] Product Popularity Report\n" +
+                                     "Choice: ");
                     switch (scn.nextLine().trim()) {
                         case "1":
                             break;
                         case "2":
                             try {
+                                int year;
+                                int refunds = 0;
+                                float average = 0;
+
+                                System.out.print("Enter year: ");
+                                year = scn.nextInt();
+                                scn.nextLine();
+
+                                String query =
+                                        """
+                                        SELECT AVG(p.average_rating) AS AverageRating
+                                        FROM products p
+                                        WHERE seller_id = ?;
+                                        """;
+
+                                PreparedStatement pstmt = conn.prepareStatement(query);
+                                pstmt.setInt(1, this.seller_id);
+                                ResultSet rstmt = pstmt.executeQuery();
+
+                                while (rstmt.next()) {
+                                    average = rstmt.getFloat("AverageRating");
+                                }
+
+                                query =
+                                        """
+                                        SELECT COUNT(product_id) AS numOfRefunds
+                                        FROM returns r
+                                        WHERE 	r.return_status = 'REFUNDED' AND
+                                                YEAR(r.return_date) = ? AND
+                                                product_id IN (SELECT product_id
+                                                FROM products p
+                                                WHERE seller_id = ?);
+                                        """;
+
+                                pstmt = conn.prepareStatement(query);
+                                pstmt.setInt(1, year);
+                                pstmt.setInt(2, seller_id);
+                                rstmt = pstmt.executeQuery();
+
+                                while (rstmt.next()) {
+                                    refunds = rstmt.getInt("numOfRefunds");
+                                }
+
+                                System.out.printf("Credibility Report for %s on Year: %d\n",seller_name,year);
+                                System.out.println("Overall Average Rating of Products | Total number of Refunds");
+                                System.out.printf("%.3f,                                %d\n", average, refunds);
 
                             } catch (Exception e) {
                                 System.out.println("Error during report generation: " + e);
@@ -355,8 +405,8 @@ public class Seller implements Account {
             String update =
                     """
                     UPDATE sellers
-                    SET seller_name = ?
-                        seller_address = ?
+                    SET seller_name = ?,
+                        seller_address = ?,
                         seller_phone_number = ?
                     WHERE seller_id = ?;
                     """;
