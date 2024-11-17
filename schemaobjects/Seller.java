@@ -1,5 +1,7 @@
 package schemaobjects;
 import java.sql.*;
+import java.time.Instant;
+import java.time.Year;
 import java.util.Scanner;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -241,6 +243,49 @@ public class Seller implements Account {
                                      "Choice: ");
                     switch (scn.nextLine().trim()) {
                         case "1":
+                            try {
+                                int month, year;
+
+                                System.out.print("Enter month: ");
+                                month = scn.nextInt();
+                                scn.nextLine();
+                                System.out.print("Enter year: ");
+                                year = scn.nextInt();
+                                scn.nextLine();
+
+                                if (month > 0 && month <= 12 && year <= Year.now().getValue()) {
+                                    String query = """
+                                               SELECT COUNT(DISTINCT o.order_id) AS count, SUM(oc.subtotal) AS total
+                                               FROM order_contents oc
+                                               	JOIN products p ON oc.product_id = p.product_id
+                                                   JOIN orders o ON o.order_id = oc.order_id
+                                               WHERE p.seller_id = ?
+                                                   AND YEAR(o.purchase_date) = ?
+                                               	AND MONTH(o.purchase_date) = ?
+                                               	AND o.order_status = 'DELIVERED'
+                                               GROUP BY o.order_id;
+                                            """;
+
+                                    PreparedStatement ps = conn.prepareStatement(query);
+                                    ps.setInt(1, this.seller_id);
+                                    ps.setInt(2, year);
+                                    ps.setInt(3, month);
+                                    ResultSet rs = ps.executeQuery();
+
+                                    int transactions = 0;
+                                    float sumOfEarnings = 0f;
+                                    if (rs.next()) {
+                                        do {
+                                            transactions += rs.getInt("count");
+                                            sumOfEarnings += rs.getInt("total");
+                                        } while(rs.next());
+                                    }
+                                    System.out.printf("Total orders handled: %d\n", transactions);
+                                    System.out.printf("Total earnings: Php %.2f\n", sumOfEarnings);
+                                }
+                            } catch (Exception e) {
+                                System.out.println("Error during report generation: " + e);
+                            }
                             break;
                         case "2":
                             try {
