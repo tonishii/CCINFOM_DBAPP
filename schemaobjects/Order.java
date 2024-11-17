@@ -21,15 +21,9 @@ public class Order {
         this.order_status = OrderStatus.BEINGPREPARED;
     }
     
-    public void setReceiveDate(Date date) {
-        this.receive_date = date;
-    }
-    public int getOrderID() {
-        return this.order_id;
-    }
-    public int getUserID() {
-        return this.user_id;
-    }
+    public void setReceiveDate(Date date) { this.receive_date = date; }
+    public int getOrderID() { return this.order_id; }
+    public int getUserID() { return this.user_id; }
     public int getCourierID() {
         return this.courier_id;
     }

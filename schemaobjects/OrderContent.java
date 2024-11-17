@@ -22,11 +22,9 @@ public class OrderContent {
     public int getQuantity() {
         return this.quantity;
     }
-
     public float getPriceEach() {
         return priceEach;
     }
-
     public String getProductName() {
         return productName;
     }

@@ -18,14 +18,16 @@ public class Courier implements Account {
         int id = Integer.parseInt(scn.nextLine());
 
         String query =
-        "SELECT courier_id, courier_name, courier_email_address, courier_address, courier_verified_status " +
-        "FROM couriers WHERE courier_id = ?";
+        """
+        SELECT courier_id, courier_name, courier_email_address, courier_address, courier_verified_status
+        FROM couriers
+        WHERE courier_id = ?
+        """;
 
         try {
             PreparedStatement pstmt = conn.prepareStatement(query);
             pstmt.setInt(1, id);
 
-            // Execute the query
             ResultSet result = pstmt.executeQuery();
             if (result.next()) {
                 this.courier_id = result.getInt("courier_id");
@@ -54,10 +56,10 @@ public class Courier implements Account {
         courier_email_address = scn.nextLine();
         String regex = "^[\\w!#$%&'*+/=?`{|}~^-]+(?:\\.[\\w!#$%&'*+/=?`{|}~^-]+)" +
                 "*@(?:[a-zA-Z0-9-]+\\.)+[a-zA-Z]{2,6}";
-        // yeah wtf is this
-        //
+
         Pattern pattern = Pattern.compile(regex);
         Matcher matcher = pattern.matcher(courier_email_address);
+
         while(!matcher.matches()){
             System.out.print("Invalid Email!\n Re-Enter email address:  ");
             courier_email_address = scn.nextLine();
@@ -84,6 +86,19 @@ public class Courier implements Account {
                 pstmt.setBoolean(4, courier_verified_status);
 
                 pstmt.executeUpdate();
+            }
+
+            query =
+            """
+            SELECT MAX(courier_id)
+            FROM couriers
+            """;
+
+            try (PreparedStatement selectStmt = conn.prepareStatement(query);
+                 ResultSet rs = selectStmt.executeQuery()) {
+                if (rs.next()) {
+                    this.courier_id = rs.getInt(1);
+                }
             }
 
             System.out.println("Welcome! " + courier_name);
@@ -211,23 +226,24 @@ public class Courier implements Account {
 
     public static int assignCourier(Connection conn) {
         try {
-            String query = """
-                SELECT courier_pendings.courier_id, SUM(order_count) AS total_orders
-                FROM (
-                    SELECT o.courier_id, COUNT(o.order_id) AS order_count
-                    FROM orders o
-                    LEFT JOIN `returns` r ON r.courier_id = o.courier_id
-                    GROUP BY o.courier_id
-                    UNION
-                    SELECT r.courier_id, COUNT(r.order_id) AS order_count
-                    FROM `returns` r
-                    RIGHT JOIN orders o ON r.courier_id = o.courier_id
-                    GROUP BY r.courier_id
-                ) courier_pendings
-                GROUP BY courier_pendings.courier_id
-                ORDER BY total_orders ASC
-                LIMIT 1;
-                           """;
+            String query =
+            """
+            SELECT courier_pendings.courier_id, SUM(order_count) AS total_orders
+            FROM (
+                SELECT o.courier_id, COUNT(o.order_id) AS order_count
+                FROM orders o
+                LEFT JOIN `returns` r ON r.courier_id = o.courier_id
+                GROUP BY o.courier_id
+                UNION
+                SELECT r.courier_id, COUNT(r.order_id) AS order_count
+                FROM `returns` r
+                RIGHT JOIN orders o ON r.courier_id = o.courier_id
+                GROUP BY r.courier_id
+            ) courier_pendings
+            GROUP BY courier_pendings.courier_id
+            ORDER BY total_orders ASC
+            LIMIT 1;
+            """;
             // very much not yet tested
 
             PreparedStatement ps = conn.prepareStatement(query);

@@ -36,11 +36,12 @@ public class Product {
 
     public void sendToDB(Connection conn) {
         try {
-            String query = """
-                INSERT INTO products (product_id, seller_id, product_name, product_price, product_type, average_rating, quantity_stocked, listed_status, description)
-                SELECT IFNULL(MAX(product_id), 0) + 1, ?, ?, ?, ?, ?, ?, ?, ?
-                FROM products
-                """;
+            String query =
+            """
+            INSERT INTO products (product_id, seller_id, product_name, product_price, product_type, average_rating, quantity_stocked, listed_status, description)
+            SELECT IFNULL(MAX(product_id), 0) + 1, ?, ?, ?, ?, ?, ?, ?, ?
+            FROM products
+            """;
 
             try (PreparedStatement pstmt = conn.prepareStatement(query)) {
                 pstmt.setInt(1, seller_id);

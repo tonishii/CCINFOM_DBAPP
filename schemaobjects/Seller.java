@@ -20,18 +20,18 @@ public class Seller implements Account {
         int id = Integer.parseInt(scn.nextLine());
 
         String query =
-        "SELECT seller_id, seller_name, seller_address, seller_verified_status, seller_phone_number, seller_creation_date " +
-        "FROM sellers WHERE seller_id = ?";
+        """
+        SELECT seller_id, seller_name, seller_address, seller_verified_status, seller_phone_number, seller_creation_date
+        FROM sellers
+        WHERE seller_id = ?
+        """;
 
         try {
             PreparedStatement pstmt = conn.prepareStatement(query);
             pstmt.setInt(1, id);
 
-            // Execute the query
             ResultSet result = pstmt.executeQuery();
-
             if (result.next()) {
-                // Retrieve and set seller details
                 this.seller_id = result.getInt("seller_id");
                 this.seller_name = result.getString("seller_name");
                 this.seller_address = result.getString("seller_address");
@@ -61,6 +61,7 @@ public class Seller implements Account {
         seller_phone_number = scn.nextLine();
         Pattern pattern = Pattern.compile("^\\d{11}$");
         Matcher matcher = pattern.matcher(seller_phone_number);
+
         while(!matcher.matches()){
             System.out.print("Invalid Phone Number!\nRe-Enter phone number: ");
             seller_phone_number = scn.nextLine();
@@ -88,6 +89,19 @@ public class Seller implements Account {
                 pstmt.executeUpdate();
             }
 
+            query =
+            """
+            SELECT MAX(seller_id)
+            FROM sellers
+            """;
+
+            try (PreparedStatement selectStmt = conn.prepareStatement(query);
+                 ResultSet rs = selectStmt.executeQuery()) {
+                if (rs.next()) {
+                    this.seller_id = rs.getInt(1);
+                }
+            }
+
             System.out.println("Welcome! " + seller_name);
 
         } catch (Exception e) {
@@ -108,7 +122,7 @@ public class Seller implements Account {
             "Select option: ");
 
             switch (scn.nextLine().trim()) {
-                case "1":
+                case "1" -> {
                     Product product = new Product();
                     product.setSellerID(this.seller_id);
 
@@ -129,49 +143,49 @@ public class Seller implements Account {
                     product.updateListedStatus();
                     System.out.print("Enter product description: ");
                     product.setDescription(scn.nextLine());
-                    
+
                     product.sendToDB(conn);
-                    break;
-                case "2":
+                }
+                case "2" -> {
                     try {
-                        String query = 
-                        "SELECT product_id, product_name, product_price, product_type, average_rating, quantity_stocked, listed_status, description " +
-                        "FROM products " +
-                        "WHERE seller_id = ?";
-                    
+                        String query =
+                                "SELECT product_id, product_name, product_price, product_type, average_rating, quantity_stocked, listed_status, description " +
+                                        "FROM products " +
+                                        "WHERE seller_id = ?";
+
                         PreparedStatement pstmt = conn.prepareStatement(query);
                         pstmt.setInt(1, this.seller_id);
                         ResultSet resultSet = pstmt.executeQuery();
-                        
+
                         System.out.println("Product ID | Product Name | Product Price | Product Type | Avg. Rating | Quantity | Listed? | Description");
-                        
+
                         while (resultSet.next()) {
                             System.out.printf("%d | %s | %f | %s | %f | %d | %b | %s\n", resultSet.getInt("product_id"), resultSet.getString("product_name"),
                                     resultSet.getFloat("product_price"), resultSet.getString("product_type"), resultSet.getFloat("average_rating"),
                                     resultSet.getInt("quantity_stocked"), resultSet.getBoolean("listed_status"), resultSet.getString("description"));
-                            
+
                         }
-                        
+
                         System.out.print("Enter product ID: ");
                         int id = scn.nextInt();
                         scn.nextLine();
-                        
+
                         query = "SELECT product_name, product_price, product_type, average_rating, quantity_stocked, listed_status, description " +
-                        "FROM products " +
-                        "WHERE product_id = ?";
-                        
+                                "FROM products " +
+                                "WHERE product_id = ?";
+
                         pstmt = conn.prepareStatement(query);
                         pstmt.setInt(1, id);
                         resultSet = pstmt.executeQuery();
-                        
+
                         resultSet.next();
                         product = new Product(id, this.seller_id, resultSet.getString("product_name"),
-                                    resultSet.getFloat("product_price"), resultSet.getString("product_type"), resultSet.getFloat("average_rating"),
-                                    resultSet.getInt("quantity_stocked"), resultSet.getBoolean("listed_status"), resultSet.getString("description"));
-                        
+                                resultSet.getFloat("product_price"), resultSet.getString("product_type"), resultSet.getFloat("average_rating"),
+                                resultSet.getInt("quantity_stocked"), resultSet.getBoolean("listed_status"), resultSet.getString("description"));
+
                         System.out.println("Which field to edit?\n[1] Product Name\n[2] Product Price\n[3] Product Type");
                         System.out.print("[4] Quantity\n[5] Description\nChoice: ");
-                        
+
                         switch (scn.nextLine().trim()) {
                             case "1":
                                 System.out.print("Enter product name: ");
@@ -196,9 +210,10 @@ public class Seller implements Account {
                                 System.out.print("Enter product description: ");
                                 product.setDescription(scn.nextLine());
                                 break;
-                            default: System.out.println("Invalid input.");
+                            default:
+                                System.out.println("Invalid input.");
                         }
-                        
+
                         query = "REPLACE INTO products(product_id, seller_id, product_name, product_price, product_type, average_rating, quantity_stocked, listed_status, description) "
                                 + "VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?)";
                         pstmt = conn.prepareStatement(query);
@@ -211,14 +226,14 @@ public class Seller implements Account {
                         pstmt.setInt(7, product.getQuantity());
                         pstmt.setBoolean(8, product.isListed());
                         pstmt.setString(9, product.getDescription());
-                        
+
                         pstmt.executeUpdate();
-                        
+
                     } catch (Exception e) {
                         System.out.println("Error during product editing: " + e.getMessage());
                     }
-                    break;
-                case "3":
+                }
+                case "3" -> {
                     System.out.print("\n[GENERATE REPORT]\n[1] Sales Report\n[2] Credibility Report\n[3] Product Popularity Report\nChoice: ");
                     switch (scn.nextLine().trim()) {
                         case "1":
@@ -228,30 +243,30 @@ public class Seller implements Account {
                         case "3":
                             try {
                                 int month, year;
-                            
+
                                 System.out.print("Enter month: ");
                                 month = scn.nextInt();
                                 scn.nextLine();
                                 System.out.print("Enter year: ");
                                 year = scn.nextInt();
                                 scn.nextLine();
-                                
+
                                 String query = "SELECT p.product_name, SUM(oc.item_quantity) AS amt_sold, p.average_rating " +
-                                                "FROM order_contents oc " +
-                                                "JOIN orders o ON oc.order_id = o.order_id " +
-                                                "JOIN products p ON oc.product_id = p.product_id " +
-                                                "WHERE YEAR(o.purchase_date) = ? " +
-                                                "AND MONTH(o.purchase_date) = ? " +
-                                                "AND p.seller_id = ? " +
-                                                "GROUP BY p.product_name, p.average_rating " +
-                                                "ORDER BY p.average_rating DESC, p.product_name";
+                                        "FROM order_contents oc " +
+                                        "JOIN orders o ON oc.order_id = o.order_id " +
+                                        "JOIN products p ON oc.product_id = p.product_id " +
+                                        "WHERE YEAR(o.purchase_date) = ? " +
+                                        "AND MONTH(o.purchase_date) = ? " +
+                                        "AND p.seller_id = ? " +
+                                        "GROUP BY p.product_name, p.average_rating " +
+                                        "ORDER BY p.average_rating DESC, p.product_name";
 
                                 PreparedStatement ps = conn.prepareStatement(query);
                                 ps.setInt(1, year);
                                 ps.setInt(2, month);
                                 ps.setInt(3, this.seller_id);
                                 ResultSet rs = ps.executeQuery();
-                                
+
                                 System.out.println("Product Name | Units Sold | Average Rating");
                                 int rank = 1;
                                 while (rs.next()) {
@@ -261,14 +276,14 @@ public class Seller implements Account {
                                 System.out.println("Error during report generation: " + e);
                             }
                             break;
-                        default: System.out.println("Invalid input.");
+                        default:
+                            System.out.println("Invalid input.");
                     }
-                    break;
+                }
                 case "4":
                     break;
 
-                case "5": // Exit
-                    return;
+                case "5": return; // Exit
                 default: System.out.println("Error: Enter valid option.");
             }
         }
@@ -279,31 +294,13 @@ public class Seller implements Account {
         this.seller_verified_status = true;
     }
 
-    public void setName(String seller_name) {
-        this.seller_name = seller_name;
-    }
-    public void setAddress(String seller_address) {
-        this.seller_address = seller_address;
-    }
-    public void setPhoneNumber(String seller_phone_number) {
-        this.seller_phone_number = seller_phone_number;
-    }
-    public int getID() {
-        return this.seller_id;
-    }
-    public String getName() {
-        return this.seller_name;
-    }
-    public String getAddress() {
-        return this.seller_address;
-    }
-    public String getPhoneNumber() {
-        return this.seller_phone_number;
-    }
-    public Date getCreationDate() {
-        return this.seller_creation_date;
-    }
-    public boolean getStatus() {
-        return this.seller_verified_status;
-    }
+    public void setName(String seller_name) { this.seller_name = seller_name; }
+    public void setAddress(String seller_address) { this.seller_address = seller_address; }
+    public void setPhoneNumber(String seller_phone_number) { this.seller_phone_number = seller_phone_number; }
+    public int getID() { return this.seller_id; }
+    public String getName() { return this.seller_name; }
+    public String getAddress() { return this.seller_address; }
+    public String getPhoneNumber() { return this.seller_phone_number; }
+    public Date getCreationDate() { return this.seller_creation_date; }
+    public boolean getStatus() { return this.seller_verified_status; }
 }
