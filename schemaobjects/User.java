@@ -1,9 +1,11 @@
 package schemaobjects;
+import enums.OrderStatus;
 import java.awt.*;
 import java.util.ArrayList;
 import java.util.Objects;
 import java.util.Scanner;
 import java.sql.*;
+import java.text.SimpleDateFormat;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -153,8 +155,19 @@ public class User implements Account {
                 case "3":
                     break;
                 case "4":
+                    if (displayPurchaseHistory(conn)) {
+                        System.out.print("Enter Order ID: ");
+                        int order_id = scn.nextInt();
+                        scn.nextLine();
+                        Order.displayOrderContents(conn, order_id);
+                        System.out.print("Enter Product ID to refund: ");
+                        int product_id = scn.nextInt();
+                        scn.nextLine();
+                        Return.requestReturn(scn, conn, product_id, order_id);
+                    }
                     break;
                 case "5":
+                    displayPurchaseHistory(conn);
                     break;
                 case "6":
                     break;
@@ -165,6 +178,51 @@ public class User implements Account {
                 default: System.out.println("Error: Enter valid option.");
             }
         }
+    }
+    
+    public boolean displayPurchaseHistory(Connection conn) {
+        ArrayList<Order> ph = this.getPurchaseHistory(conn);
+        if (!(ph.isEmpty())) {
+            System.out.println("Order ID | Courier ID | Date Purchased | Total | Date Received");
+            for (Order order : ph) {
+                System.out.printf("%d | %d | %s | %f | %s\n", order.getOrderID(), order.getCourierID(), formatDate(order.getPurchaseDate()),
+                        order.getTotalPrice(), formatDate(order.getReceiveDate()));
+            }
+        }
+        else {
+            System.out.println("No purchase history.");
+            return false;
+        }
+        return true;
+    }
+    
+    private String formatDate(Date date) {
+        String pattern = "yyyy-MM-dd";
+        SimpleDateFormat sdf = new SimpleDateFormat(pattern);
+        return sdf.format(date);
+    }
+    
+    public ArrayList<Order> getPurchaseHistory(Connection conn) {
+        ArrayList<Order> ph = new ArrayList<>();
+        try {
+            String query = 
+                    """
+                    SELECT order_id, courier_id, purchase_date, total_price, order_status, receive_date
+                    FROM orders
+                    WHERE user_id =  ?
+                    AND order_status = "DELIVERED"
+                    """;
+            PreparedStatement ps = conn.prepareStatement(query);
+            ps.setInt(1, this.user_id);
+            ResultSet rs = ps.executeQuery();
+            while (rs.next()) {
+                ph.add(new Order(rs.getInt("order_id"), this.user_id, rs.getInt("courier_id"), rs.getDate("purchase_date"), 
+                        rs.getFloat("total_price"), OrderStatus.valueOf(rs.getString("order_status")), rs.getDate("receive_date")));
+            }
+        } catch (Exception e) {
+            System.out.println("Error while getting purchase history: " + e);
+        }
+        return ph;
     }
 
     private ArrayList<OrderContent> browseOptions(Scanner scn, Connection conn) {

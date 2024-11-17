@@ -15,12 +15,14 @@ public class Order {
     private OrderStatus order_status;
     private Date        receive_date;
     
-    public Order(int user_id) {
+    public Order(int order_id, int user_id, int courier_id, Date purchase_date, float total_price, OrderStatus order_status, Date receive_date) {
+        this.order_id = order_id;
         this.user_id = user_id;
-        // sql to generate order id and calculate for courier id
-        long ms = System.currentTimeMillis();
-        this.purchase_date = new Date(ms);
-        this.order_status = OrderStatus.BEING_PREPARED;
+        this.courier_id = courier_id;
+        this.purchase_date = purchase_date;
+        this.total_price = total_price;
+        this.order_status = order_status;
+        this.receive_date = receive_date;
     }
     
     public static void generateOrder(int user_id, Connection conn, ArrayList<OrderContent> cart, float total_price) {
@@ -66,6 +68,37 @@ public class Order {
         } catch (Exception e) {
             System.out.println("Error during order generation: " + e);
         }
+    }
+    
+    public static void displayOrderContents(Connection conn, int order_id) {
+        ArrayList<OrderContent> oc = getOrderContents(conn, order_id);
+        System.out.println("Product ID | Product Name | Quantity Purchased | Subtotal");
+        for (OrderContent item : oc) {
+            System.out.printf("%d | %s | %d | %f\n", item.getProductID(), item.getProductName(), item.getQuantity(), (float) item.getPriceEach() * item.getQuantity());
+        }
+    }
+    
+    public static ArrayList<OrderContent> getOrderContents(Connection conn, int order_id) {
+        ArrayList<OrderContent> oc = new ArrayList<>();
+        try {
+            String query = 
+                """
+                SELECT p.product_id, p.product_name, oc.item_quantity, oc.subtotal
+                FROM order_contents oc
+                JOIN products p ON oc.product_id = p.product_id
+                WHERE oc.order_id = ?
+                """;
+            PreparedStatement ps = conn.prepareStatement(query);
+            ps.setInt(1, order_id);
+            ResultSet rs = ps.executeQuery();
+            
+            while (rs.next()) {
+                oc.add(new OrderContent(rs.getInt("p.product_id"), rs.getString("p.product_name"), rs.getInt("oc.item_quantity"), rs.getFloat("oc.subtotal")));
+            }
+        } catch (Exception e) {
+            System.out.println("Error in fetching order contents: " + e);
+        }      
+        return oc;
     }
     
     public void setReceiveDate(Date date) {
