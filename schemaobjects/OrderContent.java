@@ -18,31 +18,16 @@ public class OrderContent {
     }
     
     public void insertOrderContent(int order_id, Connection conn) {
-        try {
+        try {            
             String query = """
-                        SELECT average_rating
-                        FROM products
-                        WHERE product_id = ?
-                           """;
-            PreparedStatement ps = conn.prepareStatement(query);
-            ps.setInt(1, this.product_id);
-            ResultSet rs = ps.executeQuery();
-            float avg_rating = 0.0f;
-            
-            if (rs.next()) {
-                avg_rating = rs.getFloat("average_rating");
-            }
-            
-            query = """
                INSERT INTO order_contents
-               VALUES (?, ?, ?, ?, ?)
+               VALUES (?, ?, ?, ?)
                """;
-            ps = conn.prepareStatement(query);
+            PreparedStatement ps = conn.prepareStatement(query);
             ps.setInt(1, order_id);
             ps.setInt(2, this.product_id);
             ps.setInt(3, this.quantity);
             ps.setFloat(4, (float) this.quantity * this.priceEach);
-            ps.setFloat(5, avg_rating);
             ps.executeUpdate();
         } catch (Exception e) {
             System.out.println("Error while adding order content: " + e);
