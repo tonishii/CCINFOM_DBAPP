@@ -245,7 +245,6 @@ public class Courier implements Account {
                 ORDER BY total_orders ASC, courier_pendings.courier_id
                 LIMIT 1;
                            """;
-            // very much not yet tested
 
             PreparedStatement ps = conn.prepareStatement(query);
             ResultSet rs = ps.executeQuery();
