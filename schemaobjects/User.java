@@ -183,7 +183,7 @@ public class User implements Account {
                                             "[2] Phone Number: %s\n" +
                                             "[3] Address: %s\n" +
                                             "[4] First Name: %s\n" +
-                                            "[5] Last Name: %s\n " +
+                                            "[5] Last Name: %s\n" +
                                             "[6] Go Back\n",
                                             user_name,
                                             user_phone_number,
@@ -753,10 +753,10 @@ public class User implements Account {
             String update =
                     """
                     UPDATE users
-                    SET user_name = ?
-                        user_phone_number = ?
-                        user_address = ?
-                        user_firstname = ?
+                    SET user_name = ?,
+                        user_phone_number = ?,
+                        user_address = ?,
+                        user_firstname = ?,
                         user_lastname = ?
                     WHERE user_id = ?;
                     """;
@@ -766,7 +766,7 @@ public class User implements Account {
             pstmt.setString(3, this.user_address);
             pstmt.setString(4, this.user_firstname);
             pstmt.setString(5, this.user_lastname);
-            pstmt.setInt(5, this.user_id);
+            pstmt.setInt(6, this.user_id);
             pstmt.executeUpdate();
         } catch (Exception e){
             System.out.println("Error updating name: " + e);
