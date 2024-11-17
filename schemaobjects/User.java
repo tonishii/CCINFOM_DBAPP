@@ -1,6 +1,7 @@
 package schemaobjects;
 import enums.OrderStatus;
 import java.awt.*;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Objects;
 import java.util.Scanner;
@@ -153,6 +154,7 @@ public class User implements Account {
                     viewShoppingCart(scn, shoppingCart, conn);
                     break;
                 case "3":
+                    receiveOrder(scn, conn);
                     break;
                 case "4":
                     if (displayPurchaseHistory(conn)) {
@@ -623,6 +625,62 @@ public class User implements Account {
             }
         } catch (Exception e) {
             System.out.println("Error while adding product rating: " + e);
+        }
+    }
+
+    public void receiveOrder(Scanner scn, Connection conn) {
+        try {
+            String query = """
+                            SELECT *
+                            FROM orders o
+                            WHERE o.user_id = ? AND o.order_status = 'FOR_DELIVERY'
+                            ORDER BY o.order_id
+                            """;
+            PreparedStatement ps = conn.prepareStatement(query);
+            ps.setInt(1, this.user_id);
+            ResultSet rs = ps.executeQuery();
+
+            ArrayList<Order> orderList = new ArrayList<>();
+
+            if(rs.next()) {
+                System.out.println("Order ID | Purchase Date");
+                do {
+                    orderList.add(new Order(rs.getInt("order_id"), this.user_id, rs.getInt("courier_id"), rs.getDate("purchase_date"),
+                            rs.getFloat("total_price"), OrderStatus.valueOf(rs.getString("order_status")), rs.getDate("receive_date")));
+                    System.out.printf("%d | %s\n", rs.getInt("order_id"), rs.getTimestamp("purchase_date").toString());
+                } while(rs.next());
+
+                System.out.println("Enter Order ID of Order to receive: ");
+                int id;
+                while(true) {
+                    id = Integer.parseInt(scn.nextLine());
+                    int checkValid = id;
+                    if(orderList.stream().anyMatch(o -> o.getOrderID() == checkValid))
+                        break;
+                    else System.out.println("Error: Please enter a valid Order ID.");
+                }
+
+                PreparedStatement pstmt;
+                String update =
+                        """
+                                UPDATE orders
+                                SET order_status = 'DELIVERED', receive_date = ?
+                                WHERE order_id = ?;
+                        """;
+                pstmt = conn.prepareStatement(update);
+                pstmt.setTimestamp(1, Timestamp.from(Instant.now()));
+                pstmt.setInt(2, id);
+                pstmt.executeUpdate();
+                // the ff lines are for GUI implementation:
+//                int fID = id;
+//                orderList.remove(orderList.stream().filter(o -> o.getOrderID() == fID).findFirst().get());
+                System.out.println("Order received. Returning to menu...");
+            }
+            else {
+                System.out.println("No orders to receive. Returning...");
+            }
+        } catch (Exception e) {
+            throw new RuntimeException(e);
         }
     }
 
