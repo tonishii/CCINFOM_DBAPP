@@ -143,6 +143,19 @@ public class Courier implements Account {
                             case "2":
                                 System.out.print("Enter new email address: ");
                                 this.courier_email_address = scn.nextLine();
+                                if (!courier_email_address.isEmpty()) {
+                                    String regex = "^[\\w!#$%&'*+/=?`{|}~^-]+(?:\\.[\\w!#$%&'*+/=?`{|}~^-]+)" +
+                                            "*@(?:[a-zA-Z0-9-]+\\.)+[a-zA-Z]{2,6}";
+
+                                    Pattern pattern = Pattern.compile(regex);
+                                    Matcher matcher = pattern.matcher(courier_email_address);
+
+                                    while (!matcher.matches()) {
+                                        System.out.print("Invalid Email!\n Re-Enter email address:  ");
+                                        courier_email_address = scn.nextLine();
+                                        matcher = pattern.matcher(courier_email_address);
+                                    }
+                                }
                                 updateStatus();
                                 break;
                             case "3":
