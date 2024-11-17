@@ -226,31 +226,32 @@ public class Courier implements Account {
 
     public static int assignCourier(Connection conn) {
         try {
-            String query =
-            """
-            SELECT courier_pendings.courier_id, SUM(order_count) AS total_orders
-            FROM (
-                SELECT o.courier_id, COUNT(o.order_id) AS order_count
-                FROM orders o
-                LEFT JOIN `returns` r ON r.courier_id = o.courier_id
-                GROUP BY o.courier_id
-                UNION
-                SELECT r.courier_id, COUNT(r.order_id) AS order_count
-                FROM `returns` r
-                RIGHT JOIN orders o ON r.courier_id = o.courier_id
-                GROUP BY r.courier_id
-            ) courier_pendings
-            GROUP BY courier_pendings.courier_id
-            ORDER BY total_orders ASC
-            LIMIT 1;
-            """;
+            String query = """
+                SELECT c.courier_id, IFNULL(SUM(order_count), 0)  AS total_orders
+                FROM (
+                	SELECT o.courier_id, COUNT(o.order_id) AS order_count
+                	FROM orders o
+                	LEFT JOIN `returns` r ON r.courier_id = o.courier_id
+                	GROUP BY o.courier_id
+                	UNION
+                	SELECT r.courier_id, COUNT(r.order_id) AS order_count
+                	FROM `returns` r
+                	RIGHT JOIN orders o ON r.courier_id = o.courier_id
+                	GROUP BY r.courier_id
+                ) courier_pendings
+                RIGHT JOIN couriers c ON courier_pendings.courier_id = c.courier_id
+                WHERE c.courier_verified_status = (1)
+                GROUP BY courier_pendings.courier_id, c.courier_id
+                ORDER BY total_orders ASC, courier_pendings.courier_id
+                LIMIT 1;
+                           """;
             // very much not yet tested
 
             PreparedStatement ps = conn.prepareStatement(query);
             ResultSet rs = ps.executeQuery();
             rs.next();
 
-            return rs.getInt("courier_pendings.courier_id");
+            return rs.getInt("c.courier_id");
         } catch (Exception e) {
             System.out.println("Error in assigning courier: " + e);
         }
