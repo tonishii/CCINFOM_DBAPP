@@ -25,42 +25,47 @@ public class Order {
     
     public static void generateOrder(int user_id, Connection conn, ArrayList<OrderContent> cart) {
         try {
-            int order_id = -1;
-            String query =
-                """
-                SELECT IFNULL(MAX(order_id), 0) + 1 AS id
-                FROM orders
-                """;
-            PreparedStatement ps = conn.prepareStatement(query);
-            ResultSet rs = ps.executeQuery();
-            
-            if (rs.next()) {
-                order_id = rs.getInt("id");
+            if (Courier.assignCourier(conn) != -1) {
+                int order_id = -1;
+                String query =
+                    """
+                    SELECT IFNULL(MAX(order_id), 0) + 1 AS id
+                    FROM orders
+                    """;
+                PreparedStatement ps = conn.prepareStatement(query);
+                ResultSet rs = ps.executeQuery();
+
+                if (rs.next()) {
+                    order_id = rs.getInt("id");
+                }
+
+                float total_price = 0.0f;            
+                for (OrderContent product : cart) {
+                    total_price += (float) product.getPriceEach() * product.getQuantity();
+                }
+
+                query = 
+                    """
+                    INSERT INTO orders
+                    VALUES(?, ?, ?, ?, ?, ?, ?)
+                    """;
+                ps = conn.prepareStatement(query);
+                ps.setInt(1, order_id);
+                ps.setInt(2, user_id);
+                ps.setInt(3, Courier.assignCourier(conn));
+                ps.setDate(4, new Date(System.currentTimeMillis()));
+                ps.setFloat(5, total_price);
+                ps.setString(6, OrderStatus.BEING_PREPARED.name());
+                ps.setDate(7, Date.valueOf("9999-12-31"));
+
+                ps.executeUpdate();
+
+                for (OrderContent product : cart) {
+                    product.insertOrderContent(order_id, conn);
+                }
             }
-            
-            float total_price = 0.0f;            
-            for (OrderContent product : cart) {
-                total_price += (float) product.getPriceEach() * product.getQuantity();
-            }
-            
-            query = 
-                """
-                INSERT INTO orders
-                VALUES(?, ?, ?, ?, ?, ?, ?)
-                """;
-            ps = conn.prepareStatement(query);
-            ps.setInt(1, order_id);
-            ps.setInt(2, user_id);
-            ps.setInt(3, Courier.assignCourier(conn));
-            ps.setDate(4, new Date(System.currentTimeMillis()));
-            ps.setFloat(5, total_price);
-            ps.setString(6, OrderStatus.BEING_PREPARED.name());
-            ps.setDate(7, Date.valueOf("9999-12-31"));
-            
-            ps.executeUpdate();
-                       
-            for (OrderContent product : cart) {
-                product.insertOrderContent(order_id, conn);
+            else {
+                System.out.println("No available couriers for delivery.");
             }
         } catch (Exception e) {
             System.out.println("Error during order generation: " + e);

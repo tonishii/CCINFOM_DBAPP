@@ -248,9 +248,9 @@ public class Courier implements Account {
 
             PreparedStatement ps = conn.prepareStatement(query);
             ResultSet rs = ps.executeQuery();
-            rs.next();
-
-            return rs.getInt("c.courier_id");
+            if (rs != null && rs.next()) {
+                return rs.getInt("c.courier_id");
+            }
         } catch (Exception e) {
             System.out.println("Error in assigning courier: " + e);
         }
