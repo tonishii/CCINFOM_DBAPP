@@ -1,8 +1,8 @@
 package enums;
 
 public enum OrderStatus {
-    BEINGPREPARED,
-    FORDELIVERY,
+    BEING_PREPARED,
+    FOR_DELIVERY,
     DELIVERED,
     REFUNDED;
 }
