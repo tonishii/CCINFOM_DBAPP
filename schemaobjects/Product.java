@@ -102,35 +102,18 @@ public class Product {
     }
 
     public void updateRating(Connection conn, int productId) throws SQLException {
-        ArrayList<Integer> productRatings = new ArrayList<>();
-        int count = 0;
-        float total = 0;
         String query =
                 """
-                SELECT COUNT(DISTINCT od.order_id) AS unique_ratings
+                SELECT AVG(DISTINCT od.product_rating)
                 FROM order_contents od
-                WHERE od.product_id = ? AND od.product_rating IS NOT NULL;
+                WHERE od.product_id = 10 AND od.product_rating IS NOT NULL;
                 """;
         PreparedStatement pstmt = conn.prepareStatement(query);
         pstmt.setInt(1, productId);
         ResultSet resultSet = pstmt.executeQuery();
         while (resultSet.next()){
-            count = resultSet.getInt("unique_ratings");
+            resultSet.getFloat("product_rating");
         }
-
-        query =
-                """
-                SELECT DISTINCT od.order_id, od.product_rating
-                FROM order_contents od
-                WHERE od.product_id = ? AND od.product_rating IS NOT NULL;
-                """;
-        pstmt = conn.prepareStatement(query);
-        pstmt.setInt(1, productId);
-        resultSet = pstmt.executeQuery();
-        while (resultSet.next()){
-            total+=resultSet.getFloat("product_rating");
-        }
-        total = total/count;
 
         query =
                 """
@@ -139,7 +122,7 @@ public class Product {
                 WHERE product_id = ?;
                 """;
         pstmt = conn.prepareStatement(query);
-        pstmt.setFloat(1, total);
+        pstmt.setFloat(1, resultSet.getFloat("product_rating"));
         pstmt.setInt(2, productId);
         pstmt.executeUpdate();
         System.out.println("Rating Success!!");
