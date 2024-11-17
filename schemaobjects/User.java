@@ -452,6 +452,85 @@ public class User implements Account {
         } while(scn.nextLine().trim().equalsIgnoreCase("y"));
     }
 
+    public void rateProduct(Scanner scn, Connection conn) {
+        try {
+            ArrayList<Product> rateList = new ArrayList<Product>();
+            int count = 0;
+            String query =
+                    """
+                    SELECT COUNT(product_id) AS numofProducts
+                    FROM products p
+                    WHERE p.product_id IN (
+                                            SELECT product_id
+                            				FROM orders o
+                                            LEFT JOIN order_contents od ON o.order_id = od. order_id
+                                            WHERE o.user_id = ? AND o.order_status = 'DELIVERED');
+                    """;
+
+            PreparedStatement pstmt = conn.prepareStatement(query);
+            pstmt.setInt(1, user_id);
+            ResultSet resultSet = pstmt.executeQuery();
+
+            while (resultSet.next()) {
+                count = resultSet.getInt("numofProducts");
+            }
+
+            if (count>0) {
+                query =
+                        """
+                                SELECT p.product_id, p.product_name, p.product_type, p.average_rating
+                                FROM products p
+                                WHERE p.product_id IN (
+                                                        SELECT product_id
+                                                        FROM orders o
+                                                        LEFT JOIN order_contents od ON o.order_id = od. order_id
+                                                        WHERE o.user_id = ? AND o.order_status = 'DELIVERED');
+                                """;
+
+                pstmt = conn.prepareStatement(query);
+                pstmt.setInt(1, user_id);
+                resultSet = pstmt.executeQuery();
+
+                while (resultSet.next()) {
+                    rateList.add(new Product(
+                            resultSet.getInt("product_id"),
+                            resultSet.getInt("seller_id"),
+                            resultSet.getString("product_name"),
+                            resultSet.getFloat("product_price"),
+                            resultSet.getString("product_type"),
+                            resultSet.getFloat("average_rating"),
+                            resultSet.getInt("quantity_stocked"),
+                            resultSet.getBoolean("listed_status"),
+                            resultSet.getString("description")
+                    ));
+                }
+
+                System.out.println("Product ID | Product Name | Product Type");
+                for (Product product : rateList) {
+                    System.out.printf("%d | %s | %s\n", product.getProductID(), product.getType());
+                }
+
+                System.out.print("Enter product ID: ");
+                int product_id  = Integer.parseInt(scn.nextLine())-1;
+                if (product_id>rateList.size()-1){
+
+                }
+                Product product = rateList.stream()
+                        .filter(p -> p.getProductID() == product_id)
+                        .findFirst()
+                        .orElse(null);
+
+                System.out.print("Enter rating (out of 5.0): ");
+                float product_rating= Float.parseFloat(scn.nextLine());
+            }
+            else{
+                System.out.println("No products found!!!!!!!!!!!!!!!!");
+            }
+        } catch (Exception e) {
+            System.out.println("Error while adding product rating: " + e);
+        }
+    }
+
     public void updateStatus() {
         // checking fields
         this.user_verified_status = true;
