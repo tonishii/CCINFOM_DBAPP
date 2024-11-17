@@ -1,8 +1,7 @@
 package schemaobjects;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
+import java.util.ArrayList;
+import java.sql.*;
 
 public class Product {
     private int     product_id;
@@ -67,10 +66,6 @@ public class Product {
         description != null ? description : "N/A");
     }
 
-    public void updateAveRating() {
-
-    }
-
     public static void updateQuantity(Connection conn, int productId, int qty) {
         try {
             String query = """
@@ -104,6 +99,50 @@ public class Product {
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
+    }
+
+    public void updateRating(Connection conn, int productId) throws SQLException {
+        ArrayList<Integer> productRatings = new ArrayList<>();
+        int count = 0;
+        float total = 0;
+        String query =
+                """
+                SELECT COUNT(DISTINCT od.order_id) AS unique_ratings
+                FROM order_contents od
+                WHERE od.product_id = ? AND od.product_rating IS NOT NULL;
+                """;
+        PreparedStatement pstmt = conn.prepareStatement(query);
+        pstmt.setInt(1, productId);
+        ResultSet resultSet = pstmt.executeQuery();
+        while (resultSet.next()){
+            count = resultSet.getInt("unique_ratings");
+        }
+
+        query =
+                """
+                SELECT DISTINCT od.order_id, od.product_rating
+                FROM order_contents od
+                WHERE od.product_id = ? AND od.product_rating IS NOT NULL;
+                """;
+        pstmt = conn.prepareStatement(query);
+        pstmt.setInt(1, productId);
+        resultSet = pstmt.executeQuery();
+        while (resultSet.next()){
+            total+=resultSet.getFloat("product_rating");
+        }
+        total = total/count;
+
+        query =
+                """
+                UPDATE products
+                SET average_rating = ?
+                WHERE product_id = ?;
+                """;
+        pstmt = conn.prepareStatement(query);
+        pstmt.setFloat(1, total);
+        pstmt.setInt(2, productId);
+        pstmt.executeUpdate();
+        System.out.println("Rating Success!!");
     }
 
     public void updateListedStatus() {

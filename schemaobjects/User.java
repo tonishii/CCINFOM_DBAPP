@@ -170,6 +170,7 @@ public class User implements Account {
                     displayPurchaseHistory(conn);
                     break;
                 case "6":
+                    rateProduct(scn, conn);
                     break;
                 case "7":
                     break;
@@ -540,13 +541,13 @@ public class User implements Account {
             int count = 0;
             String query =
                     """
-                    SELECT COUNT(product_id) AS numofProducts
+                    SELECT COUNT(DISTINCT product_id) AS numofProducts
                     FROM products p
                     WHERE p.product_id IN (
-                                            SELECT product_id
-                            				FROM orders o
-                                            LEFT JOIN order_contents od ON o.order_id = od. order_id
-                                            WHERE o.user_id = ? AND o.order_status = 'DELIVERED');
+                                           SELECT product_id
+                                           FROM orders o
+                                           LEFT JOIN order_contents od ON o.order_id = od. order_id
+                                           WHERE o.user_id = ? AND o.order_status = 'DELIVERED' AND od.product_rating IS NULL);
                     """;
 
             PreparedStatement pstmt = conn.prepareStatement(query);
@@ -556,18 +557,17 @@ public class User implements Account {
             while (resultSet.next()) {
                 count = resultSet.getInt("numofProducts");
             }
-
             if (count>0) {
                 query =
                         """
-                                SELECT p.product_id, p.product_name, p.product_type, p.average_rating
-                                FROM products p
-                                WHERE p.product_id IN (
-                                                        SELECT product_id
-                                                        FROM orders o
-                                                        LEFT JOIN order_contents od ON o.order_id = od. order_id
-                                                        WHERE o.user_id = ? AND o.order_status = 'DELIVERED');
-                                """;
+                        SELECT DISTINCT *
+                        FROM products p
+                        WHERE p.product_id IN (
+                                               SELECT product_id
+                                               FROM orders o
+                                               LEFT JOIN order_contents od ON o.order_id = od. order_id
+                                               WHERE o.user_id = 3 AND o.order_status = 'DELIVERED' AND od.product_rating IS NULL);
+                        """;
 
                 pstmt = conn.prepareStatement(query);
                 pstmt.setInt(1, user_id);
@@ -589,21 +589,34 @@ public class User implements Account {
 
                 System.out.println("Product ID | Product Name | Product Type");
                 for (Product product : rateList) {
-                    System.out.printf("%d | %s | %s\n", product.getProductID(), product.getType());
+                    System.out.printf("%d | %s | %s\n", product.getProductID(), product.getName(), product.getType());
                 }
 
                 System.out.print("Enter product ID: ");
-                int product_id  = Integer.parseInt(scn.nextLine())-1;
-                if (product_id>rateList.size()-1){
+                int product_id  = Integer.parseInt(scn.nextLine());
 
+                if (rateList.stream().anyMatch(p -> p.getProductID() == product_id)) {
+                    System.out.print("Enter rating (out of 5.0): ");
+                    float product_rating = Float.parseFloat(scn.nextLine());
+                    String update =
+                            """
+                                    UPDATE order_contents
+                                    SET product_rating = ?
+                                    WHERE product_id = ?;
+                            """;
+                    pstmt = conn.prepareStatement(update);
+                    pstmt.setFloat(1, product_rating);
+                    pstmt.setInt(2, product_id);
+                    pstmt.executeUpdate();
+                    Product product = rateList.stream()
+                            .filter(p -> p.getProductID() == product_id)
+                            .findFirst()
+                            .orElse(null);
+                    product.updateRating(conn, product_id);
                 }
-                Product product = rateList.stream()
-                        .filter(p -> p.getProductID() == product_id)
-                        .findFirst()
-                        .orElse(null);
-
-                System.out.print("Enter rating (out of 5.0): ");
-                float product_rating= Float.parseFloat(scn.nextLine());
+                else{
+                    System.out.println("No products found!!!!!!!!!!!!!!!!");
+                }
             }
             else{
                 System.out.println("No products found!!!!!!!!!!!!!!!!");
