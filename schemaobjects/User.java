@@ -175,6 +175,70 @@ public class User implements Account {
                     rateProduct(scn, conn);
                     break;
                 case "7":
+                    try{
+                        boolean goBack = true;
+                        while (goBack) {
+                            System.out.printf("User Details:\n" +
+                                            "[1] Name: %s\n" +
+                                            "[2] Phone Number: %s\n" +
+                                            "[3] Address: %s\n" +
+                                            "[4] First Name: %s\n" +
+                                            "[5] Last Name: %s\n " +
+                                            "[6] Go Back\n",
+                                            user_name,
+                                            user_phone_number,
+                                            user_address,
+                                            user_firstname,
+                                            user_lastname);
+                            System.out.print("Enter option to edit: ");
+
+                            switch (scn.nextLine()) {
+                                case "1":
+                                    System.out.print("Enter new user name: ");
+                                    this.user_name = scn.nextLine();
+                                    updateAccount(conn);
+                                    break;
+                                case "2":
+                                    System.out.print("Enter new phone number: ");
+                                    this.user_phone_number = scn.nextLine();
+                                    if (!user_phone_number.isEmpty()) {
+                                        Pattern pattern = Pattern.compile("^\\d{11}$");
+                                        Matcher matcher = pattern.matcher(user_phone_number);
+
+                                        while (!matcher.matches()) {
+                                            System.out.print("Invalid Phone Number!\nRe-Enter phone number: ");
+                                            user_phone_number = scn.nextLine();
+                                            matcher = pattern.matcher(user_phone_number);
+                                        }
+                                    }
+                                    updateAccount(conn);
+                                    break;
+                                case "3":
+                                    System.out.print("Enter new address: ");
+                                    this.user_address = scn.nextLine();
+                                    updateAccount(conn);
+                                    break;
+                                case "4":
+                                    System.out.print("Enter new first name: ");
+                                    this.user_firstname = scn.nextLine();
+                                    updateAccount(conn);
+                                    break;
+                                case "5":
+                                    System.out.print("Enter new last name: ");
+                                    this.user_lastname = scn.nextLine();
+                                    updateAccount(conn);
+                                    break;
+                                case "6":
+                                    goBack = false;
+                                    break;
+
+                                default:
+                                    System.out.print("Error: Enter valid option.");
+                            }
+                        }
+                    } catch (Exception e){
+                        System.out.println("Error during account editing: " + e.getMessage());
+                    }
                     break;
                 case "8":
                     return;
@@ -681,6 +745,31 @@ public class User implements Account {
             }
         } catch (Exception e) {
             throw new RuntimeException(e);
+        }
+    }
+
+    public void updateAccount(Connection conn){
+        try{
+            String update =
+                    """
+                    UPDATE users
+                    SET user_name = ?
+                        user_phone_number = ?
+                        user_address = ?
+                        user_firstname = ?
+                        user_lastname = ?
+                    WHERE user_id = ?;
+                    """;
+            PreparedStatement pstmt = conn.prepareStatement(update);
+            pstmt.setString(1, this.user_name);
+            pstmt.setString(2, this.user_phone_number);
+            pstmt.setString(3, this.user_address);
+            pstmt.setString(4, this.user_firstname);
+            pstmt.setString(5, this.user_lastname);
+            pstmt.setInt(5, this.user_id);
+            pstmt.executeUpdate();
+        } catch (Exception e){
+            System.out.println("Error updating name: " + e);
         }
     }
 

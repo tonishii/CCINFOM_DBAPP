@@ -139,6 +139,7 @@ public class Courier implements Account {
                             case "1":
                                 System.out.print("Enter new courier name: ");
                                 this.courier_name = scn.nextLine();
+                                updateAccount(conn);
                                 break;
                             case "2":
                                 System.out.print("Enter new email address: ");
@@ -157,11 +158,13 @@ public class Courier implements Account {
                                     }
                                 }
                                 updateStatus();
+                                updateAccount(conn);
                                 break;
                             case "3":
                                 System.out.print("Enter new courier address: ");
                                 this.courier_address = scn.nextLine();
                                 updateStatus();
+                                updateAccount(conn);
                                 break;
                             case "4":
                                 goBack = false;
@@ -277,7 +280,29 @@ public class Courier implements Account {
         }
         return -1;
     }
-    
+
+    @Override
+    public void updateAccount(Connection conn) {
+        try{
+            String update =
+                    """
+                    UPDATE couriers
+                    SET courier_name = ?
+                        courier_email_address = ?
+                        courier_address = ?
+                    WHERE courier_id = ?;
+                    """;
+            PreparedStatement pstmt = conn.prepareStatement(update);
+            pstmt.setString(1, this.courier_name);
+            pstmt.setString(2, this.courier_email_address);
+            pstmt.setString(3, this.courier_address);
+            pstmt.setInt(4, this.courier_id);
+            pstmt.executeUpdate();
+        } catch (Exception e){
+            System.out.println("Error updating name: " + e);
+        }
+    }
+
     public void setName(String courier_name) { this.courier_name = courier_name; }
     public void setEmailAddress(String courier_email_address) { this.courier_email_address = courier_email_address; }
     public void setAddress(String courier_address) { this.courier_address = courier_address; }

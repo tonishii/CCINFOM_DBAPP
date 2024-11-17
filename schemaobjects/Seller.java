@@ -239,6 +239,11 @@ public class Seller implements Account {
                         case "1":
                             break;
                         case "2":
+                            try {
+
+                            } catch (Exception e) {
+                                System.out.println("Error during report generation: " + e);
+                            }
                             break;
                         case "3":
                             try {
@@ -281,7 +286,55 @@ public class Seller implements Account {
                     }
                 }
                 case "4" -> {
-                    break;
+                    try{
+                        boolean goBack = true;
+                        while (goBack) {
+                            System.out.printf("User Details:\n" +
+                                              "[1] Name: %s\n" +
+                                              "[2] Address: %s\n" +
+                                              "[3] Phone Number: %s\n" +
+                                              "[4] Go Back\n",
+                                              seller_name,
+                                              seller_address,
+                                              seller_phone_number);
+                            System.out.print("Enter option to edit: ");
+
+                            switch (scn.nextLine()) {
+                                case "1":
+                                    System.out.print("Enter new user name: ");
+                                    this.seller_name = scn.nextLine();
+                                    updateAccount(conn);
+                                    break;
+                                case "2":
+                                    System.out.print("Enter new address: ");
+                                    this.seller_address = scn.nextLine();
+                                    updateAccount(conn);
+                                    break;
+                                case "3":
+                                    System.out.print("Enter new phone number: ");
+                                    this.seller_phone_number = scn.nextLine();
+                                    if (!seller_phone_number.isEmpty()) {
+                                        Pattern pattern = Pattern.compile("^\\d{11}$");
+                                        Matcher matcher = pattern.matcher(seller_phone_number);
+
+                                        while (!matcher.matches()) {
+                                            System.out.print("Invalid Phone Number!\nRe-Enter phone number: ");
+                                            seller_phone_number = scn.nextLine();
+                                            matcher = pattern.matcher(seller_phone_number);
+                                        }
+                                    }
+                                    updateAccount(conn);
+                                    break;
+                                case "4":
+                                    goBack = false;
+                                    break;
+                                default:
+                                    System.out.print("Error: Enter valid option.");
+                            }
+                        }
+                    } catch (Exception e){
+                        System.out.println("Error during account editing: " + e.getMessage());
+                    }
                 }
                 case "5" -> {
                     return;
@@ -294,6 +347,28 @@ public class Seller implements Account {
     public void updateStatus() {
         // checking fields
         this.seller_verified_status = true;
+    }
+
+    @Override
+    public void updateAccount(Connection conn) {
+        try{
+            String update =
+                    """
+                    UPDATE sellers
+                    SET seller_name = ?
+                        seller_address = ?
+                        seller_phone_number = ?
+                    WHERE seller_id = ?;
+                    """;
+            PreparedStatement pstmt = conn.prepareStatement(update);
+            pstmt.setString(1, this.seller_name);
+            pstmt.setString(2, this.seller_address);
+            pstmt.setString(3, this.seller_phone_number);
+            pstmt.setInt(4, this.seller_id);
+            pstmt.executeUpdate();
+        } catch (Exception e){
+            System.out.println("Error updating name: " + e);
+        }
     }
 
     public void setName(String seller_name) { this.seller_name = seller_name; }
