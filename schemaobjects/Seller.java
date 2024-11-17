@@ -179,7 +179,7 @@ public class Seller implements Account {
                         resultSet = pstmt.executeQuery();
 
                         resultSet.next();
-                        product = new Product(id, this.seller_id, resultSet.getString("product_name"),
+                        Product product = new Product(id, this.seller_id, resultSet.getString("product_name"),
                                 resultSet.getFloat("product_price"), resultSet.getString("product_type"), resultSet.getFloat("average_rating"),
                                 resultSet.getInt("quantity_stocked"), resultSet.getBoolean("listed_status"), resultSet.getString("description"));
 
@@ -280,11 +280,13 @@ public class Seller implements Account {
                             System.out.println("Invalid input.");
                     }
                 }
-                case "4":
+                case "4" -> {
                     break;
-
-                case "5": return; // Exit
-                default: System.out.println("Error: Enter valid option.");
+                }
+                case "5" -> {
+                    return;
+                } // Exit
+                default -> System.out.println("Error: Enter valid option.");
             }
         }
     }

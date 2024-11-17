@@ -23,7 +23,7 @@ public class Order {
         this.order_status = OrderStatus.BEING_PREPARED;
     }
     
-    public static void generateOrder(int user_id, Connection conn, ArrayList<OrderContent> cart) {
+    public static void generateOrder(int user_id, Connection conn, ArrayList<OrderContent> cart, float total_price) {
         try {
             if (Courier.assignCourier(conn) != -1) {
                 int order_id = -1;
@@ -39,12 +39,7 @@ public class Order {
                     order_id = rs.getInt("id");
                 }
 
-                float total_price = 0.0f;            
-                for (OrderContent product : cart) {
-                    total_price += (float) product.getPriceEach() * product.getQuantity();
-                }
-
-                query = 
+                query =
                     """
                     INSERT INTO orders
                     VALUES(?, ?, ?, ?, ?, ?, ?)
@@ -62,6 +57,7 @@ public class Order {
 
                 for (OrderContent product : cart) {
                     product.insertOrderContent(order_id, conn);
+                    Product.updateQuantity(conn, product.getProductID(), product.getQuantity());
                 }
             }
             else {

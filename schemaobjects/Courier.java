@@ -83,7 +83,7 @@ public class Courier implements Account {
                 pstmt.setString(1, courier_name);
                 pstmt.setString(2, courier_email_address);
                 pstmt.setString(3, courier_address);
-                pstmt.setBoolean(4, courier_verified_status);
+                pstmt.setBoolean(4, verifyStatus(courier_address, courier_email_address));
 
                 pstmt.executeUpdate();
             }
@@ -141,10 +141,12 @@ public class Courier implements Account {
                             case "2":
                                 System.out.print("Enter new email address: ");
                                 this.courier_email_address = scn.nextLine();
+                                updateStatus();
                                 break;
                             case "3":
                                 System.out.print("Enter new courier address: ");
                                 this.courier_address = scn.nextLine();
+                                updateStatus();
                                 break;
                             case "4":
                                 goBack = false;
@@ -220,8 +222,12 @@ public class Courier implements Account {
     }
 
     public void updateStatus() {
-        // checking fields
-        this.courier_verified_status = true;
+        if(this.courier_address != null && this.courier_email_address != null)
+            this.courier_verified_status = true;
+    }
+
+    private boolean verifyStatus(String address, String email_address) {
+        return !(address.isEmpty() || email_address.isEmpty());
     }
 
     public static int assignCourier(Connection conn) {

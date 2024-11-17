@@ -71,6 +71,41 @@ public class Product {
 
     }
 
+    public static void updateQuantity(Connection conn, int productId, int qty) {
+        try {
+            String query = """
+                        SELECT quantity_stocked
+                        FROM products
+                        WHERE product_id = ?
+                        """;
+            PreparedStatement ps = conn.prepareStatement(query);
+            ps.setInt(1, productId);
+            ResultSet rs = ps.executeQuery();
+
+            int currQty = 0;
+            if (rs.next()) {
+                currQty = rs.getInt("quantity_stocked");
+            }
+
+            String update =
+                    """
+                    UPDATE products
+                    SET quantity_stocked = ?, listed_status = ?
+                    WHERE product_id = ?
+                    """;
+
+            try (PreparedStatement pstmt = conn.prepareStatement(update)) {
+                pstmt.setInt(1, (currQty - qty));
+                pstmt.setBoolean(2, ((currQty - qty) > 0));
+                pstmt.setInt(3, productId);
+
+                pstmt.executeUpdate();
+            }
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
     public void updateListedStatus() {
         this.listed_status = this.quantity_stocked != 0;
     }

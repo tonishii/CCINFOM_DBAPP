@@ -147,7 +147,7 @@ public class User implements Account {
                     shoppingCart.addAll(browseOptions(scn, conn));
                     break;
                 case "2":
-                    viewShoppingCart(scn, shoppingCart);
+                    viewShoppingCart(scn, shoppingCart, conn);
                     break;
                 case "3":
                     break;
@@ -366,7 +366,7 @@ public class User implements Account {
         }
     }
 
-    public void viewShoppingCart(Scanner scn, ArrayList<OrderContent> cart) {
+    public void viewShoppingCart(Scanner scn, ArrayList<OrderContent> cart, Connection conn) {
         do {
             if (cart.isEmpty()) {
                 System.out.println("Cart Empty. Returning...");
@@ -382,41 +382,65 @@ public class User implements Account {
             Options:
             [1] Edit Quantity
             [2] Remove Product
-            [3] Exit
+            [3] Checkout
+            [4] Exit
             Select Option: \s"""
             );
 
             try {
                 int option = Integer.parseInt(scn.nextLine());
 
-                assert (option > 0 && option <= 3);
-                if (option == 3)
-                    return;
+                assert (option > 0 && option < 5);
+                switch(option) {
+                    case 1 -> {
+                        System.out.print("Enter Product ID to edit: ");
+                        int productID = Integer.parseInt(scn.nextLine());
 
-                System.out.printf("Enter Product ID %s: ", option == 1 ? "to edit" : "to remove");
-                int productID = Integer.parseInt(scn.nextLine());
+                        OrderContent product = cart.stream()
+                                .filter(o -> o.getProductID() == productID)
+                                .findFirst()
+                                .orElse(null);
 
-                OrderContent product = cart.stream()
-                        .filter(o -> o.getProductID() == productID)
-                        .findFirst()
-                        .orElse(null);
+                        System.out.print("Enter desired quantity: ");
+                        int qty = Integer.parseInt(scn.nextLine());
 
-                if (option == 1) {
-                    System.out.print("Enter desired quantity: ");
-                    int qty = Integer.parseInt(scn.nextLine());
-
-                    assert qty >= 0;
-                    if (qty > 0) {
-                        cart.get(cart.indexOf(product)).setQuantity(qty);
-                        System.out.println("Product quantity edited.");
-                    } else {
-                        cart.remove(product);
-                        System.out.println("Product removed due to zero quantity.");
+                        assert qty >= 0;
+                        if (qty > 0) {
+                            cart.get(cart.indexOf(product)).setQuantity(qty);
+                            System.out.println("Product quantity edited.");
+                        } else {
+                            cart.remove(product);
+                            System.out.println("Product removed due to zero quantity.");
+                        }
                     }
+                    case 2 -> {
+                        System.out.print("Enter Product ID to remove: ");
+                        int productID = Integer.parseInt(scn.nextLine());
 
-                } else {
-                    cart.remove(product);
-                    System.out.println("Product removed.");
+                        OrderContent product = cart.stream()
+                                .filter(o -> o.getProductID() == productID)
+                                .findFirst()
+                                .orElse(null);
+
+                        cart.remove(product);
+                        System.out.println("Product removed.");
+                    }
+                    case 3 -> {
+                        float totalPrice = 0f;
+                        for (OrderContent products : cart) {
+                            totalPrice += products.getPriceEach() * products.getQuantity();
+                        }
+                        System.out.printf("Subtotal: Php %.2f\nProceed with checkout? (y/n): ", totalPrice);
+                        if (scn.nextLine().trim().equalsIgnoreCase("y")) {
+                            Order.generateOrder(this.user_id, conn, cart, totalPrice);
+                            cart.clear();
+                            return;
+                        }
+                        else System.out.println("Checkout aborted. Returning...");
+                    }
+                    case 4 -> {
+                        return;
+                    }
                 }
             }
             catch (Exception e) {
