@@ -1,0 +1,24 @@
+import view.MainController;
+import view.MainMenu;
+
+import javax.swing.*;
+import javax.swing.plaf.FontUIResource;
+
+public class GUIDriver {
+    public static void main(String[] args) {
+        SwingUtilities.invokeLater(() -> {
+
+            // change the default fonts of:
+            FontUIResource font = new FontUIResource("Verdana", FontUIResource.PLAIN, 14);
+//            UIManager.put("Label.font", font); // JLabels
+//            UIManager.put("Button.font", font); // JButtons
+//            UIManager.put("List.font", font); // JLists
+//            UIManager.put("RadioButton.font", font); // JRadioButtons
+//            UIManager.put("TextField.font", font); // JTextFields
+//            UIManager.put("OptionPane.buttonFont", font); // JOptionPane's buttons
+//            UIManager.put("OptionPane.messageFont", font); // JOptionPane's messages
+
+            new MainController();
+        });
+    }
+}

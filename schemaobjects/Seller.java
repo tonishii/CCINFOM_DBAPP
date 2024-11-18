@@ -1,4 +1,5 @@
 package schemaobjects;
+import javax.swing.*;
 import java.sql.*;
 import java.time.Instant;
 import java.time.Year;
@@ -17,10 +18,7 @@ public class Seller implements Account {
     private boolean seller_verified_status;
 
     @Override
-    public boolean login(Scanner scn, Connection conn){
-        System.out.print("Enter Account ID: ");
-        int id = Integer.parseInt(scn.nextLine());
-
+    public boolean login(int id, Connection conn){
         String query =
         """
         SELECT seller_id, seller_name, seller_address, seller_verified_status, seller_phone_number, seller_creation_date
@@ -111,6 +109,12 @@ public class Seller implements Account {
         }
     }
 
+    @Override
+    public JPanel displayPage() {
+        JPanel sellerPage = new JPanel();
+
+        return sellerPage;
+    }
 
     @Override
     public void displayView(Scanner scn, Connection conn) {
@@ -464,6 +468,11 @@ public class Seller implements Account {
         } catch (Exception e){
             System.out.println("Error updating name: " + e);
         }
+    }
+
+    @Override
+    public String toString() {
+        return "Seller";
     }
 
     public void setName(String seller_name) { this.seller_name = seller_name; }

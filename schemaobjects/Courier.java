@@ -1,5 +1,6 @@
 package schemaobjects;
 
+import javax.swing.*;
 import java.util.Scanner;
 import java.sql.*;
 import java.util.regex.Matcher;
@@ -13,10 +14,7 @@ public class Courier implements Account {
     private boolean  courier_verified_status;
 
     @Override
-    public boolean login(Scanner scn, Connection conn) {
-        System.out.print("Enter Courier Account ID: ");
-        int id = Integer.parseInt(scn.nextLine());
-
+    public boolean login(int id, Connection conn) {
         String query =
         """
         SELECT courier_id, courier_name, courier_email_address, courier_address, courier_verified_status
@@ -108,6 +106,13 @@ public class Courier implements Account {
         } catch (Exception e){
             System.out.println(e.getMessage());
         }
+    }
+
+    @Override
+    public JPanel displayPage() {
+        JPanel courierPage = new JPanel();
+
+        return courierPage;
     }
 
     @Override
@@ -301,6 +306,11 @@ public class Courier implements Account {
         } catch (Exception e){
             System.out.println("Error updating name: " + e);
         }
+    }
+
+    @Override
+    public String toString() {
+        return "Courier";
     }
 
     public void setName(String courier_name) { this.courier_name = courier_name; }

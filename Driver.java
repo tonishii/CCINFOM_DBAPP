@@ -68,7 +68,9 @@ public class Driver {
 
             if (isLogin) {
                 while (true) {
-                    if (account.login(scn, conn)) {
+                    System.out.print("Enter account ID: ");
+
+                    if (account.login(Integer.parseInt(scn.nextLine()), conn)) {
                         // successful login
                         break;
                     } else {

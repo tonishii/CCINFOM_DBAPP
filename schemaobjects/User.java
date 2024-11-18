@@ -1,5 +1,7 @@
 package schemaobjects;
 import enums.OrderStatus;
+
+import javax.swing.*;
 import java.awt.*;
 import java.time.Instant;
 import java.util.ArrayList;
@@ -22,11 +24,7 @@ public class User implements Account {
     private boolean user_verified_status;
 
     @Override
-    public boolean login(Scanner scn, Connection conn) {
-        System.out.print("Enter User Account ID: ");
-        int id = Integer.parseInt(scn.nextLine());
-
-        // SQL query to fetch the user by user_id
+    public boolean login(int id, Connection conn) {
         String query =
         """
         SELECT user_id, user_name, user_phone_number, user_address, user_verified_status, user_creation_date, user_firstname, user_lastname
@@ -37,8 +35,6 @@ public class User implements Account {
         try {
             PreparedStatement pstmt = conn.prepareStatement(query);
             pstmt.setInt(1, id);
-
-            // Execute the query
             ResultSet result = pstmt.executeQuery();
 
             if (result.next()) {
@@ -131,20 +127,28 @@ public class User implements Account {
     }
 
     @Override
+    public JPanel displayPage() {
+        JPanel userPage = new JPanel();
+
+        return userPage;
+    }
+
+    @Override
     public void displayView(Scanner scn, Connection conn) {
         ArrayList<OrderContent> shoppingCart = new ArrayList<>();
 
         while (true) {
             System.out.print(
-            "[1] Shopping\n" +
-            "[2] View Shopping Cart (Jericho)\n" +
-            "[3] Receive Order\n" +
-            "[4] Request Return/Refund (Eara)\n" +
-            "[5] Purchase History\n" +
-            "[6] Rate a Product\n" +
-            "[7] Edit Account\n" +
-            "[8] Exit\n" +
-            "Select option: ");
+            """
+            [1] Shopping
+            [2] View Shopping Cart (Jericho)
+            [3] Receive Order
+            [4] Request Return/Refund (Eara)
+            [5] Purchase History
+            [6] Rate a Product
+            [7] Edit Account
+            [8] Exit
+            Select option:\s""");
 
             switch (scn.nextLine().trim()) {
                 case "1":
@@ -776,6 +780,10 @@ public class User implements Account {
     public void updateStatus() {
         // checking fields
         this.user_verified_status = true;
+    }
+
+    public String toString() {
+        return "User";
     }
 
     public void setUsername(String user_name) { this.user_name = user_name; }

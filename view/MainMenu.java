@@ -1,118 +1,201 @@
 package view;
 
+import schemaobjects.Account;
+import schemaobjects.Courier;
+import schemaobjects.Seller;
+import schemaobjects.User;
+
 import javax.swing.*;
 import javax.swing.border.TitledBorder;
 import java.awt.*;
 import java.awt.event.ActionListener;
 import java.sql.Connection;
 import java.sql.DriverManager;
+import java.util.Objects;
 
 public class MainMenu extends JFrame {
-    private JPanel menu;
-    private JLabel text;
-    private JButton login;
-    private JButton signup;
-    private JButton exit;
+    private JLabel userLbl;
+    private JLabel passLbl;
+    private JTextField usernameField;
+    private JTextField passwordField;
+    private JButton submitBtn;
+    private JButton exitBtn;
 
-    private JPanel connPanel;
-    private JLabel userText;
-    private JLabel passText;
-    private JTextField username;
-    private JTextField password;
-    private JButton submit;
+    private JPanel accountPage;
+    private CardLayout accountCardLayout;
+    private JComboBox<String> accountTypeBox;
+    private JButton loginBtn;
+    private JButton signupBtn;
+    private JButton backBtn;
+    private JTextField idLoginField;
+
+    private JPanel signUpPage;
+
+    private CardLayout centerCardLayout;
+    private JPanel centerPanel;
 
     public MainMenu() {
-        this.setTitle("Login");
-        this.setSize(500,300);
+        this.setTitle("E-Commerce Database Application");
+        this.setSize(800,700);
         this.setLayout(new BorderLayout(10,10));
+        this.setResizable(false);
 
-        this.connPanel = new JPanel(new GridBagLayout());
-        this.connPanel.setBorder(BorderFactory.createTitledBorder(BorderFactory.createLineBorder(Color.BLACK, 2), "SQL Login", TitledBorder.CENTER, TitledBorder.TOP, new Font("Montserrat", Font.PLAIN, 12)));
-        GridBagConstraints gbc = new GridBagConstraints();
-        gbc.insets = new Insets(5, 5, 5, 5);
+        JPanel topBanner = new JPanel();
+        topBanner.setBackground(Color.PINK);
+        topBanner.setPreferredSize(new Dimension(800, 60));
+        this.add(topBanner, BorderLayout.NORTH);
 
-        this.userText = new JLabel("Username: ");
-        userText.setVisible(true);
-        userText.setHorizontalTextPosition(JLabel.CENTER);
-        userText.setVerticalTextPosition(JLabel.TOP);
-        userText.setForeground(Color.BLACK);
+        centerCardLayout = new CardLayout(50, 40);
+        centerPanel = new JPanel();
+        centerPanel.setLayout(centerCardLayout);
+        centerPanel.setBorder(BorderFactory.createRaisedBevelBorder());
+        this.add(centerPanel, BorderLayout.CENTER);
 
-        this.passText = new JLabel("Password: ");
-        passText.setVisible(true);
-        passText.setHorizontalTextPosition(JLabel.CENTER);
-        passText.setVerticalTextPosition(JLabel.TOP);
-        passText.setForeground(Color.BLACK);
-
-        this.username = new JTextField();
-        username.setPreferredSize(new Dimension(200, 20));
-
-        this.password = new JTextField();
-        password.setPreferredSize(new Dimension(200, 20));
-
-        this.submit = new JButton("Submit");
-        this.exit = new JButton("Exit");
-
-        connPanel.add(userText, gbc);
-        gbc.gridx = 1;
-        connPanel.add(username, gbc);
-        gbc.gridy = 1;
-        gbc.gridx = 0;
-        connPanel.add(passText, gbc);
-        gbc.gridx = 1;
-        connPanel.add(password, gbc);
-        gbc.gridy = 2;
-        gbc.gridx = 0;
-        connPanel.add(submit, gbc);
-        gbc.gridx = 1;
-        connPanel.add(exit, gbc);
-
-        this.add(connPanel);
         this.setLocationRelativeTo(null);
         this.setVisible(true);
     }
 
-    public void showOptions() {
-        this.setTitle("Main Menu");
-        this.setSize(500,500);
-        this.setLayout(new BorderLayout(10,10));
+    public JPanel getConnectionPage() {
+        JPanel connPanel = new JPanel(new GridBagLayout());
+        connPanel.setPreferredSize(new Dimension(800, 640));
 
-        this.menu = new JPanel(new GridBagLayout());
-        this.menu.setBorder(BorderFactory.createTitledBorder(BorderFactory.createLineBorder(Color.BLACK, 2), "Main Menu", TitledBorder.CENTER, TitledBorder.TOP, new Font("Montserrat", Font.PLAIN, 12)));
+        connPanel.setBorder(BorderFactory.createTitledBorder(BorderFactory.createLineBorder(Color.BLACK, 2),
+                "SQL Connection Login", TitledBorder.LEFT, TitledBorder.TOP, new Font("Montserrat", Font.PLAIN, 12)));
+
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.insets = new Insets(5, 5, 5, 5);
 
-        this.text = new JLabel("Select an option:");
-        text.setFont(new Font("Montserrat", Font.PLAIN, 25));
-        text.setVisible(true);
-        text.setHorizontalTextPosition(JLabel.CENTER);
-        text.setVerticalTextPosition(JLabel.TOP);
-        text.setForeground(Color.BLACK);
+        this.userLbl = new JLabel("Username: ");
+        userLbl.setVisible(true);
+        userLbl.setHorizontalTextPosition(JLabel.CENTER);
+        userLbl.setVerticalTextPosition(JLabel.TOP);
+        userLbl.setForeground(Color.BLACK);
 
-        this.login = new JButton("Login");
-        this.signup = new JButton("Sign Up");
-        this.exit = new JButton("Exit");
+        this.passLbl = new JLabel("Password: ");
+        passLbl.setVisible(true);
+        passLbl.setHorizontalTextPosition(JLabel.CENTER);
+        passLbl.setVerticalTextPosition(JLabel.TOP);
+        passLbl.setForeground(Color.BLACK);
 
-        menu.add(text, gbc);
+        this.usernameField = new JTextField();
+        usernameField.setPreferredSize(new Dimension(200, 20));
+
+        this.passwordField = new JTextField();
+        passwordField.setPreferredSize(new Dimension(200, 20));
+
+        this.submitBtn = new JButton("Submit");
+        this.submitBtn.setFocusable(false);
+        this.exitBtn = new JButton("Exit");
+        this.exitBtn.setFocusable(false);
+
+        connPanel.add(userLbl, gbc);
+        gbc.gridx = 1;
+        connPanel.add(usernameField, gbc);
         gbc.gridy = 1;
-        menu.add(login, gbc);
+        gbc.gridx = 0;
+        connPanel.add(passLbl, gbc);
+        gbc.gridx = 1;
+        connPanel.add(passwordField, gbc);
         gbc.gridy = 2;
-        menu.add(signup, gbc);
+        gbc.gridx = 0;
+        connPanel.add(submitBtn, gbc);
+        gbc.gridx = 1;
+        connPanel.add(exitBtn, gbc);
+
+        return connPanel;
+    }
+
+    public JPanel getAccountPage() {
+        this.accountCardLayout = new CardLayout();
+        this.accountPage = new JPanel(accountCardLayout);
+
+        JPanel accountSelectPage = new JPanel(new GridBagLayout());
+        accountSelectPage.setBorder(BorderFactory.createTitledBorder(BorderFactory.createLineBorder(Color.BLACK, 2),
+    "Account Login/Sign-up", TitledBorder.LEFT, TitledBorder.TOP, new Font("Montserrat", Font.PLAIN, 12)));
+
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.insets = new Insets(5, 5, 5, 5);
+
+        JLabel textLbl = new JLabel("Account Type: ");
+        textLbl.setFont(new Font("Montserrat", Font.PLAIN, 25));
+        textLbl.setVisible(true);
+        textLbl.setHorizontalTextPosition(JLabel.CENTER);
+        textLbl.setVerticalTextPosition(JLabel.TOP);
+        textLbl.setForeground(Color.BLACK);
+
+        String[] accountTypes = { "User", "Courier", "Seller" };
+        this.accountTypeBox = new JComboBox<>(accountTypes);
+
+        this.loginBtn = new JButton("Login");
+        this.signupBtn = new JButton("Sign Up");
+        this.backBtn = new JButton("Back");
+
+        accountSelectPage.add(textLbl, gbc);
+        gbc.gridy = 1;
+        accountSelectPage.add(accountTypeBox, gbc);
+
+        accountSelectPage.add(loginBtn, gbc);
+        gbc.gridy = 2;
+        accountSelectPage.add(signupBtn, gbc);
         gbc.gridy = 3;
-        menu.add(exit, gbc);
+        accountSelectPage.add(backBtn, gbc);
 
-        this.add(menu);
-        this.remove(connPanel);
+        JPanel loginPage = new JPanel(new GridBagLayout());
+        textLbl = new JLabel("Enter ID: ");
+
+        idLoginField = new JTextField();
+        idLoginField.setPreferredSize(new Dimension(200, 20));
+
+        loginPage.add(textLbl);
+        loginPage.add(idLoginField);
+
+        signUpPage = new JPanel();
+
+        accountPage.add(accountSelectPage, "select");
+        accountPage.add(loginPage, "login");
+        accountPage.add(signUpPage, "signup");
+
+        return accountPage;
     }
 
-    public JButton getSubmit() {
-        return submit;
+    public void initConnListeners(ActionListener submitLtr, ActionListener exitLtr) {
+        this.submitBtn.addActionListener(submitLtr);
+        this.exitBtn.addActionListener(exitLtr);
     }
 
+    public void initAccListeners(ActionListener loginLtr, ActionListener signUpLtr, ActionListener backLtr) {
+        this.loginBtn.addActionListener(loginLtr);
+        this.signupBtn.addActionListener(signUpLtr);
+        this.exitBtn.addActionListener(backLtr);
+    }
+
+    public void nextAccountPageName(String name) {
+        this.accountCardLayout.show(this.accountPage, name);
+    }
+
+    public void nextPageName(String name) {
+        this.centerCardLayout.show(this.centerPanel, name);
+    }
+
+    public void addToCenterPanel(JPanel panel, String name) {
+        this.centerPanel.add(panel, name);
+    }
+
+    public Account getAccountType() {
+        return switch ((String) Objects.requireNonNull(accountTypeBox.getSelectedItem())) {
+            case "Seller" -> new Seller();
+            case "Courier" -> new Courier();
+            case "User" -> new User();
+            default -> null;
+        };
+    }
+
+    public void setAccountPage(JPanel accountPage) { this.accountPage.add(accountPage); }
+    public String getID() { return idLoginField.getText(); }
     public String getUsername() {
-        return username.getText();
+        return usernameField.getText();
     }
-
     public String getPassword() {
-        return password.getText();
+        return passwordField.getText();
     }
 }
