@@ -1,6 +1,5 @@
-package schemaobjects;
+package model;
 
-import java.util.ArrayList;
 import java.sql.*;
 
 public class Product {

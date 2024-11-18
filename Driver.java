@@ -3,10 +3,10 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.util.Scanner;
 
-import schemaobjects.Account;
-import schemaobjects.Courier;
-import schemaobjects.Seller;
-import schemaobjects.User;
+import model.Account;
+import model.Courier;
+import model.Seller;
+import model.User;
 
 public class Driver {
     public static Account selectAccountType(Scanner scn) {

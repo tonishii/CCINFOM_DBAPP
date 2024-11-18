@@ -1,4 +1,4 @@
-package schemaobjects;
+package model;
 
 import java.util.Scanner;
 import java.sql.*;

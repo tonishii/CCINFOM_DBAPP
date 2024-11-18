@@ -1,4 +1,4 @@
-package schemaobjects;
+package model;
 import enums.OrderStatus;
 
 import java.time.Instant;

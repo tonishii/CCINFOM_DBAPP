@@ -1,9 +1,9 @@
 package view;
 
-import schemaobjects.Account;
-import schemaobjects.Courier;
-import schemaobjects.Seller;
-import schemaobjects.User;
+import model.Account;
+import model.Courier;
+import model.Seller;
+import model.User;
 
 import java.sql.*;
 import java.util.regex.Matcher;

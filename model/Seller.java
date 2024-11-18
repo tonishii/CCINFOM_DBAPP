@@ -1,4 +1,4 @@
-package schemaobjects;
+package model;
 
 import java.sql.*;
 import java.time.Year;

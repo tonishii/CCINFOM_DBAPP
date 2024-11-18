@@ -1,8 +1,7 @@
-package schemaobjects;
+package model;
 
 import java.sql.Connection;
 import java.sql.*;
-import java.util.ArrayList;
 
 public class OrderContent {
     private int product_id;
