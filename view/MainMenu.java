@@ -9,8 +9,6 @@ import javax.swing.*;
 import javax.swing.border.TitledBorder;
 import java.awt.*;
 import java.awt.event.ActionListener;
-import java.sql.Connection;
-import java.sql.DriverManager;
 import java.util.Objects;
 
 public class MainMenu extends JFrame {
@@ -27,12 +25,14 @@ public class MainMenu extends JFrame {
     private JButton loginBtn;
     private JButton signupBtn;
     private JButton backBtn;
+
     private JTextField idLoginField;
+    private JButton submitLoginBtn;
 
     private JPanel signUpPage;
 
-    private CardLayout centerCardLayout;
-    private JPanel centerPanel;
+    private final CardLayout centerCardLayout;
+    private final JPanel centerPanel;
 
     public MainMenu() {
         this.setTitle("E-Commerce Database Application");
@@ -144,13 +144,17 @@ public class MainMenu extends JFrame {
         loginPage.setBorder(BorderFactory.createTitledBorder(BorderFactory.createLineBorder(Color.BLACK, 2),
     "Account Login", TitledBorder.LEFT, TitledBorder.TOP, new Font("Montserrat", Font.PLAIN, 12)));
 
-        textLbl = new JLabel("Enter ID: ");
+        textLbl = new JLabel("Enter your ID: ");
 
         idLoginField = new JTextField();
         idLoginField.setPreferredSize(new Dimension(200, 20));
 
+        submitLoginBtn = new JButton("Submit");
+        submitLoginBtn.setFocusable(false);
+
         loginPage.add(textLbl);
         loginPage.add(idLoginField);
+        loginPage.add(submitLoginBtn);
 
         signUpPage = new JPanel();
 
@@ -166,10 +170,11 @@ public class MainMenu extends JFrame {
         this.exitBtn.addActionListener(exitLtr);
     }
 
-    public void initAccListeners(ActionListener loginLtr, ActionListener signUpLtr, ActionListener backLtr) {
+    public void initSelectListeners(ActionListener loginLtr, ActionListener signUpLtr, ActionListener submitLoginLtr, ActionListener backLtr) {
         this.loginBtn.addActionListener(loginLtr);
         this.signupBtn.addActionListener(signUpLtr);
         this.exitBtn.addActionListener(backLtr);
+        this.submitLoginBtn.addActionListener(submitLoginLtr);
     }
 
     public void nextAccountPageName(String name) {
@@ -193,7 +198,6 @@ public class MainMenu extends JFrame {
         };
     }
 
-    public void setAccountPage(JPanel accountPage) { this.accountPage.add(accountPage); }
     public String getID() { return idLoginField.getText(); }
     public String getUsername() {
         return usernameField.getText();

@@ -2,7 +2,9 @@ package schemaobjects;
 import enums.OrderStatus;
 
 import javax.swing.*;
+import javax.swing.border.TitledBorder;
 import java.awt.*;
+import java.awt.event.ActionListener;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Objects;
@@ -22,6 +24,13 @@ public class User implements Account {
     private String  user_phone_number;
     private Date    user_creation_date;
     private boolean user_verified_status;
+
+    private JTextField userNameField,
+                       userFirstNameField,
+                       userLastNameField,
+                       userAddressField,
+                       userPhoneField;
+    private JButton    submitSignUpBtn;
 
     @Override
     public boolean login(int id, Connection conn) {
@@ -59,27 +68,19 @@ public class User implements Account {
     }
 
     @Override
-    public void signUp(Scanner scn, Connection conn) {
-        System.out.print("Enter user account name: ");
-        user_name  = scn.nextLine();
+    public void signUp(Connection conn) {
+        this.user_name = userNameField.getText();
+        this.user_firstname = userFirstNameField.getText();
+        this.user_lastname = userLastNameField.getText();
+        this.user_address = userAddressField.getText();
 
-        System.out.print("Enter user first name: ");
-        user_firstname = scn.nextLine();
-
-        System.out.print("Enter user last name: ");
-        user_lastname = scn.nextLine();
-
-        System.out.print("Enter user address:  ");
-        user_address = scn.nextLine();
-
-        System.out.print("Enter phone number:  ");
-        user_phone_number = scn.nextLine();
+        this.user_phone_number = userPhoneField.getText();
         Pattern pattern = Pattern.compile("^\\d{11}$");
         Matcher matcher = pattern.matcher(user_phone_number);
 
-        while(!matcher.matches()){
+        while (!matcher.matches()) {                                            // THIS MUST BE CHANGED
             System.out.print("Invalid Phone Number!\nRe-Enter phone number: ");
-            user_phone_number = scn.nextLine();
+            user_phone_number = userPhoneField.getText();
             matcher = pattern.matcher(user_phone_number);
         }
 
@@ -127,7 +128,62 @@ public class User implements Account {
     }
 
     @Override
-    public JPanel displayPage() {
+    public JPanel getSignUpPage() {
+        JPanel signUpPage = new JPanel();
+        signUpPage.setBorder(BorderFactory.createTitledBorder(BorderFactory.createLineBorder(Color.BLACK, 2),
+    "User sign-up", TitledBorder.LEFT, TitledBorder.TOP, new Font("Montserrat", Font.PLAIN, 12)));
+
+        JLabel label = new JLabel("Enter user account name: ");
+        userNameField = new JTextField();
+        userNameField.setPreferredSize(new Dimension(200, 20));
+
+        signUpPage.add(label);
+        signUpPage.add(userNameField);
+
+        label = new JLabel("Enter user first name: ");
+        userFirstNameField = new JTextField();
+        userFirstNameField.setPreferredSize(new Dimension(200, 20));
+
+        signUpPage.add(label);
+        signUpPage.add(userFirstNameField);
+
+        label = new JLabel("Enter user last name: ");
+        userLastNameField = new JTextField();
+        userLastNameField.setPreferredSize(new Dimension(200, 20));
+
+        signUpPage.add(label);
+        signUpPage.add(userLastNameField);
+
+        label = new JLabel("Enter user address: ");
+        userAddressField = new JTextField();
+        userAddressField.setPreferredSize(new Dimension(200, 20));
+
+        signUpPage.add(label);
+        signUpPage.add(userAddressField);
+
+        label = new JLabel("Enter phone number:  ");
+        userPhoneField = new JTextField();
+        userPhoneField.setPreferredSize(new Dimension(200, 20));
+
+        signUpPage.add(label);
+        signUpPage.add(userPhoneField);
+
+        submitSignUpBtn = new JButton("Submit");
+
+        signUpPage.add(submitSignUpBtn);
+
+        return signUpPage;
+    }
+
+    @Override
+    public void initSignUpListeners(ActionListener signUpLtr) {
+        if (submitSignUpBtn.getActionListeners().length == 0) {
+            submitSignUpBtn.addActionListener(signUpLtr);
+        }
+    }
+
+    @Override
+    public JPanel getPage() {
         JPanel userPage = new JPanel();
 
         return userPage;

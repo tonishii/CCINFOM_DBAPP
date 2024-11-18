@@ -2,11 +2,12 @@ package view;
 
 import schemaobjects.Account;
 
+import java.awt.event.ActionListener;
 import java.sql.Connection;
 import java.sql.DriverManager;
 
 public class MainController {
-    private MainMenu mainMenuPage;
+    private final MainMenu mainMenuPage;
 
     private Connection conn;
     private Account account;
@@ -51,35 +52,37 @@ public class MainController {
     }
 
     private void initSelectListeners() {
-        mainMenuPage.initAccListeners(loginEvent -> {
+        ActionListener submitSignUpLtr = signUpEvent -> {
+            account.signUp(conn);
+
+            mainMenuPage.addToCenterPanel(account.getPage(), account.toString() + "main");
+            mainMenuPage.nextPageName(account.toString() + "main");
+        };
+
+        mainMenuPage.initSelectListeners(loginEvent -> {    // Happens when you press login button
             this.account = mainMenuPage.getAccountType();
 
-            if (account != null) {
-                mainMenuPage.nextAccountPageName("login");
+            assert (account != null);
 
-                // Could cause a parsing error
-                if (account.login(Integer.parseInt(mainMenuPage.getID()), conn)) {
-                    this.mainMenuPage.add(account.displayPage(), account.toString());
-                    mainMenuPage.nextPageName(account.toString());
-                } else {
-                    // Could also cause an error while logging in (returns false)
-                }
-            } else {
-
-            }
-
-        }, signUpEvent -> {
+            mainMenuPage.nextAccountPageName("login");
+        }, signUpEvent -> {    // Happens when you press sign up button
             this.account = mainMenuPage.getAccountType();
 
-            if (account != null) {
-                mainMenuPage.nextAccountPageName("signUp");
-//                account.signUp();
-            } else {
+            assert (account != null);
 
+            mainMenuPage.addToCenterPanel(account.getSignUpPage(), account.toString() + "signup");
+            account.initSignUpListeners(submitSignUpLtr);
+            mainMenuPage.nextPageName(account.toString() + "signup");
+
+        }, submitLoginEvent -> {        // Happens when you press submit in login page
+            if (account.login(Integer.parseInt(mainMenuPage.getID()), conn)) {
+                mainMenuPage.addToCenterPanel(account.getPage(), account.toString() + "main");
+                mainMenuPage.nextPageName(account.toString() + "main");
+            } else {
+                // Could also cause an error while logging in (returns false)
             }
-        }, backEvent -> {
-            this.mainMenuPage.nextPageName("conn");
-        });
+
+        }, backEvent -> this.mainMenuPage.nextPageName("conn"));
     }
 
     private void initAccountListeners() {

@@ -1,15 +1,19 @@
 package schemaobjects;
 
 import javax.swing.*;
+import java.awt.event.ActionListener;
 import java.sql.Connection;
 import java.util.Scanner;
 
 public interface Account {
-    public boolean login(int id, Connection conn);
-    public void displayView(Scanner scn, Connection conn);
-    public void signUp(Scanner scn, Connection conn);
-    public void updateAccount(Connection conn);
-    public JPanel displayPage();
+    boolean login(int id, Connection conn);
+    void displayView(Scanner scn, Connection conn);
+    void signUp(Connection conn);
+    void updateAccount(Connection conn);
+    JPanel getPage();
+    JPanel getSignUpPage();
 
-    public String toString();
+    void initSignUpListeners(ActionListener signUpLtr);
+
+    String toString();
 }

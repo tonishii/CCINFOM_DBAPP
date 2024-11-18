@@ -81,7 +81,7 @@ public class Driver {
                 }
             } else {
                 // Create a new account based on the account
-                account.signUp(scn, conn);
+                account.signUp(conn);
             }
 
             account.displayView(scn, conn);

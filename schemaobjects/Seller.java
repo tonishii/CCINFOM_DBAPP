@@ -1,11 +1,11 @@
 package schemaobjects;
 import javax.swing.*;
+import javax.swing.border.TitledBorder;
+import java.awt.*;
+import java.awt.event.ActionListener;
 import java.sql.*;
-import java.time.Instant;
 import java.time.Year;
 import java.util.Scanner;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -16,6 +16,11 @@ public class Seller implements Account {
     private String  seller_phone_number;
     private Date    seller_creation_date;
     private boolean seller_verified_status;
+
+    private JTextField sellerNameField,
+                       sellerPhoneField,
+                       sellerAddressField;
+    private JButton    submitSignUpBtn;
 
     @Override
     public boolean login(int id, Connection conn){
@@ -50,21 +55,18 @@ public class Seller implements Account {
     }
 
     @Override
-    public void signUp(Scanner scn, Connection conn) {
-        System.out.print("Enter seller name: ");
-        seller_name = scn.nextLine();
+    public void signUp(Connection conn) {
 
-        System.out.print("Enter seller address: ");
-        seller_address = scn.nextLine();
+        seller_name = sellerNameField.getText();
+        seller_address = sellerAddressField.getText();
+        seller_phone_number = sellerPhoneField.getText();
 
-        System.out.print("Enter phone number: ");
-        seller_phone_number = scn.nextLine();
         Pattern pattern = Pattern.compile("^\\d{11}$");
         Matcher matcher = pattern.matcher(seller_phone_number);
 
-        while(!matcher.matches()){
+        while (!matcher.matches()) {                                  // THIS MUST BE CHANGED
             System.out.print("Invalid Phone Number!\nRe-Enter phone number: ");
-            seller_phone_number = scn.nextLine();
+            seller_phone_number = sellerPhoneField.getText();
             matcher = pattern.matcher(seller_phone_number);
         }
 
@@ -110,7 +112,46 @@ public class Seller implements Account {
     }
 
     @Override
-    public JPanel displayPage() {
+    public JPanel getSignUpPage() {
+        JPanel signUpPage = new JPanel();
+        signUpPage.setBorder(BorderFactory.createTitledBorder(BorderFactory.createLineBorder(Color.BLACK, 2),
+    "Seller sign-up", TitledBorder.LEFT, TitledBorder.TOP, new Font("Montserrat", Font.PLAIN, 12)));
+
+        JLabel label = new JLabel("Enter seller name: ");
+        sellerNameField = new JTextField();
+        sellerNameField.setPreferredSize(new Dimension(200, 20));
+
+        signUpPage.add(label);
+        signUpPage.add(sellerNameField);
+
+        label = new JLabel("Enter seller address: ");
+        sellerAddressField = new JTextField();
+        sellerAddressField.setPreferredSize(new Dimension(200, 20));
+
+        signUpPage.add(label);
+        signUpPage.add(sellerAddressField);
+
+        label = new JLabel("Enter phone number: ");
+        sellerPhoneField = new JTextField();
+        sellerPhoneField.setPreferredSize(new Dimension(200, 20));
+
+        signUpPage.add(label);
+        signUpPage.add(sellerPhoneField);
+
+        submitSignUpBtn = new JButton("Submit");
+
+        return signUpPage;
+    }
+
+    @Override
+    public void initSignUpListeners(ActionListener signUpLtr) {
+        if (submitSignUpBtn.getActionListeners().length != 0) {
+            submitSignUpBtn.addActionListener(signUpLtr);
+        }
+    }
+
+    @Override
+    public JPanel getPage() {
         JPanel sellerPage = new JPanel();
 
         return sellerPage;
@@ -119,13 +160,13 @@ public class Seller implements Account {
     @Override
     public void displayView(Scanner scn, Connection conn) {
         while (true) {
-            System.out.print(
-            "[1] Add Product\n" +
-            "[2] Edit Product\n" +
-            "[3] Generate Report\n" +
-            "[4] Edit Account\n" +
-            "[5] Exit\n" +
-            "Select option: ");
+            System.out.print("""
+            [1] Add Product
+            [2] Edit Product
+            [3] Generate Report
+            [4] Edit Account
+            [5] Exit
+            Select option:\s""");
 
             switch (scn.nextLine().trim()) {
                 case "1" -> {
@@ -240,11 +281,12 @@ public class Seller implements Account {
                     }
                 }
                 case "3" -> {
-                    System.out.print("\n[GENERATE REPORT]\n" +
-                                     "[1] Sales Report\n" +
-                                     "[2] Credibility Report\n" +
-                                     "[3] Product Popularity Report\n" +
-                                     "Choice: ");
+                    System.out.print("""
+                    [GENERATE REPORT]
+                    [1] Sales Report
+                    [2] Credibility Report
+                    [3] Product Popularity Report
+                    Choice:\s""");
                     switch (scn.nextLine().trim()) {
                         case "1":
                             try {
@@ -388,14 +430,16 @@ public class Seller implements Account {
                     try{
                         boolean goBack = true;
                         while (goBack) {
-                            System.out.printf("User Details:\n" +
-                                              "[1] Name: %s\n" +
-                                              "[2] Address: %s\n" +
-                                              "[3] Phone Number: %s\n" +
-                                              "[4] Go Back\n",
-                                              seller_name,
-                                              seller_address,
-                                              seller_phone_number);
+                            System.out.printf("""
+                            User Details:
+                            [1] Name: %s
+                            [2] Address: %s
+                            [3] Phone Number: %s
+                            [4] Go Back
+                            """,
+                            seller_name,
+                            seller_address,
+                            seller_phone_number);
                             System.out.print("Enter option to edit: ");
 
                             switch (scn.nextLine()) {
