@@ -1,5 +1,4 @@
 import view.MainController;
-import view.MainMenu;
 
 import javax.swing.*;
 import javax.swing.plaf.FontUIResource;

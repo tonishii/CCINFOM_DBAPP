@@ -1,9 +1,5 @@
 package schemaobjects;
 
-import javax.swing.*;
-import javax.swing.border.TitledBorder;
-import java.awt.*;
-import java.awt.event.ActionListener;
 import java.util.Scanner;
 import java.sql.*;
 import java.util.regex.Matcher;
@@ -16,11 +12,16 @@ public class Courier implements Account {
     private String   courier_address;
     private boolean  courier_verified_status;
 
-    private JTextField courierNameField,
-                       courierEmailField,
-                       courierAddressField;
+    public Courier(int courier_id, String courier_name, String courier_email_address,
+                   String courier_address, boolean courier_verified_status) {
+        this.courier_id = courier_id;
+        this.courier_name = courier_name;
+        this.courier_email_address = courier_email_address;
+        this.courier_address = courier_address;
+        this.courier_verified_status = courier_verified_status;
+    }
 
-    private JButton    submitSignUpBtn;
+    public Courier() {}
 
     @Override
     public boolean login(int id, Connection conn) {
@@ -55,111 +56,6 @@ public class Courier implements Account {
     }
 
     @Override
-    public void signUp(Connection conn) {
-
-        courier_name = courierNameField.getText();
-        courier_email_address = courierEmailField.getText();
-        courier_address = courierAddressField.getText();
-
-        if (!courier_email_address.isEmpty()) {
-            String regex = "^[\\w!#$%&'*+/=?`{|}~^-]+(?:\\.[\\w!#$%&'*+/=?`{|}~^-]+)" +
-                    "*@(?:[a-zA-Z0-9-]+\\.)+[a-zA-Z]{2,6}";
-
-            Pattern pattern = Pattern.compile(regex);
-            Matcher matcher = pattern.matcher(courier_email_address);
-
-            while (!matcher.matches()) {
-                System.out.print("Invalid Email!\n Re-Enter email address:  "); // THIS MUST BE CHANGED
-                courier_email_address = courierEmailField.getText();
-                matcher = pattern.matcher(courier_email_address);
-            }
-        }
-
-        courier_verified_status = false;
-
-        try {
-            String query =
-            """
-            INSERT INTO couriers (courier_id, courier_name, courier_email_address, courier_address, courier_verified_status)
-            SELECT IFNULL(MAX(courier_id), 0) + 1, ?, ?, ?, ?
-            FROM couriers
-            """;
-
-            try (PreparedStatement pstmt = conn.prepareStatement(query)) {
-                pstmt.setString(1, courier_name);
-                pstmt.setString(2, courier_email_address);
-                pstmt.setString(3, courier_address);
-                pstmt.setBoolean(4, verifyStatus(courier_address, courier_email_address));
-
-                pstmt.executeUpdate();
-            }
-
-            query =
-            """
-            SELECT MAX(courier_id)
-            FROM couriers
-            """;
-
-            try (PreparedStatement selectStmt = conn.prepareStatement(query);
-                 ResultSet rs = selectStmt.executeQuery()) {
-                if (rs.next()) {
-                    this.courier_id = rs.getInt(1);
-                }
-            }
-
-            System.out.println("Welcome! " + courier_name);
-
-        } catch (Exception e){
-            System.out.println(e.getMessage());
-        }
-    }
-
-    @Override
-    public JPanel getSignUpPage() {
-        JPanel signUpPage = new JPanel();
-        signUpPage.setBorder(BorderFactory.createTitledBorder(BorderFactory.createLineBorder(Color.BLACK, 2),
-    "Courier sign-up", TitledBorder.LEFT, TitledBorder.TOP, new Font("Montserrat", Font.PLAIN, 12)));
-
-        JLabel label = new JLabel("Enter courier name: ");
-        courierNameField = new JTextField();
-        courierNameField.setPreferredSize(new Dimension(200, 20));
-
-        signUpPage.add(label);
-        signUpPage.add(courierNameField);
-
-        label = new JLabel("Enter email address: ");
-        courierEmailField = new JTextField();
-        courierEmailField.setPreferredSize(new Dimension(200, 20));
-
-        signUpPage.add(label);
-        signUpPage.add(courierEmailField);
-
-        label = new JLabel("Enter courier address: ");
-        courierAddressField = new JTextField();
-        courierAddressField.setPreferredSize(new Dimension(200, 20));
-
-        signUpPage.add(label);
-        signUpPage.add(courierAddressField);
-
-        submitSignUpBtn = new JButton("Submit");
-
-        return signUpPage;
-    }
-
-    @Override
-    public void initSignUpListeners(ActionListener signUpLtr) {
-        if (submitSignUpBtn.getActionListeners().length != 0) {
-            submitSignUpBtn.addActionListener(signUpLtr);
-        }
-    }
-    @Override
-    public JPanel getPage() {
-        JPanel courierPage = new JPanel();
-
-        return courierPage;
-    }
-
-    @Override
     public void displayView(Scanner scn, Connection conn) {
         while (true) {
             System.out.print(
@@ -173,9 +69,7 @@ public class Courier implements Account {
             switch (scn.nextLine().trim()) {
                 case "1" -> showOngoingOrders(conn);
 
-                case "2" -> {
-                    generateActivityReport(conn);
-                }
+                case "2" -> generateActivityReport(conn);
 
                 case "3" -> {
                     boolean goBack = true;
@@ -360,10 +254,6 @@ public class Courier implements Account {
             this.courier_verified_status = true;
     }
 
-    private boolean verifyStatus(String address, String email_address) {
-        return !(address.isEmpty() || email_address.isEmpty());
-    }
-
     public static int assignCourier(Connection conn) {
         try {
             String query = """
@@ -421,7 +311,7 @@ public class Courier implements Account {
 
     @Override
     public String toString() {
-        return "Courier";
+        return "courier";
     }
 
     public void setName(String courier_name) { this.courier_name = courier_name; }

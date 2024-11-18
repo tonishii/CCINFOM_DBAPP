@@ -1,10 +1,6 @@
 package schemaobjects;
 import enums.OrderStatus;
 
-import javax.swing.*;
-import javax.swing.border.TitledBorder;
-import java.awt.*;
-import java.awt.event.ActionListener;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Objects;
@@ -25,12 +21,18 @@ public class User implements Account {
     private Date    user_creation_date;
     private boolean user_verified_status;
 
-    private JTextField userNameField,
-                       userFirstNameField,
-                       userLastNameField,
-                       userAddressField,
-                       userPhoneField;
-    private JButton    submitSignUpBtn;
+    public User(int user_id, String user_name, String user_firstname, String user_lastname,
+                String user_address, String user_phone_number, Date user_creation_date) {
+        this.user_id = user_id;
+        this.user_name = user_name;
+        this.user_firstname = user_firstname;
+        this.user_lastname = user_lastname;
+        this.user_address = user_address;
+        this.user_phone_number = user_phone_number;
+        this.user_creation_date = user_creation_date;
+    }
+
+    public User() {}
 
     @Override
     public boolean login(int id, Connection conn) {
@@ -65,128 +67,6 @@ public class User implements Account {
         }
 
         return false; // Login failed
-    }
-
-    @Override
-    public void signUp(Connection conn) {
-        this.user_name = userNameField.getText();
-        this.user_firstname = userFirstNameField.getText();
-        this.user_lastname = userLastNameField.getText();
-        this.user_address = userAddressField.getText();
-
-        this.user_phone_number = userPhoneField.getText();
-        Pattern pattern = Pattern.compile("^\\d{11}$");
-        Matcher matcher = pattern.matcher(user_phone_number);
-
-        while (!matcher.matches()) {                                            // THIS MUST BE CHANGED
-            System.out.print("Invalid Phone Number!\nRe-Enter phone number: ");
-            user_phone_number = userPhoneField.getText();
-            matcher = pattern.matcher(user_phone_number);
-        }
-
-        user_creation_date = new Date(System.currentTimeMillis());
-        user_verified_status = false;
-
-        try {
-            String query =
-            """
-            INSERT INTO users (user_id, user_name, user_phone_number, user_address, user_verified_status, user_creation_date, user_firstname, user_lastname)
-            SELECT IFNULL(MAX(user_id), 0) + 1, ?, ?, ?, ?, ?, ?, ?
-            FROM users
-            """;
-
-            try (PreparedStatement pstmt = conn.prepareStatement(query)) {
-                pstmt.setString(1, user_name);
-                pstmt.setString(2, user_phone_number);
-                pstmt.setString(3, user_address);
-                pstmt.setBoolean(4, user_verified_status);
-                pstmt.setTimestamp(5, new java.sql.Timestamp(user_creation_date.getTime()));
-                pstmt.setString(6, user_firstname);
-                pstmt.setString(7, user_lastname);
-
-                pstmt.executeUpdate();
-            }
-
-            query =
-            """
-            SELECT MAX(user_id)
-            FROM users
-            """;
-
-            try (PreparedStatement selectStmt = conn.prepareStatement(query);
-                 ResultSet rs = selectStmt.executeQuery()) {
-                if (rs.next()) {
-                    this.user_id = rs.getInt(1);
-                }
-            }
-
-            System.out.println("Welcome! " + user_name);
-
-        } catch (Exception e){
-            System.out.println(e.getMessage());
-        }
-    }
-
-    @Override
-    public JPanel getSignUpPage() {
-        JPanel signUpPage = new JPanel();
-        signUpPage.setBorder(BorderFactory.createTitledBorder(BorderFactory.createLineBorder(Color.BLACK, 2),
-    "User sign-up", TitledBorder.LEFT, TitledBorder.TOP, new Font("Montserrat", Font.PLAIN, 12)));
-
-        JLabel label = new JLabel("Enter user account name: ");
-        userNameField = new JTextField();
-        userNameField.setPreferredSize(new Dimension(200, 20));
-
-        signUpPage.add(label);
-        signUpPage.add(userNameField);
-
-        label = new JLabel("Enter user first name: ");
-        userFirstNameField = new JTextField();
-        userFirstNameField.setPreferredSize(new Dimension(200, 20));
-
-        signUpPage.add(label);
-        signUpPage.add(userFirstNameField);
-
-        label = new JLabel("Enter user last name: ");
-        userLastNameField = new JTextField();
-        userLastNameField.setPreferredSize(new Dimension(200, 20));
-
-        signUpPage.add(label);
-        signUpPage.add(userLastNameField);
-
-        label = new JLabel("Enter user address: ");
-        userAddressField = new JTextField();
-        userAddressField.setPreferredSize(new Dimension(200, 20));
-
-        signUpPage.add(label);
-        signUpPage.add(userAddressField);
-
-        label = new JLabel("Enter phone number:  ");
-        userPhoneField = new JTextField();
-        userPhoneField.setPreferredSize(new Dimension(200, 20));
-
-        signUpPage.add(label);
-        signUpPage.add(userPhoneField);
-
-        submitSignUpBtn = new JButton("Submit");
-
-        signUpPage.add(submitSignUpBtn);
-
-        return signUpPage;
-    }
-
-    @Override
-    public void initSignUpListeners(ActionListener signUpLtr) {
-        if (submitSignUpBtn.getActionListeners().length == 0) {
-            submitSignUpBtn.addActionListener(signUpLtr);
-        }
-    }
-
-    @Override
-    public JPanel getPage() {
-        JPanel userPage = new JPanel();
-
-        return userPage;
     }
 
     @Override
@@ -238,18 +118,21 @@ public class User implements Account {
                     try{
                         boolean goBack = true;
                         while (goBack) {
-                            System.out.printf("User Details:\n" +
-                                            "[1] Name: %s\n" +
-                                            "[2] Phone Number: %s\n" +
-                                            "[3] Address: %s\n" +
-                                            "[4] First Name: %s\n" +
-                                            "[5] Last Name: %s\n" +
-                                            "[6] Go Back\n",
-                                            user_name,
-                                            user_phone_number,
-                                            user_address,
-                                            user_firstname,
-                                            user_lastname);
+                            System.out.printf("""
+                            User Details:
+                            [1] Name: %s
+                            [2] Phone Number: %s
+                            [3] Address: %s
+                            [4] First Name: %s
+                            [5] Last Name: %s
+                            [6] Go Back
+                            """,
+                            user_name,
+                            user_phone_number,
+                            user_address,
+                            user_firstname,
+                            user_lastname);
+
                             System.out.print("Enter option to edit: ");
 
                             switch (scn.nextLine()) {
@@ -663,7 +546,7 @@ public class User implements Account {
 
     public void rateProduct(Scanner scn, Connection conn) {
         try {
-            ArrayList<Product> rateList = new ArrayList<Product>();
+            ArrayList<Product> rateList = new ArrayList<>();
             int count = 0;
             String query =
                     """
@@ -738,9 +621,10 @@ public class User implements Account {
                             .filter(p -> p.getProductID() == product_id)
                             .findFirst()
                             .orElse(null);
-                    product.updateRating(conn, product_id);
-                }
-                else{
+                    if (product != null) {
+                        product.updateRating(conn, product_id);
+                    }
+                } else {
                     System.out.println("No products found!!!!!!!!!!!!!!!!");
                 }
             }
@@ -839,7 +723,7 @@ public class User implements Account {
     }
 
     public String toString() {
-        return "User";
+        return "user";
     }
 
     public void setUsername(String user_name) { this.user_name = user_name; }

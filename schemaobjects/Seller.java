@@ -1,8 +1,5 @@
 package schemaobjects;
-import javax.swing.*;
-import javax.swing.border.TitledBorder;
-import java.awt.*;
-import java.awt.event.ActionListener;
+
 import java.sql.*;
 import java.time.Year;
 import java.util.Scanner;
@@ -17,10 +14,17 @@ public class Seller implements Account {
     private Date    seller_creation_date;
     private boolean seller_verified_status;
 
-    private JTextField sellerNameField,
-                       sellerPhoneField,
-                       sellerAddressField;
-    private JButton    submitSignUpBtn;
+    public Seller(int seller_id, String seller_name, String seller_address,
+                  String seller_phone_number, Date seller_creation_date, boolean seller_verified_status) {
+        this.seller_id = seller_id;
+        this.seller_name = seller_name;
+        this.seller_address = seller_address;
+        this.seller_phone_number = seller_phone_number;
+        this.seller_creation_date = seller_creation_date;
+        this.seller_verified_status = seller_verified_status;
+    }
+
+    public Seller() {}
 
     @Override
     public boolean login(int id, Connection conn){
@@ -52,109 +56,6 @@ public class Seller implements Account {
             System.out.println("Error during login: " + e.getMessage());
         }
         return false;
-    }
-
-    @Override
-    public void signUp(Connection conn) {
-
-        seller_name = sellerNameField.getText();
-        seller_address = sellerAddressField.getText();
-        seller_phone_number = sellerPhoneField.getText();
-
-        Pattern pattern = Pattern.compile("^\\d{11}$");
-        Matcher matcher = pattern.matcher(seller_phone_number);
-
-        while (!matcher.matches()) {                                  // THIS MUST BE CHANGED
-            System.out.print("Invalid Phone Number!\nRe-Enter phone number: ");
-            seller_phone_number = sellerPhoneField.getText();
-            matcher = pattern.matcher(seller_phone_number);
-        }
-
-        seller_creation_date = new Date(System.currentTimeMillis());
-        seller_verified_status = false;
-
-        try {
-            String query =
-            """
-            INSERT INTO sellers (seller_id, seller_name, seller_address, seller_verified_status, seller_phone_number, seller_creation_date)
-            SELECT IFNULL(MAX(seller_id), 0) + 1, ?, ?, ?, ?, ?
-            FROM sellers
-            """;
-
-            try (PreparedStatement pstmt = conn.prepareStatement(query)) {
-                pstmt.setString(1, seller_name);
-                pstmt.setString(2, seller_address);
-                pstmt.setBoolean(3, seller_verified_status);
-                pstmt.setString(4, seller_phone_number);
-                pstmt.setTimestamp(5, new java.sql.Timestamp(seller_creation_date.getTime()));
-
-                pstmt.executeUpdate();
-            }
-
-            query =
-            """
-            SELECT MAX(seller_id)
-            FROM sellers
-            """;
-
-            try (PreparedStatement selectStmt = conn.prepareStatement(query);
-                 ResultSet rs = selectStmt.executeQuery()) {
-                if (rs.next()) {
-                    this.seller_id = rs.getInt(1);
-                }
-            }
-
-            System.out.println("Welcome! " + seller_name);
-
-        } catch (Exception e) {
-            System.out.println("Error during seller sign-up: " + e.getMessage());
-        }
-    }
-
-    @Override
-    public JPanel getSignUpPage() {
-        JPanel signUpPage = new JPanel();
-        signUpPage.setBorder(BorderFactory.createTitledBorder(BorderFactory.createLineBorder(Color.BLACK, 2),
-    "Seller sign-up", TitledBorder.LEFT, TitledBorder.TOP, new Font("Montserrat", Font.PLAIN, 12)));
-
-        JLabel label = new JLabel("Enter seller name: ");
-        sellerNameField = new JTextField();
-        sellerNameField.setPreferredSize(new Dimension(200, 20));
-
-        signUpPage.add(label);
-        signUpPage.add(sellerNameField);
-
-        label = new JLabel("Enter seller address: ");
-        sellerAddressField = new JTextField();
-        sellerAddressField.setPreferredSize(new Dimension(200, 20));
-
-        signUpPage.add(label);
-        signUpPage.add(sellerAddressField);
-
-        label = new JLabel("Enter phone number: ");
-        sellerPhoneField = new JTextField();
-        sellerPhoneField.setPreferredSize(new Dimension(200, 20));
-
-        signUpPage.add(label);
-        signUpPage.add(sellerPhoneField);
-
-        submitSignUpBtn = new JButton("Submit");
-
-        return signUpPage;
-    }
-
-    @Override
-    public void initSignUpListeners(ActionListener signUpLtr) {
-        if (submitSignUpBtn.getActionListeners().length != 0) {
-            submitSignUpBtn.addActionListener(signUpLtr);
-        }
-    }
-
-    @Override
-    public JPanel getPage() {
-        JPanel sellerPage = new JPanel();
-
-        return sellerPage;
     }
 
     @Override
@@ -516,7 +417,7 @@ public class Seller implements Account {
 
     @Override
     public String toString() {
-        return "Seller";
+        return "seller";
     }
 
     public void setName(String seller_name) { this.seller_name = seller_name; }
