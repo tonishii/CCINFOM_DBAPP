@@ -14,6 +14,10 @@ import java.util.Objects;
 public class SelectAccount extends JPanel {
     public CardLayout selectCardLayout;
 
+    // Constants used for the main select acc page and login page
+    public static final String SELECTACCPAGE = "select";
+    public static final String LOGINPAGE = "login";
+
     private JComboBox<String> accountTypeBox;
     private JButton loginBtn;
     private JButton signupBtn;
@@ -82,8 +86,8 @@ public class SelectAccount extends JPanel {
         loginPage.add(backLoginBtn);
         loginPage.add(errorLbl);
 
-        this.add(accountSelectPage, "select");
-        this.add(loginPage, "login");
+        this.add(accountSelectPage, SELECTACCPAGE);
+        this.add(loginPage, LOGINPAGE);
     }
 
     public void initSelectListeners(ActionListener loginLtr, ActionListener signUpLtr, ActionListener submitLoginLtr, ActionListener backLoginLtr, ActionListener backLtr) {

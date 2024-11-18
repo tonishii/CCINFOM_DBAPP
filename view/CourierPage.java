@@ -14,6 +14,12 @@ public class CourierPage extends JPanel implements AccountPage {
                        courierBackBtn;
     private JLabel     errorLbl;
 
+    // Main page
+    private JPanel     topPanel,
+                       bottomPanel;
+
+    private CardLayout mainCardLayout;
+
     public CourierPage() {
         this.courierCardLayout = new CardLayout();
         this.setLayout(courierCardLayout);
@@ -81,6 +87,11 @@ public class CourierPage extends JPanel implements AccountPage {
     @Override
     public void nextPageName(String name) {
         this.courierCardLayout.show(this, name);
+    }
+
+    @Override
+    public void nextMainPageName(String name) {
+        this.mainCardLayout.show(bottomPanel, name);
     }
 
     public void setErrorLbl(String text) { this.errorLbl.setText(text); }

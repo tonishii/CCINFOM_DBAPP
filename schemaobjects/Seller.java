@@ -48,7 +48,6 @@ public class Seller implements Account {
                 this.seller_phone_number = result.getString("seller_phone_number");
                 this.seller_creation_date = result.getDate("seller_creation_date");
 
-                System.out.println("Welcome! " + seller_name);
                 return true; // Login successful
             }
 

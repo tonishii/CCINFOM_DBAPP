@@ -14,6 +14,12 @@ public class SellerPage extends JPanel implements AccountPage {
                        sellerBackBtn;
     private JLabel     errorLbl;
 
+    // Main page
+    private JPanel     topPanel,
+                       bottomPanel;
+
+    private CardLayout mainCardLayout;
+
     public SellerPage() {
         this.sellerCardLayout = new CardLayout();
         this.setLayout(sellerCardLayout);
@@ -69,6 +75,8 @@ public class SellerPage extends JPanel implements AccountPage {
         JPanel sellerPage = new JPanel();
         sellerPage.setBorder(BorderFactory.createTitledBorder(BorderFactory.createLineBorder(Color.BLACK, 2),
     "Seller", TitledBorder.LEFT, TitledBorder.TOP, new Font("Montserrat", Font.PLAIN, 12)));
+
+
         return sellerPage;
     }
 
@@ -81,6 +89,11 @@ public class SellerPage extends JPanel implements AccountPage {
     @Override
     public void nextPageName(String name) {
         this.sellerCardLayout.show(this, name);
+    }
+
+    @Override
+    public void nextMainPageName(String name) {
+        this.mainCardLayout.show(bottomPanel, name);
     }
 
     public void setErrorLbl(String text) { this.errorLbl.setText(text); }

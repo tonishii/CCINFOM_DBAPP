@@ -44,7 +44,6 @@ public class Courier implements Account {
                 this.courier_address = result.getString("courier_address");
                 this.courier_verified_status = result.getBoolean("courier_verified_status");
 
-                System.out.println("Welcome! " + courier_name);
                 return true; // Login successful
             }
 

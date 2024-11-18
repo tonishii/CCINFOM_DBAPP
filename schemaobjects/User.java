@@ -58,7 +58,6 @@ public class User implements Account {
                 this.user_firstname = result.getString("user_firstname");
                 this.user_lastname = result.getString("user_lastname");
 
-                System.out.println("Welcome! " + user_name);
                 return true; // Login successful
             }
 
@@ -216,12 +215,12 @@ public class User implements Account {
         ArrayList<Order> ph = new ArrayList<>();
         try {
             String query = 
-                    """
-                    SELECT order_id, courier_id, purchase_date, total_price, order_status, receive_date
-                    FROM orders
-                    WHERE user_id =  ?
-                    AND order_status = "DELIVERED"
-                    """;
+            """
+            SELECT order_id, courier_id, purchase_date, total_price, order_status, receive_date
+            FROM orders
+            WHERE user_id =  ?
+            AND order_status = "DELIVERED"
+            """;
             PreparedStatement ps = conn.prepareStatement(query);
             ps.setInt(1, this.user_id);
             ResultSet rs = ps.executeQuery();

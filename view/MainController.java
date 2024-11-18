@@ -25,23 +25,23 @@ public class MainController {
         mainMenuPage = new MainFrame();
 
         connectPage = new SQLConnect();
-        mainMenuPage.addToCenterPanel(connectPage, "conn");
+        mainMenuPage.addToCenterPanel(connectPage, MainFrame.CONNECTPAGE);
         initConnectionListeners();
 
         selectAccountPage = new SelectAccount();
-        mainMenuPage.addToCenterPanel(selectAccountPage, "acc");
+        mainMenuPage.addToCenterPanel(selectAccountPage, MainFrame.SELECTACCPAGE);
         initSelectListeners();
 
         userPage = new UserPage();
-        mainMenuPage.addToCenterPanel(userPage, "user");
+        mainMenuPage.addToCenterPanel(userPage, MainFrame.USERPAGE);
         initUserListeners();
 
         sellerPage = new SellerPage();
-        mainMenuPage.addToCenterPanel(sellerPage, "seller");
+        mainMenuPage.addToCenterPanel(sellerPage, MainFrame.SELLERPAGE);
         initSellerListeners();
 
         courierPage = new CourierPage();
-        mainMenuPage.addToCenterPanel(courierPage, "courier");
+        mainMenuPage.addToCenterPanel(courierPage, MainFrame.COURIERPAGE);
         initCourierListeners();
     }
 
@@ -55,8 +55,8 @@ public class MainController {
                 Class.forName("com.mysql.cj.jdbc.Driver");
                 this.conn = DriverManager.getConnection(url, username, password);
 
-                this.selectAccountPage.nextPageName("select");
-                this.mainMenuPage.nextPageName("acc");
+                this.selectAccountPage.nextPageName(SelectAccount.SELECTACCPAGE);
+                this.mainMenuPage.nextPageName(MainFrame.SELECTACCPAGE);
 
             } catch (Exception e) {
                 connectPage.setErrorLbl("Error: " + e.getMessage());
@@ -78,7 +78,7 @@ public class MainController {
     private void initSelectListeners() {
         selectAccountPage.initSelectListeners(loginEvent -> {
             this.account = selectAccountPage.getAccountType();
-            selectAccountPage.nextPageName("login");
+            selectAccountPage.nextPageName(SelectAccount.LOGINPAGE);
 
         }, signUpEvent -> {
             this.account = selectAccountPage.getAccountType();
@@ -88,16 +88,15 @@ public class MainController {
             if (account.login(Integer.parseInt(selectAccountPage.getID()), conn)) {
                 (account instanceof User ? userPage :
                  account instanceof Seller ? sellerPage :
-                 courierPage).nextPageName("main");
+                 courierPage).nextPageName(AccountPage.MAINPAGE);
 
                 mainMenuPage.nextPageName(account.toString());
             } else {
                 selectAccountPage.setErrorLbl("Error: Account was not found");
             }
 
-        }, backLoginEvent -> selectAccountPage.nextPageName("select")
-
-        , backEvent -> this.mainMenuPage.nextPageName("conn"));
+        }, backLoginEvent -> selectAccountPage.nextPageName(SelectAccount.SELECTACCPAGE)
+        , backEvent -> mainMenuPage.nextPageName(MainFrame.CONNECTPAGE));
     }
 
     private void initUserListeners() {
@@ -156,16 +155,51 @@ public class MainController {
                 }
 
                 this.account = new User(user_id, user_name, user_firstname, user_lastname, user_address, user_phone_number, user_creation_date);
-                userPage.nextPageName("main");
+                userPage.nextPageName(AccountPage.MAINPAGE);
 
             } catch (Exception e){
                 userPage.setErrorLbl("Error: " + e.getMessage());
             }
 
         }, backSignUpEvent -> {
-            mainMenuPage.nextPageName("acc");
-            selectAccountPage.nextPageName("select");
-            userPage.nextPageName("signup");
+            mainMenuPage.nextPageName(MainFrame.SELECTACCPAGE);
+            selectAccountPage.nextPageName(SelectAccount.SELECTACCPAGE);
+            userPage.nextPageName(AccountPage.SIGNUPPAGE);
+        });
+
+        userPage.initMainListeners(shopEvent -> {
+            userPage.nextMainPageName(UserPage.SHOPPAGE);
+
+            // GET THE LIST OF PRODUCTS AND REFLECT ON THE J-LIST
+        }, cartEvent -> {
+            userPage.nextMainPageName(UserPage.CARTPAGE);
+
+        }, ordersEvent -> {
+            userPage.nextMainPageName(UserPage.ORDERSPAGE);
+
+        }, profileEvent -> {
+            userPage.nextMainPageName(UserPage.PROFILEPAGE);
+
+        }, logOutEvent -> {
+            mainMenuPage.nextPageName(MainFrame.SELECTACCPAGE);
+            selectAccountPage.nextPageName(SelectAccount.SELECTACCPAGE);
+
+        }, addToCartEvent -> {
+
+        }, viewInfoEvent -> {
+
+        }, checkOutEvent -> {
+
+        }, removeItemEvent -> {
+
+        }, returnEvent -> {
+
+        }, rateEvent -> {
+
+        }, receiveEvent -> {
+
+        }, saveChangeEvent -> {
+
         });
     }
 
@@ -219,16 +253,17 @@ public class MainController {
                     }
                 }
                 this.account = new Seller(seller_id, seller_name, seller_address, seller_phone_number, seller_creation_date, seller_verified_status);
-                sellerPage.nextPageName("main");
+                sellerPage.nextPageName(AccountPage.MAINPAGE);
 
             } catch (Exception e) {
                 sellerPage.setErrorLbl("Error during seller sign-up: " + e.getMessage());
             }
 
         }, backSignUpEvent -> {
-            mainMenuPage.nextPageName("acc");
-            selectAccountPage.nextPageName("select");
-            sellerPage.nextPageName("signup");
+            mainMenuPage.nextPageName(MainFrame.SELECTACCPAGE);
+            selectAccountPage.nextPageName(SelectAccount.SELECTACCPAGE);
+
+            sellerPage.nextPageName(AccountPage.SIGNUPPAGE);
         });
     }
 
@@ -286,16 +321,16 @@ public class MainController {
                 }
 
                 this.account = new Courier(courier_id, courier_name, courier_email_address, courier_address, courier_verified_status);
-                courierPage.nextPageName("main");
+                courierPage.nextPageName(AccountPage.MAINPAGE);
 
             } catch (Exception e){
                 courierPage.setErrorLbl("Error: " + e.getMessage());
             }
 
         }, backSignUpEvent -> {
-            mainMenuPage.nextPageName("acc");
-            selectAccountPage.nextPageName("select");
-            courierPage.nextPageName("signup");
+            mainMenuPage.nextPageName(MainFrame.SELECTACCPAGE);
+            selectAccountPage.nextPageName(SelectAccount.SELECTACCPAGE);
+            courierPage.nextPageName(AccountPage.SIGNUPPAGE);
         });
     }
 }
