@@ -5,6 +5,8 @@ import model.Courier;
 import model.Seller;
 import model.User;
 
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.sql.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -43,6 +45,21 @@ public class MainController {
         courierPage = new CourierPage();
         mainMenuPage.addToCenterPanel(courierPage, MainFrame.COURIERPAGE);
         initCourierListeners();
+
+        mainMenuPage.addWindowListener(new WindowAdapter()
+        {
+            @Override
+            public void windowClosing(WindowEvent e)
+            {
+                System.out.println("closed");
+                try {
+                    conn.close();
+                } catch (Exception ex) {
+                    e.getWindow().dispose();
+                }
+                e.getWindow().dispose();
+            }
+        });
     }
 
     private void initConnectionListeners() {

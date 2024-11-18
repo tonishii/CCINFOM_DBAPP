@@ -32,14 +32,14 @@ public class SQLConnect extends JPanel {
         gbc.weighty = GridBagConstraints.RELATIVE;
 
         this.userLbl = new JLabel("Username: ");
-        userLbl.setFont(new Font("Verdana", FontUIResource.BOLD, 18));
+        userLbl.setFont(new Font("Verdana", Font.BOLD, 18));
         userLbl.setVisible(true);
         userLbl.setHorizontalTextPosition(JLabel.CENTER);
         userLbl.setVerticalTextPosition(JLabel.TOP);
         userLbl.setForeground(Color.BLACK);
 
         this.passLbl = new JLabel("Password: ");
-        passLbl.setFont(new Font("Verdana", FontUIResource.BOLD, 18));
+        passLbl.setFont(new Font("Verdana", Font.BOLD, 18));
         passLbl.setVisible(true);
         passLbl.setHorizontalTextPosition(JLabel.CENTER);
         passLbl.setVerticalTextPosition(JLabel.TOP);
@@ -55,8 +55,12 @@ public class SQLConnect extends JPanel {
 
         this.submitBtn = new JButton("Submit");
         this.submitBtn.setFocusable(false);
+        this.submitBtn.setContentAreaFilled(false);
+        this.submitBtn.setPreferredSize(new Dimension(100, 40));
         this.exitBtn = new JButton("Exit");
         this.exitBtn.setFocusable(false);
+        this.exitBtn.setContentAreaFilled(false);
+        this.exitBtn.setPreferredSize(new Dimension(100, 40));
 
         this.add(userLbl, gbc);
         gbc.gridx = 1;

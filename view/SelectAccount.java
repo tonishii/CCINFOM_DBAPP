@@ -7,6 +7,7 @@ import model.User;
 
 import javax.swing.*;
 import javax.swing.border.TitledBorder;
+import javax.swing.plaf.FontUIResource;
 import java.awt.*;
 import java.awt.event.ActionListener;
 import java.util.Objects;
@@ -46,21 +47,36 @@ public class SelectAccount extends JPanel {
         textLbl.setVerticalTextPosition(JLabel.TOP);
         textLbl.setForeground(Color.BLACK);
 
+        DefaultListCellRenderer dLCR = new DefaultListCellRenderer();
+        dLCR.setHorizontalAlignment(DefaultListCellRenderer.CENTER);
+
         String[] accountTypes = { "User", "Courier", "Seller" };
         this.accountTypeBox = new JComboBox<>(accountTypes);
+        this.accountTypeBox.setPreferredSize(new Dimension(200,40));
+        this.accountTypeBox.setRenderer(dLCR);
+        this.accountTypeBox.setFont(new Font("Verdana", Font.BOLD, 18));
 
         this.loginBtn = new JButton("Login");
+        this.loginBtn.setFocusable(false);
+        this.loginBtn.setContentAreaFilled(false);
+        this.loginBtn.setPreferredSize(new Dimension(100,40));
         this.signupBtn = new JButton("Sign Up");
+        this.signupBtn.setFocusable(false);
+        this.signupBtn.setContentAreaFilled(false);
+        this.signupBtn.setPreferredSize(new Dimension(100,40));
         this.backBtn = new JButton("Back");
+        this.backBtn.setFocusable(false);
+        this.backBtn.setContentAreaFilled(false);
+        this.backBtn.setPreferredSize(new Dimension(100,40));
 
         accountSelectPage.add(textLbl, gbc);
         gbc.gridy = 1;
         accountSelectPage.add(accountTypeBox, gbc);
-
-        accountSelectPage.add(loginBtn, gbc);
         gbc.gridy = 2;
-        accountSelectPage.add(signupBtn, gbc);
+        accountSelectPage.add(loginBtn, gbc);
         gbc.gridy = 3;
+        accountSelectPage.add(signupBtn, gbc);
+        gbc.gridy = 4;
         accountSelectPage.add(backBtn, gbc);
 
         JPanel loginPage = new JPanel(new GridBagLayout());
