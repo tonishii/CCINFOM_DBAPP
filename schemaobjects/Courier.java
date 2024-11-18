@@ -130,7 +130,7 @@ public class Courier implements Account {
                 case "1" -> showOngoingOrders(conn);
 
                 case "2" -> {
-
+                    generateActivityReport(conn);
                 }
 
                 case "3" -> {
@@ -187,6 +187,73 @@ public class Courier implements Account {
         }
     }
 
+    public void generateActivityReport(Connection conn) {
+        try {
+            String orderQuery =
+                    """
+                    SELECT order_id, user_id, purchase_date, total_price, order_status, receive_date
+                    FROM orders
+                    WHERE courier_id = ? AND order_status IN ('Completed', 'Delivered');
+                    """;
+
+            String returnQuery =
+                    """
+                    SELECT r.order_id, r.product_id, r.return_reason, r.return_description, r.return_date, r.return_status
+                    FROM returns r
+                    WHERE r.courier_id = ? AND r.return_status = 'REFUNDED';
+                    """;
+
+            PreparedStatement ordersStmt = conn.prepareStatement(orderQuery);
+            ordersStmt.setInt(1, this.courier_id);
+            ResultSet ordersResultSet = ordersStmt.executeQuery();
+
+            PreparedStatement returnsStmt = conn.prepareStatement(returnQuery);
+            returnsStmt.setInt(1, this.courier_id);
+            ResultSet returnsResultSet = returnsStmt.executeQuery();
+            System.out.println();
+            if(ordersResultSet.next()) {
+                System.out.println("Completed Orders:");
+                System.out.println("Order ID | User ID | Purchase Date | Total Price | Order Status | Receive Date");
+                do {
+                    int orderId = ordersResultSet.getInt("order_id");
+                    int userId = ordersResultSet.getInt("user_id");
+                    Date purchaseDate = ordersResultSet.getDate("purchase_date");
+                    float totalPrice = ordersResultSet.getFloat("total_price");
+                    String orderStatus = ordersResultSet.getString("order_status");
+                    Date receiveDate = ordersResultSet.getDate("receive_date");
+
+                    System.out.printf("%5d    | %4d    |   %s  | %9.2f   |   %s  |  %s\n",
+                            orderId, userId, purchaseDate, totalPrice, orderStatus, receiveDate);
+                } while (ordersResultSet.next());
+            }
+            else {
+                System.out.println("No completed orders yet.");
+            }
+            System.out.println();
+            if(returnsResultSet.next()) {
+                System.out.println("Completed Returns:");
+                System.out.println("Order ID | Product ID | Return Reason | Return Description | Return Date | Return Status");
+                do {
+                    int orderId = returnsResultSet.getInt("order_id");
+                    int productId = returnsResultSet.getInt("product_id");
+                    String returnReason = returnsResultSet.getString("return_reason");
+                    String returnDescription = returnsResultSet.getString("return_description");
+                    Date returnDate = returnsResultSet.getDate("return_date");
+                    String returnStatus = returnsResultSet.getString("return_status");
+
+                    System.out.printf("%5d    | %6d     | %s | %s | %s | %s\n",
+                            orderId, productId, returnReason, returnDescription, returnDate, returnStatus);
+                } while (returnsResultSet.next());
+            }
+            else {
+                System.out.println("No completed returns yet.");
+            }
+        }
+        catch (Exception e) {
+            System.err.println("Error: " + e.getMessage());
+        }
+    }
+
     public void showOngoingOrders(Connection conn) {
         try {
             String orderQuery =
@@ -221,7 +288,7 @@ public class Courier implements Account {
                 String orderStatus = ordersResultSet.getString("order_status");
                 Date receiveDate = ordersResultSet.getDate("receive_date");
 
-                System.out.printf("%d | %d | %s | %f | %s | %s\n",
+                System.out.printf("%5d    | %4d    |   %s  | %9.2f  | %s |  %s\n",
                 orderId, userId, purchaseDate, totalPrice, orderStatus, receiveDate);
             }
 
