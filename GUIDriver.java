@@ -9,13 +9,14 @@ public class GUIDriver {
 
             // change the default fonts of:
             FontUIResource font = new FontUIResource("Verdana", FontUIResource.PLAIN, 14);
-//            UIManager.put("Label.font", font); // JLabels
-//            UIManager.put("Button.font", font); // JButtons
-//            UIManager.put("List.font", font); // JLists
-//            UIManager.put("RadioButton.font", font); // JRadioButtons
-//            UIManager.put("TextField.font", font); // JTextFields
-//            UIManager.put("OptionPane.buttonFont", font); // JOptionPane's buttons
-//            UIManager.put("OptionPane.messageFont", font); // JOptionPane's messages
+            UIManager.put("Label.font", font); // JLabels
+            UIManager.put("Button.font", font); // JButtons
+            UIManager.put("List.font", font); // JLists
+            UIManager.put("RadioButton.font", font); // JRadioButtons
+            UIManager.put("TextField.font", font); // JTextFields
+            UIManager.put("OptionPane.buttonFont", font); // JOptionPane's buttons
+            UIManager.put("OptionPane.messageFont", font); // JOptionPane's messages
+            UIManager.put("CheckBoxMenuItem.font", font); // JComboBox's items
 
             new MainController();
         });

@@ -10,7 +10,7 @@ public class SQLConnect extends JPanel {
     private JLabel userLbl;
     private JLabel passLbl;
     private JTextField usernameField;
-    private JTextField passwordField;
+    private JPasswordField passwordField;
     private JButton submitBtn;
     private JButton exitBtn;
 
@@ -48,7 +48,7 @@ public class SQLConnect extends JPanel {
         this.usernameField = new JTextField();
         usernameField.setPreferredSize(new Dimension(300, 20));
 
-        this.passwordField = new JTextField();
+        this.passwordField = new JPasswordField();
         passwordField.setPreferredSize(new Dimension(300, 20));
 
         this.errorLbl = new JLabel();
