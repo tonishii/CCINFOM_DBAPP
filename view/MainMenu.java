@@ -141,6 +141,9 @@ public class MainMenu extends JFrame {
         accountSelectPage.add(backBtn, gbc);
 
         JPanel loginPage = new JPanel(new GridBagLayout());
+        loginPage.setBorder(BorderFactory.createTitledBorder(BorderFactory.createLineBorder(Color.BLACK, 2),
+    "Account Login", TitledBorder.LEFT, TitledBorder.TOP, new Font("Montserrat", Font.PLAIN, 12)));
+
         textLbl = new JLabel("Enter ID: ");
 
         idLoginField = new JTextField();
