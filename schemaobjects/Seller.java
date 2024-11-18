@@ -204,12 +204,14 @@ public class Seller implements Account {
                                     String query = """
                                                SELECT COUNT(DISTINCT o.order_id) AS count, SUM(oc.subtotal) AS total
                                                FROM order_contents oc
-                                               	JOIN products p ON oc.product_id = p.product_id
-                                                   JOIN orders o ON o.order_id = oc.order_id
+                                               JOIN products p ON oc.product_id = p.product_id
+                                               JOIN orders o ON o.order_id = oc.order_id
+                                               LEFT JOIN `returns` r ON r.order_id = oc.order_id AND r.product_id = oc.product_id
                                                WHERE p.seller_id = ?
-                                                   AND YEAR(o.purchase_date) = ?
-                                               	AND MONTH(o.purchase_date) = ?
-                                               	AND o.order_status = 'DELIVERED'
+                                               AND YEAR(o.purchase_date) = ?
+                                               AND MONTH(o.purchase_date) = ?
+                                               AND o.order_status = 'DELIVERED'
+                                               AND (r.return_status IS NULL OR r.return_status != 'REFUNDED')
                                                GROUP BY o.order_id;
                                             """;
 
