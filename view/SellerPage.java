@@ -27,7 +27,7 @@ public class SellerPage extends JPanel implements AccountPage {
 
         JPanel signUpPage = new JPanel();
         this.setBorder(BorderFactory.createTitledBorder(BorderFactory.createLineBorder(Color.BLACK, 2),
-                "Seller sign-up", TitledBorder.LEFT, TitledBorder.TOP, new Font("Montserrat", Font.PLAIN, 12)));
+    "Seller sign-up", TitledBorder.LEFT, TitledBorder.TOP, new Font("Montserrat", Font.PLAIN, 12)));
 
         JLabel label = new JLabel("Enter seller name: ");
         sellerNameField = new JTextField();
@@ -67,7 +67,8 @@ public class SellerPage extends JPanel implements AccountPage {
     @Override
     public JPanel getMainPage() {
         JPanel sellerPage = new JPanel();
-
+        sellerPage.setBorder(BorderFactory.createTitledBorder(BorderFactory.createLineBorder(Color.BLACK, 2),
+    "Seller", TitledBorder.LEFT, TitledBorder.TOP, new Font("Montserrat", Font.PLAIN, 12)));
         return sellerPage;
     }
 
@@ -83,7 +84,8 @@ public class SellerPage extends JPanel implements AccountPage {
     }
 
     public void setErrorLbl(String text) { this.errorLbl.setText(text); }
-    public String getSellerName() { return sellerNameField.getText(); }
-    public String getSellerAddress() { return sellerAddressField.getText(); }
-    public String getSellerPhone() { return sellerPhoneField.getText(); }
+
+    public String getSellerName() { return sellerNameField.getText().trim(); }
+    public String getSellerAddress() { return sellerAddressField.getText().trim(); }
+    public String getSellerPhone() { return sellerPhoneField.getText().trim(); }
 }

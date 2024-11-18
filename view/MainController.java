@@ -86,6 +86,10 @@ public class MainController {
 
         }, submitLoginEvent -> {
             if (account.login(Integer.parseInt(selectAccountPage.getID()), conn)) {
+                (account instanceof User ? userPage :
+                 account instanceof Seller ? sellerPage :
+                 courierPage).nextPageName("main");
+
                 mainMenuPage.nextPageName(account.toString());
             } else {
                 selectAccountPage.setErrorLbl("Error: Account was not found");

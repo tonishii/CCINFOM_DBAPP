@@ -108,5 +108,6 @@ public class SelectAccount extends JPanel {
     }
 
     public void setErrorLbl(String text) { errorLbl.setText(text); }
-    public String getID() { return idLoginField.getText(); }
+
+    public String getID() { return idLoginField.getText().trim(); }
 }

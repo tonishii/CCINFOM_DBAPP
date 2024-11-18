@@ -82,6 +82,8 @@ public class UserPage extends JPanel implements AccountPage {
     @Override
     public JPanel getMainPage() {
         JPanel userPage = new JPanel();
+        userPage.setBorder(BorderFactory.createTitledBorder(BorderFactory.createLineBorder(Color.BLACK, 2),
+    "User", TitledBorder.LEFT, TitledBorder.TOP, new Font("Montserrat", Font.PLAIN, 12)));
 
         return userPage;
     }
@@ -99,9 +101,10 @@ public class UserPage extends JPanel implements AccountPage {
     }
 
     public void setErrorLbl(String text) { this.errorLbl.setText(text); }
-    public String getUserName() { return userNameField.getText(); }
-    public String getUserFirstName() { return userNameField.getText(); }
-    public String getUserLastName() { return userNameField.getText(); }
-    public String getUserAddress() { return userNameField.getText(); }
-    public String getUserPhone() { return userPhoneField.getText(); }
+
+    public String getUserName() { return userNameField.getText().trim(); }
+    public String getUserFirstName() { return userNameField.getText().trim(); }
+    public String getUserLastName() { return userNameField.getText().trim(); }
+    public String getUserAddress() { return userNameField.getText().trim(); }
+    public String getUserPhone() { return userPhoneField.getText().trim(); }
 }

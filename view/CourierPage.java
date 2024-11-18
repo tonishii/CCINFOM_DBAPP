@@ -66,6 +66,8 @@ public class CourierPage extends JPanel implements AccountPage {
     @Override
     public JPanel getMainPage() {
         JPanel courierPage = new JPanel();
+        courierPage.setBorder(BorderFactory.createTitledBorder(BorderFactory.createLineBorder(Color.BLACK, 2),
+    "Courier", TitledBorder.LEFT, TitledBorder.TOP, new Font("Montserrat", Font.PLAIN, 12)));
 
         return courierPage;
     }
@@ -82,7 +84,8 @@ public class CourierPage extends JPanel implements AccountPage {
     }
 
     public void setErrorLbl(String text) { this.errorLbl.setText(text); }
-    public String getCourierName() { return courierNameField.getText(); }
-    public String getCourierEmail() { return courierEmailField.getText(); }
-    public String getCourierAddress() { return courierAddressField.getText(); }
+
+    public String getCourierName() { return courierNameField.getText().trim(); }
+    public String getCourierEmail() { return courierEmailField.getText().trim(); }
+    public String getCourierAddress() { return courierAddressField.getText().trim(); }
 }

@@ -10,20 +10,12 @@ public class MainFrame extends JFrame {
     public MainFrame() {
         this.setTitle("E-Commerce Database Application");
         this.setSize(800,700);
-        this.setLayout(new BorderLayout(10,10));
-        this.setResizable(false);
-
-        JPanel topBanner = new JPanel();
-        topBanner.setBackground(Color.PINK);
-        topBanner.setPreferredSize(new Dimension(800, 60));
-        this.add(topBanner, BorderLayout.NORTH);
 
         centerCardLayout = new CardLayout(50, 40);
-        centerPanel = new JPanel();
-        centerPanel.setLayout(centerCardLayout);
-        centerPanel.setBorder(BorderFactory.createRaisedBevelBorder());
+        centerPanel = new JPanel(centerCardLayout);
         this.add(centerPanel);
 
+        this.setResizable(false);
         this.setLocationRelativeTo(null);
         this.setVisible(true);
     }

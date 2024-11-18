@@ -74,10 +74,7 @@ public class SQLConnect extends JPanel {
     }
 
     public void setErrorLbl(String text) { errorLbl.setText(text); }
-    public String getUsername() {
-        return usernameField.getText();
-    }
-    public String getPassword() {
-        return passwordField.getText();
-    }
+
+    public String getUsername() { return usernameField.getText().trim(); }
+    public String getPassword() { return passwordField.getText().trim(); }
 }
