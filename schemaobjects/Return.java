@@ -28,7 +28,6 @@ public class Return {
     }
     
     public static void requestReturn(Scanner scn, Connection conn, int product_id, int order_id) {
-        // unfinished
         if (Courier.assignCourier(conn) == -1) {
             System.out.println("No available couriers for return requests.");
             return;
@@ -73,6 +72,44 @@ public class Return {
             } catch (Exception e) {
                 System.out.println("Error in requesting return: " + e);
             }
+    }
+    
+    public void approveReturn(Connection conn, int product_id, int order_id) {
+        try {
+            String query = 
+                    """
+                    UPDATE `returns`
+                    SET return_status = 'REFUNDED'
+                    WHERE product_id = ?
+                    AND order_id = ?
+                    """;
+            PreparedStatement ps = conn.prepareStatement(query);
+            ps.setInt(1, product_id);
+            ps.setInt(2, order_id);
+            
+            ps.executeUpdate();
+        } catch (Exception e) {
+            System.out.println("Error: " + e);
+        }
+    }
+    
+    public void rejectReturn(Connection conn, int product_id, int order_id) {
+        try {
+            String query = 
+                    """
+                    UPDATE `returns`
+                    SET return_status = 'REJECTED'
+                    WHERE product_id = ?
+                    AND order_id = ?
+                    """;
+            PreparedStatement ps = conn.prepareStatement(query);
+            ps.setInt(1, product_id);
+            ps.setInt(2, order_id);
+            
+            ps.executeUpdate();
+        } catch (Exception e) {
+            System.out.println("Error: " + e);
+        }
     }
     
     public int getOrderID() {
