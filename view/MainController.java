@@ -106,6 +106,7 @@ public class MainController {
             courierPage).nextPageName(AccountPage.SIGNUPPAGE);
 
         }, submitLoginEvent -> {
+
             try {
                 account.login(Integer.parseInt(selectAccountPage.getID()), conn);
                 (account instanceof User ? userPage :
