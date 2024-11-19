@@ -1,6 +1,8 @@
 package model;
 
 import enums.OrderStatus;
+import enums.ReturnReason;
+import enums.ReturnStatus;
 
 import javax.swing.*;
 import java.util.ArrayList;
@@ -211,6 +213,37 @@ public class Courier implements Account {
             JOptionPane.showMessageDialog(null, "Error.");
         }
         return orderList;
+    }
+
+    public ArrayList<Return> showOngoingReturns(Connection conn) {
+        ArrayList<Return> returns = new ArrayList<>();
+        try {
+            String returnQuery =
+                    """
+                    SELECT r.order_id, r.product_id, r.return_reason, r.return_description, r.return_date, r.return_status
+                    FROM returns r
+                    WHERE r.courier_id = ?;
+                    """;
+
+            PreparedStatement returnsStmt = conn.prepareStatement(returnQuery);
+            returnsStmt.setInt(1, this.courier_id);
+            ResultSet returnsResultSet = returnsStmt.executeQuery();
+
+            while (returnsResultSet.next()) {
+                returns.add(new Return(
+                    returnsResultSet.getInt("order_id"),
+                    returnsResultSet.getInt("product_id"),
+                    returnsResultSet.getInt("courier_id"),
+                    ReturnReason.valueOf(returnsResultSet.getString("return_reason")),
+                    returnsResultSet.getString("return_description"),
+                    returnsResultSet.getDate("return_date"),
+                    ReturnStatus.valueOf(returnsResultSet.getString("return_status"))
+                ));
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+        return returns;
     }
 
     public void showOngoingOrders(Connection conn) {

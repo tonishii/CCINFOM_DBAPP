@@ -26,6 +26,16 @@ public class Return {
         this.return_status = ReturnStatus.PROCESSING;
         // sql to generate courier id
     }
+
+    public Return(int order_id, int product_id, int courier_id, ReturnReason return_reason, String return_description, java.sql.Date return_date, ReturnStatus return_status) {
+        this.order_id = order_id;
+        this.product_id = product_id;
+        this.courier_id = courier_id;
+        this.return_reason = return_reason;
+        this.return_description = return_description;
+        this.return_date = return_date;
+        this.return_status = return_status;
+    }
     
     public static void requestReturn(Scanner scn, Connection conn, int product_id, int order_id) {
         if (Courier.assignCourier(conn) == -1) {
