@@ -226,10 +226,12 @@ public class SellerPage extends JPanel implements AccountPage {
         sellerBackBtn.addActionListener(backLtr);
     }
 
-    public void initMainListeners(ActionListener genLtr, ActionListener editAccLtr, ActionListener logoutLtr){
+    public void initMainListeners(ActionListener genLtr, ActionListener editAccLtr, ActionListener logoutLtr,
+                                  ActionListener selCRLtr){
         genBtn.addActionListener(genLtr);
         editAccBtn.addActionListener(editAccLtr);
         logoutBtn.addActionListener(logoutLtr);
+        sellerCRBox.addActionListener(selCRLtr);
 
     }
 
@@ -243,6 +245,22 @@ public class SellerPage extends JPanel implements AccountPage {
         this.mainCardLayout.show(bottomPanel, name);
     }
 
+    public void setInvisibleBtns(int n){
+        if (n==1) {
+            approveBtn.setVisible(true);
+            rejectBtn.setVisible(true);
+            addBtn.setVisible(false);
+            removeBtn.setVisible(false);
+            editBtn.setVisible(false);
+        }else{
+            addBtn.setVisible(true);
+            removeBtn.setVisible(true);
+            editBtn.setVisible(true);
+            approveBtn.setVisible(false);
+            rejectBtn.setVisible(false);
+        }
+    }
+    public int getSellerCRBox(){ return this.sellerCRBox.getSelectedIndex(); }
     public String getSellerName() { return sellerNameField.getText().trim(); }
     public String getSellerAddress() { return sellerAddressField.getText().trim(); }
     public String getSellerPhone() { return sellerPhoneField.getText().trim(); }

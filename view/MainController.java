@@ -443,6 +443,8 @@ public class MainController {
             mainMenuPage.nextPageName(MainFrame.SELECTACCPAGE);
             selectAccountPage.nextPageName(SelectAccount.SELECTACCPAGE);
             sellerPage.nextPageName(SellerPage.SIGNUP);
+        }, listChangeEvent -> {
+            sellerPage.setInvisibleBtns(sellerPage.getSellerCRBox());
         });
     }
 
