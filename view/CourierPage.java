@@ -1,12 +1,23 @@
 package view;
 
+import model.Order;
+import model.OrderContent;
+
 import javax.swing.*;
 import javax.swing.border.TitledBorder;
 import java.awt.*;
 import java.awt.event.ActionListener;
+import java.util.ArrayList;
+import java.util.Set;
 
 public class CourierPage extends JPanel implements AccountPage {
     private CardLayout courierCardLayout;
+
+    // Constants used for switching between the different options
+    public static final String ONGOINGORDERSPAGE = "ongoing";
+    public static final String ACTIVITYPAGE = "activity";
+    public static final String EDITPAGE = "edit";
+
     private JTextField courierNameField,
                        courierEmailField,
                        courierAddressField;
@@ -17,8 +28,15 @@ public class CourierPage extends JPanel implements AccountPage {
     private JPanel     topPanel,
                        bottomPanel;
 
-    private JButton    profileBtn,
-                       logOutBtn;
+    private JButton     ongoingOrderBtn,
+                        activityBtn,
+                        editBtn,
+                        logOutBtn;
+
+    private JTable      ongoingTable,
+                        returnsTable;
+
+    private JScrollPane ongoingPane;
 
     private CardLayout mainCardLayout;
 
@@ -82,13 +100,21 @@ public class CourierPage extends JPanel implements AccountPage {
         topPanel.setBackground(Color.PINK);
         topPanel.setPreferredSize(new Dimension(800, 60));
 
-        profileBtn = new JButton("Profile");
-        profileBtn.setFocusable(false);
+        ongoingOrderBtn = new JButton("Ongoing Orders");
+        ongoingOrderBtn.setFocusable(false);
+
+        activityBtn = new JButton("Activity Report");
+        activityBtn.setFocusable(false);
+
+        editBtn = new JButton("Edit Account");
+        editBtn.setFocusable(false);
 
         logOutBtn = new JButton("Log out");
         logOutBtn.setFocusable(false);
 
-        topPanel.add(profileBtn);
+        topPanel.add(ongoingOrderBtn);
+        topPanel.add(activityBtn);
+        topPanel.add(editBtn);
         topPanel.add(logOutBtn);
 
         mainCardLayout = new CardLayout();
@@ -98,10 +124,33 @@ public class CourierPage extends JPanel implements AccountPage {
         bottomPanel.setBorder(BorderFactory.createTitledBorder(BorderFactory.createLineBorder(Color.BLACK, 2),
                 "Courier", TitledBorder.LEFT, TitledBorder.TOP, new Font("Montserrat", Font.PLAIN, 12)));
 
+        bottomPanel.add(getOngoingOrdersPage(), ONGOINGORDERSPAGE);
+
         courierPage.add(topPanel);
         courierPage.add(bottomPanel);
 
         return courierPage;
+    }
+
+    public JPanel getOngoingOrdersPage() {
+        JPanel oOPage = new JPanel(new GridBagLayout());
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.insets = new Insets(5, 5, 5, 5);
+
+        JLabel ongoingLabel = new JLabel("Ongoing Orders:");
+
+        OrderClassTableModel oCTM = new OrderClassTableModel(new ArrayList<>());
+        ongoingTable = new JTable(oCTM);
+        ongoingTable.setDefaultEditor(Object.class, null);
+
+        this.ongoingPane = new JScrollPane(ongoingTable, JScrollPane.VERTICAL_SCROLLBAR_ALWAYS, JScrollPane.HORIZONTAL_SCROLLBAR_ALWAYS);
+        ongoingPane.setPreferredSize(new Dimension(550, 400));
+
+        oOPage.add(ongoingLabel, gbc);
+        gbc.gridy = 1;
+        oOPage.add(ongoingPane, gbc);
+
+        return oOPage;
     }
 
     @Override
@@ -110,8 +159,10 @@ public class CourierPage extends JPanel implements AccountPage {
         courierBackBtn.addActionListener(backLtr);
     }
 
-    public void initMainListeners(ActionListener profLtr, ActionListener logOutLtr) {
-        profileBtn.addActionListener(profLtr);
+    public void initMainListeners(ActionListener orderLtr, ActionListener profLtr, ActionListener logOutLtr) {
+        ongoingOrderBtn.addActionListener(orderLtr);
+        activityBtn.addActionListener(profLtr);
+        editBtn.addActionListener(profLtr);
         logOutBtn.addActionListener(logOutLtr);
     }
 
@@ -123,6 +174,18 @@ public class CourierPage extends JPanel implements AccountPage {
     @Override
     public void nextMainPageName(String name) {
         this.mainCardLayout.show(bottomPanel, name);
+    }
+
+    public void clearTextFields() {
+        courierNameField.setText("");
+        courierEmailField.setText("");
+        courierAddressField.setText("");
+    }
+
+    public void updateOOTable(ArrayList<Order> orders) {
+        OrderClassTableModel mdl = new OrderClassTableModel(orders);
+        ongoingTable.setModel(mdl);
+        ongoingPane.setViewportView(ongoingTable);
     }
 
     public String getCourierName() { return courierNameField.getText().trim(); }

@@ -117,7 +117,16 @@ public class MainController {
             }
 
         }, backLoginEvent -> selectAccountPage.nextPageName(SelectAccount.SELECTACCPAGE)
-        , backEvent -> mainMenuPage.nextPageName(MainFrame.CONNECTPAGE));
+        , backEvent -> {
+            try {
+                connectPage.clearTextFields();
+                conn.close();
+            }
+            catch (Exception e) {
+                JOptionPane.showMessageDialog(null, "Error:");
+            }
+            mainMenuPage.nextPageName(MainFrame.CONNECTPAGE);
+                });
     }
 
     private void initUserListeners() {
@@ -516,14 +525,18 @@ public class MainController {
                 }
             }
         }, backSignUpEvent -> {
+            courierPage.clearTextFields();
             mainMenuPage.nextPageName(MainFrame.SELECTACCPAGE);
             selectAccountPage.nextPageName(SelectAccount.SELECTACCPAGE);
             courierPage.nextPageName(AccountPage.SIGNUPPAGE);
         });
 
-        courierPage.initMainListeners(profileEvent -> {
+        courierPage.initMainListeners(orderLtr -> {
+            courierPage.updateOOTable(((Courier)account).ShowOngoingOrders(conn));
+            courierPage.nextPageName(CourierPage.ONGOINGORDERSPAGE);
+            }, profileEvent -> {
 
-        }, logOutEvent -> {
+            }, logOutEvent -> {
             mainMenuPage.nextPageName(MainFrame.SELECTACCPAGE);
             selectAccountPage.nextPageName(SelectAccount.SELECTACCPAGE);
         });

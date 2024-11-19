@@ -1,5 +1,9 @@
 package model;
 
+import enums.OrderStatus;
+
+import javax.swing.*;
+import java.util.ArrayList;
 import java.util.Scanner;
 import java.sql.*;
 import java.util.regex.Matcher;
@@ -180,6 +184,33 @@ public class Courier implements Account {
         catch (Exception e) {
             System.err.println("Error: " + e.getMessage());
         }
+    }
+
+    public ArrayList<Order> ShowOngoingOrders(Connection conn) {
+        ArrayList<Order> orderList = new ArrayList<>();
+        try {
+            String orderQuery = """
+                            SELECT *
+                            FROM orders
+                            WHERE courier_id = ? AND order_status NOT IN ('Completed', 'Delivered');
+                    """;
+            PreparedStatement ordersStmt = conn.prepareStatement(orderQuery);
+            ordersStmt.setInt(1, this.courier_id);
+            ResultSet rs = ordersStmt.executeQuery();
+
+            while (rs.next()) {
+                orderList.add(new Order(rs.getInt("order_id"),
+                        this.courier_id,
+                        rs.getInt("courier_id"),
+                        rs.getDate("purchase_date"),
+                        rs.getFloat("total_price"),
+                        OrderStatus.valueOf(rs.getString("order_status")),
+                        rs.getDate("receive_date")));
+            }
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(null, "Error.");
+        }
+        return orderList;
     }
 
     public void showOngoingOrders(Connection conn) {

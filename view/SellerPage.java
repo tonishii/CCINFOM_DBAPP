@@ -1,6 +1,5 @@
 package view;
 
-import javax.smartcardio.Card;
 import javax.swing.*;
 import javax.swing.border.Border;
 import javax.swing.border.LineBorder;

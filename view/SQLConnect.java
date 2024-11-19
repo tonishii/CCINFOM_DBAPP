@@ -83,6 +83,11 @@ public class SQLConnect extends JPanel {
         this.exitBtn.addActionListener(exitLtr);
     }
 
+    public void clearTextFields()
+    {
+        usernameField.setText("");
+        passwordField.setText("");
+    }
     public String getUsername() { return usernameField.getText().trim(); }
     public String getPassword() { return passwordField.getText().trim(); }
 }
