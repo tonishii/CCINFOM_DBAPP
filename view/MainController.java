@@ -431,6 +431,19 @@ public class MainController {
 
             sellerPage.nextPageName(AccountPage.SIGNUPPAGE);
         });
+        sellerPage.initMainListeners(generateEvent -> {
+            mainMenuPage.nextPageName(MainFrame.SELECTACCPAGE);
+            selectAccountPage.nextPageName(SelectAccount.SELECTACCPAGE);
+            sellerPage.nextPageName(SellerPage.SIGNUP);
+        }, editAccountEvent -> {
+            mainMenuPage.nextPageName(MainFrame.SELECTACCPAGE);
+            selectAccountPage.nextPageName(SelectAccount.SELECTACCPAGE);
+            sellerPage.nextPageName(SellerPage.SIGNUP);
+        }, logoutEvent -> {
+            mainMenuPage.nextPageName(MainFrame.SELECTACCPAGE);
+            selectAccountPage.nextPageName(SelectAccount.SELECTACCPAGE);
+            sellerPage.nextPageName(SellerPage.SIGNUP);
+        });
     }
 
     private void initCourierListeners() {
