@@ -219,6 +219,7 @@ public class MainController {
         }, logOutEvent -> {
             mainMenuPage.nextPageName(MainFrame.SELECTACCPAGE);
             selectAccountPage.nextPageName(SelectAccount.SELECTACCPAGE);
+            userPage.nextPageName(UserPage.SHOPPAGE);
 
         }, addToCartEvent -> {
             Product selectedProduct = userPage.getSelectedProduct();
@@ -460,6 +461,13 @@ public class MainController {
             mainMenuPage.nextPageName(MainFrame.SELECTACCPAGE);
             selectAccountPage.nextPageName(SelectAccount.SELECTACCPAGE);
             courierPage.nextPageName(AccountPage.SIGNUPPAGE);
+        });
+
+        courierPage.initMainListeners(profileEvent -> {
+
+        }, logOutEvent -> {
+            mainMenuPage.nextPageName(MainFrame.SELECTACCPAGE);
+            selectAccountPage.nextPageName(SelectAccount.SELECTACCPAGE);
         });
     }
 }

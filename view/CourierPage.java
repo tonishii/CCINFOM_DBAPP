@@ -18,6 +18,9 @@ public class CourierPage extends JPanel implements AccountPage {
     private JPanel     topPanel,
                        bottomPanel;
 
+    private JButton    profileBtn,
+                       logOutBtn;
+
     private CardLayout mainCardLayout;
 
     public CourierPage() {
@@ -32,7 +35,7 @@ public class CourierPage extends JPanel implements AccountPage {
     public JPanel getSignUpPage() {
         JPanel signUpPage = new JPanel(new GridBagLayout());
         signUpPage.setBorder(BorderFactory.createTitledBorder(BorderFactory.createLineBorder(Color.BLACK, 2),
-                "Courier sign-up", TitledBorder.LEFT, TitledBorder.TOP, new Font("Montserrat", Font.PLAIN, 12)));
+    "Courier sign-up", TitledBorder.LEFT, TitledBorder.TOP, new Font("Montserrat", Font.PLAIN, 12)));
 
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.insets = new Insets(5, 5, 5, 5);
@@ -79,8 +82,29 @@ public class CourierPage extends JPanel implements AccountPage {
     @Override
     public JPanel getMainPage() {
         JPanel courierPage = new JPanel();
-        courierPage.setBorder(BorderFactory.createTitledBorder(BorderFactory.createLineBorder(Color.BLACK, 2),
-    "Courier", TitledBorder.LEFT, TitledBorder.TOP, new Font("Montserrat", Font.PLAIN, 12)));
+
+        topPanel = new JPanel();
+        topPanel.setBackground(Color.PINK);
+        topPanel.setPreferredSize(new Dimension(800, 60));
+
+        profileBtn = new JButton("Profile");
+        profileBtn.setFocusable(false);
+
+        logOutBtn = new JButton("Log out");
+        logOutBtn.setFocusable(false);
+
+        topPanel.add(profileBtn);
+        topPanel.add(logOutBtn);
+
+        mainCardLayout = new CardLayout();
+
+        bottomPanel = new JPanel(mainCardLayout);
+        bottomPanel.setPreferredSize(new Dimension(800, 640));
+        bottomPanel.setBorder(BorderFactory.createTitledBorder(BorderFactory.createLineBorder(Color.BLACK, 2),
+                "Courier", TitledBorder.LEFT, TitledBorder.TOP, new Font("Montserrat", Font.PLAIN, 12)));
+
+        courierPage.add(topPanel);
+        courierPage.add(bottomPanel);
 
         return courierPage;
     }
@@ -89,6 +113,11 @@ public class CourierPage extends JPanel implements AccountPage {
     public void initSignUpListeners(ActionListener signUpLtr, ActionListener backLtr) {
         submitSignUpBtn.addActionListener(signUpLtr);
         courierBackBtn.addActionListener(backLtr);
+    }
+
+    public void initMainListeners(ActionListener profLtr, ActionListener logOutLtr) {
+        profileBtn.addActionListener(profLtr);
+        logOutBtn.addActionListener(logOutLtr);
     }
 
     @Override
