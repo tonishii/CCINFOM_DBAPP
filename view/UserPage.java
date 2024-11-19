@@ -79,6 +79,8 @@ public class UserPage extends JPanel implements AccountPage {
 
     private JButton           saveChangesBtn;
 
+    private JScrollPane productListPane;
+
     public UserPage() {
         this.userCardLayout = new CardLayout();
         this.setLayout(userCardLayout);
@@ -221,7 +223,7 @@ public class UserPage extends JPanel implements AccountPage {
         productList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         productList.setFocusable(false);
 
-        JScrollPane productListPane = new JScrollPane(productList);
+        this.productListPane = new JScrollPane(productList);
         productListPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
         productListPane.setPreferredSize(new Dimension(300, 200));
 
@@ -457,7 +459,8 @@ public class UserPage extends JPanel implements AccountPage {
         for (Product product : products) {
             mdl.addElement(product);
         }
-        productList.setModel(mdl);
+        this.productList.setModel(mdl);
+        this.productListPane.setViewportView(productList);
     }
 
     public String getSelectedOption() {

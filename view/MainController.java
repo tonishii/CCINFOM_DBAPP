@@ -305,7 +305,7 @@ public class MainController {
                 if (userPage.getBrowseByOption().equals("By shop")) {
                     String query =
                     """
-                    SELECT product_id, seller_id, product_name, product_price, product_type, average_rating, quantity_stocked, listed_status, description
+                    SELECT *
                     FROM products
                     WHERE seller_id = ?;
                     """;
@@ -317,7 +317,7 @@ public class MainController {
                 } else if (userPage.getBrowseByOption().equals("By product type")) {
                     String query =
                     """
-                    SELECT product_id, seller_id, product_name, product_price, product_type, average_rating, quantity_stocked, listed_status, description
+                    SELECT *
                     FROM products
                     WHERE product_type = ?;
                     """;

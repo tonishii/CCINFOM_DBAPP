@@ -226,21 +226,21 @@ public class User implements Account {
         ArrayList<Product> productList = new ArrayList<>();
         ResultSet resultSet = pstmt.executeQuery();
 
-        while (resultSet.next()) {
-
-            productList.add(new Product(
-            resultSet.getInt("product_id"),
-            resultSet.getInt("seller_id"),
-            resultSet.getString("product_name"),
-            resultSet.getFloat("product_price"),
-            resultSet.getString("product_type"),
-            resultSet.getFloat("average_rating"),
-            resultSet.getInt("quantity_stocked"),
-            resultSet.getBoolean("listed_status"),
-            resultSet.getString("description")
-            ));
+        if(resultSet.next()) {
+            do {
+                productList.add(new Product(
+                        resultSet.getInt("product_id"),
+                        resultSet.getInt("seller_id"),
+                        resultSet.getString("product_name"),
+                        resultSet.getFloat("product_price"),
+                        resultSet.getString("product_type"),
+                        resultSet.getFloat("average_rating"),
+                        resultSet.getInt("quantity_stocked"),
+                        resultSet.getBoolean("listed_status"),
+                        resultSet.getString("description")
+                ));
+            } while (resultSet.next());
         }
-
         return productList;
     }
 
