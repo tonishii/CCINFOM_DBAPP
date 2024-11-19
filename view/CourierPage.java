@@ -30,41 +30,48 @@ public class CourierPage extends JPanel implements AccountPage {
 
     @Override
     public JPanel getSignUpPage() {
-        JPanel signUpPage = new JPanel();
+        JPanel signUpPage = new JPanel(new GridBagLayout());
         signUpPage.setBorder(BorderFactory.createTitledBorder(BorderFactory.createLineBorder(Color.BLACK, 2),
                 "Courier sign-up", TitledBorder.LEFT, TitledBorder.TOP, new Font("Montserrat", Font.PLAIN, 12)));
 
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.insets = new Insets(5, 5, 5, 5);
         JLabel label = new JLabel("Enter courier name: ");
         courierNameField = new JTextField();
         courierNameField.setPreferredSize(new Dimension(200, 20));
 
-        signUpPage.add(label);
-        signUpPage.add(courierNameField);
+        gbc.gridy = 0;
+        signUpPage.add(label, gbc);
+        signUpPage.add(courierNameField, gbc);
 
         label = new JLabel("Enter email address: ");
         courierEmailField = new JTextField();
         courierEmailField.setPreferredSize(new Dimension(200, 20));
 
-        signUpPage.add(label);
-        signUpPage.add(courierEmailField);
+        gbc.gridy = 1;
+        signUpPage.add(label, gbc);
+        signUpPage.add(courierEmailField, gbc);
 
         label = new JLabel("Enter courier address: ");
         courierAddressField = new JTextField();
         courierAddressField.setPreferredSize(new Dimension(200, 20));
 
-        signUpPage.add(label);
-        signUpPage.add(courierAddressField);
+        gbc.gridy = 2;
+        signUpPage.add(label,gbc);
+        signUpPage.add(courierAddressField,gbc);
 
+        gbc.gridy = 3;
         submitSignUpBtn = new JButton("Submit");
         submitSignUpBtn.setFocusable(false);
-        signUpPage.add(submitSignUpBtn);
+        signUpPage.add(submitSignUpBtn,gbc);
 
         courierBackBtn = new JButton("Back");
         courierBackBtn.setFocusable(false);
-        signUpPage.add(courierBackBtn);
+        signUpPage.add(courierBackBtn,gbc);
 
+        gbc.gridy = 4;
         errorLbl = new JLabel();
-        signUpPage.add(errorLbl);
+        signUpPage.add(errorLbl,gbc);
 
         return signUpPage;
     }
