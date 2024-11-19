@@ -16,21 +16,10 @@ public class Return {
     private Date          return_date;
     private ReturnStatus  return_status;
     
-    public Return(int order_id, int product_id, ReturnReason return_reason, String return_description) {
+    public Return(int order_id, int product_id, int courier_id, ReturnReason return_reason, String return_description, Date return_date, ReturnStatus return_status) {
         this.order_id = order_id;
-        this.product_id = product_id;
-        this.return_reason = return_reason;
-        this.return_description = return_description;
-        long ms = System.currentTimeMillis();
-        this.return_date = new Date(ms);
-        this.return_status = ReturnStatus.PROCESSING;
-        // sql to generate courier id
-    }
-
-    public Return(int order_id, int product_id, int courier_id, ReturnReason return_reason, String return_description, java.sql.Date return_date, ReturnStatus return_status) {
-        this.order_id = order_id;
-        this.product_id = product_id;
         this.courier_id = courier_id;
+        this.product_id = product_id;
         this.return_reason = return_reason;
         this.return_description = return_description;
         this.return_date = return_date;

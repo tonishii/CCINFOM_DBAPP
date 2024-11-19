@@ -1,5 +1,7 @@
 package model;
 import enums.OrderStatus;
+import enums.ReturnReason;
+import enums.ReturnStatus;
 
 import java.sql.Date;
 import java.time.Instant;
@@ -454,4 +456,50 @@ public class User implements Account {
     public String getPhoneNumber() { return this.user_phone_number; }
     public Date getCreationDate() { return this.user_creation_date; }
     public boolean getStatus() { return this.user_verified_status; }
+    
+    
+        public ArrayList<Order> getOrdersView(Connection conn, int user_id) throws SQLException {
+        ArrayList<Order> orders = new ArrayList<>();
+
+        String query =
+                """
+                SELECT order_id, courier_id, purchase_date, total_price, order_status, receive_date
+                FROM orders
+                WHERE user_id = ?
+                """;
+
+        PreparedStatement ps = conn.prepareStatement(query);
+        ps.setInt(1, user_id);
+        ResultSet rs = ps.executeQuery();
+
+        while (rs.next()) {
+            orders.add(new Order(rs.getInt("order_id"), user_id, rs.getInt("courier_id"), rs.getDate("purchase_date"), 
+                        rs.getFloat("total_price"), OrderStatus.valueOf(rs.getString("order_status")), rs.getDate("receive_date")));
+        }
+
+        return orders;
+    }
+    
+    public ArrayList<Return> getReturnsView(Connection conn, int user_id) throws SQLException {
+        ArrayList<Return> returns = new ArrayList<>();
+
+        String query =
+                """
+                SELECT r.order_id, r.product_id, r.courier_id, r.return_reason, r.return_description, r.return_date, r.return_status
+                FROM `returns` r
+                JOIN orders o ON r.order_id = o.order_id
+                WHERE o.user_id = ?;
+                """;
+
+        PreparedStatement ps = conn.prepareStatement(query);
+        ps.setInt(1, user_id);
+        ResultSet rs = ps.executeQuery();
+
+        while (rs.next()) {
+            returns.add(new Return(rs.getInt("r.order_id"), rs.getInt("r.product_id"), rs.getInt("r.courier_id"), ReturnReason.convertVal(rs.getString("r.return_reason")),
+                        rs.getString("r.return_description"), rs.getDate("r.return_date"), ReturnStatus.valueOf(rs.getString("r.return_status"))));
+        }
+
+        return returns;
+    }
 }

@@ -15,6 +15,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ItemListener;
 import java.util.*;
+import model.Return;
 
 public class UserPage extends JPanel implements AccountPage {
     private CardLayout userCardLayout;
@@ -65,7 +66,7 @@ public class UserPage extends JPanel implements AccountPage {
     // Orders option
 
     private JComboBox<String> ordersBox;
-    private JList<Order>     ordersList;
+    private JList<String>     ordersList;
 
     private JLabel            orderInfoLbl;
     private JButton           returnBtn,
@@ -284,7 +285,7 @@ public class UserPage extends JPanel implements AccountPage {
         ordersList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         ordersList.setFocusable(false);
 
-        JScrollPane ordersListPane = new JScrollPane(productList);
+        JScrollPane ordersListPane = new JScrollPane(ordersList);
         ordersListPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
         ordersListPane.setPreferredSize(new Dimension(400, 300));
 
@@ -418,7 +419,7 @@ public class UserPage extends JPanel implements AccountPage {
 
     }
 
-    public void initMainListeners(ActionListener shopLtr, ActionListener cartLtr, ActionListener ordersLtr, ActionListener profLtr, ActionListener logOutLtr,
+    public void initMainListeners(ActionListener shopLtr, ActionListener cartLtr, ActionListener ordersLtr, ActionListener ordersBoxLtr, ActionListener profLtr, ActionListener logOutLtr,
                                   ActionListener addLtr, ItemListener browseByBoxLtr, ActionListener checkOutLtr, ActionListener removeLtr, ActionListener returnLtr, ActionListener rateLtr,
                                   ActionListener receiveLtr, ActionListener saveChangesLtr, ListSelectionListener browseByListLtr, ListSelectionListener productSelectLtr, ListSelectionListener orderSelectLtr) {
         shopBtn.addActionListener(shopLtr);
@@ -429,6 +430,9 @@ public class UserPage extends JPanel implements AccountPage {
 
         addToCartBtn.addActionListener(addLtr);
         browseByBox.addItemListener(browseByBoxLtr);
+        
+        ordersBox.addActionListener(ordersBoxLtr);
+
 
         checkOutBtn.addActionListener(checkOutLtr);
         removeBtn.addActionListener(removeLtr);
@@ -442,6 +446,39 @@ public class UserPage extends JPanel implements AccountPage {
         browseByList.getSelectionModel().addListSelectionListener(browseByListLtr);
         productList.getSelectionModel().addListSelectionListener(productSelectLtr);
         ordersList.getSelectionModel().addListSelectionListener(orderSelectLtr);
+    }
+    
+    public String getOrdersViewOption() { return (String) ordersBox.getSelectedItem(); }
+    
+    public void updateOrdersList(ArrayList<Order> orders) {
+        DefaultListModel<String> mdl = new DefaultListModel<>();
+        this.options = new LinkedHashMap<>();
+        
+        for (Order order : orders) {
+            String display = "Order No. " + Integer.toString(order.getOrderID());
+            this.options.put(display, Integer.toString(order.getOrderID()));
+            mdl.addElement(display);
+        }
+        
+        ordersList.setModel(mdl);
+    }
+    
+    public void updateReturnsList(ArrayList<Return> returns) {
+        DefaultListModel<String> mdl = new DefaultListModel<>();
+        this.options = new LinkedHashMap<>();
+        
+        for (Return r : returns) {
+            String display = "Order No. " + Integer.toString(r.getOrderID());
+            String value = Integer.toString(r.getOrderID()) + " " + Integer.toString(r.getProductID()); // value.split(" ") to get order id and product ig
+            this.options.put(display, value);
+            mdl.addElement(display);
+        }
+        
+        ordersList.setModel(mdl);
+    }
+    
+    public String getSelectedOrder() {
+        return ordersList.getSelectedValue();
     }
 
     @Override
