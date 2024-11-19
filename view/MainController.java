@@ -104,17 +104,16 @@ public class MainController {
         }, submitLoginEvent -> {
 
             try {
-                if (account.login(Integer.parseInt(selectAccountPage.getID()), conn)) {
-                    (account instanceof User ? userPage :
-                    account instanceof Seller ? sellerPage :
-                    courierPage).nextPageName(AccountPage.MAINPAGE);
+                account.login(Integer.parseInt(selectAccountPage.getID()), conn);
+                (account instanceof User ? userPage :
+                account instanceof Seller ? sellerPage :
+                courierPage).nextPageName(AccountPage.MAINPAGE);
 
-                    mainMenuPage.nextPageName(account.toString());
-                } else {
-                    JOptionPane.showMessageDialog(null, "Error: Account was not found.");
-                }
+                mainMenuPage.nextPageName(account.toString());
             } catch (NumberFormatException e) {
                 JOptionPane.showMessageDialog(null, "Error: Enter valid ID.");
+            } catch (SQLException e) {
+                JOptionPane.showMessageDialog(null, "Error: " + e.getMessage());
             }
 
         }, backLoginEvent -> selectAccountPage.nextPageName(SelectAccount.SELECTACCPAGE)
