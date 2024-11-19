@@ -519,7 +519,9 @@ public class User implements Account {
             pstmt.setString(3, this.user_address);
             pstmt.setString(4, this.user_firstname);
             pstmt.setString(5, this.user_lastname);
-            pstmt.setInt(6, this.user_id);
+            pstmt.setInt(7, this.user_id);
+            updateStatus();
+            pstmt.setBoolean(6, this.user_verified_status);
             pstmt.executeUpdate();
         } catch (Exception e){
             System.out.println("Error updating name: " + e);
@@ -527,8 +529,8 @@ public class User implements Account {
     }
 
     public void updateStatus() {
-        // checking fields
-        this.user_verified_status = true;
+        if (this.user_phone_number != null && this.user_address != null)
+            this.user_verified_status = true;
     }
 
     public String toString() {
