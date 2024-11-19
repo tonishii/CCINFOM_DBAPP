@@ -112,6 +112,8 @@ public class MainController {
                 mainMenuPage.nextPageName(account.toString());
             } catch (NumberFormatException e) {
                 JOptionPane.showMessageDialog(null, "Error: Enter valid ID.");
+            } catch (SQLException e) {
+                JOptionPane.showMessageDialog(null, "Error: " + e.getMessage());
             }
 
         }, backLoginEvent -> selectAccountPage.nextPageName(SelectAccount.SELECTACCPAGE)
