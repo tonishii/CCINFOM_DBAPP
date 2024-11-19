@@ -27,7 +27,7 @@ public class Seller implements Account {
     public Seller() {}
 
     @Override
-    public boolean login(int id, Connection conn){
+    public void login(int id, Connection conn) throws SQLException {
         String query =
         """
         SELECT seller_id, seller_name, seller_address, seller_verified_status, seller_phone_number, seller_creation_date
@@ -35,26 +35,18 @@ public class Seller implements Account {
         WHERE seller_id = ?
         """;
 
-        try {
-            PreparedStatement pstmt = conn.prepareStatement(query);
-            pstmt.setInt(1, id);
+        PreparedStatement pstmt = conn.prepareStatement(query);
+        pstmt.setInt(1, id);
 
-            ResultSet result = pstmt.executeQuery();
-            if (result.next()) {
-                this.seller_id = result.getInt("seller_id");
-                this.seller_name = result.getString("seller_name");
-                this.seller_address = result.getString("seller_address");
-                this.seller_verified_status = result.getBoolean("seller_verified_status");
-                this.seller_phone_number = result.getString("seller_phone_number");
-                this.seller_creation_date = result.getDate("seller_creation_date");
-
-                return true; // Login successful
-            }
-
-        } catch (Exception e) {
-            System.out.println("Error during login: " + e.getMessage());
+        ResultSet result = pstmt.executeQuery();
+        if (result.next()) {
+            this.seller_id = result.getInt("seller_id");
+            this.seller_name = result.getString("seller_name");
+            this.seller_address = result.getString("seller_address");
+            this.seller_verified_status = result.getBoolean("seller_verified_status");
+            this.seller_phone_number = result.getString("seller_phone_number");
+            this.seller_creation_date = result.getDate("seller_creation_date");
         }
-        return false;
     }
 
     @Override

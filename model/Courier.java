@@ -24,7 +24,7 @@ public class Courier implements Account {
     public Courier() {}
 
     @Override
-    public boolean login(int id, Connection conn) {
+    public void login(int id, Connection conn) throws SQLException {
         String query =
         """
         SELECT courier_id, courier_name, courier_email_address, courier_address, courier_verified_status
@@ -32,26 +32,17 @@ public class Courier implements Account {
         WHERE courier_id = ?
         """;
 
-        try {
-            PreparedStatement pstmt = conn.prepareStatement(query);
-            pstmt.setInt(1, id);
+        PreparedStatement pstmt = conn.prepareStatement(query);
+        pstmt.setInt(1, id);
 
-            ResultSet result = pstmt.executeQuery();
-            if (result.next()) {
-                this.courier_id = result.getInt("courier_id");
-                this.courier_name = result.getString("courier_name");
-                this.courier_email_address = result.getString("courier_email_address");
-                this.courier_address = result.getString("courier_address");
-                this.courier_verified_status = result.getBoolean("courier_verified_status");
-
-                return true; // Login successful
-            }
-
-        } catch (Exception e) {
-            System.out.println("Error during courier login: " + e.getMessage());
+        ResultSet result = pstmt.executeQuery();
+        if (result.next()) {
+            this.courier_id = result.getInt("courier_id");
+            this.courier_name = result.getString("courier_name");
+            this.courier_email_address = result.getString("courier_email_address");
+            this.courier_address = result.getString("courier_address");
+            this.courier_verified_status = result.getBoolean("courier_verified_status");
         }
-
-        return false; // Login failed
     }
 
     @Override
@@ -249,7 +240,7 @@ public class Courier implements Account {
     }
 
     public void updateStatus() {
-        if(this.courier_address != null && this.courier_email_address != null)
+        if (this.courier_address != null && this.courier_email_address != null)
             this.courier_verified_status = true;
     }
 
@@ -277,9 +268,11 @@ public class Courier implements Account {
 
             PreparedStatement ps = conn.prepareStatement(query);
             ResultSet rs = ps.executeQuery();
+
             if (rs != null && rs.next()) {
                 return rs.getInt("c.courier_id");
             }
+
         } catch (Exception e) {
             System.out.println("Error in assigning courier: " + e);
         }
@@ -288,15 +281,15 @@ public class Courier implements Account {
 
     @Override
     public void updateAccount(Connection conn) {
-        try{
+        try {
             String update =
-                    """
-                    UPDATE couriers
-                    SET courier_name = ?
-                        courier_email_address = ?
-                        courier_address = ?
-                    WHERE courier_id = ?;
-                    """;
+            """
+            UPDATE couriers
+            SET courier_name = ?
+                courier_email_address = ?
+                courier_address = ?
+            WHERE courier_id = ?;
+            """;
             PreparedStatement pstmt = conn.prepareStatement(update);
             pstmt.setString(1, this.courier_name);
             pstmt.setString(2, this.courier_email_address);

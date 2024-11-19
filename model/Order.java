@@ -4,6 +4,7 @@ import java.sql.*;
 
 import enums.OrderStatus;
 import java.util.ArrayList;
+import java.util.Set;
 
 public class Order {
     private int        order_id;
@@ -25,48 +26,60 @@ public class Order {
         this.receive_date = receive_date;
     }
     
-    public static void generateOrder(int user_id, Connection conn, ArrayList<OrderContent> cart, float total_price) {
-        try {
-            if (Courier.assignCourier(conn) != -1) {
-                int order_id = -1;
-                String query =
-                    """
-                    SELECT IFNULL(MAX(order_id), 0) + 1 AS id
-                    FROM orders
-                    """;
-                PreparedStatement ps = conn.prepareStatement(query);
-                ResultSet rs = ps.executeQuery();
+    public void sendToDB(Connection conn, Set<OrderContent> cart) throws SQLException {
+        String query =
+        """
+        INSERT INTO orders
+        VALUES(?, ?, ?, ?, ?, ?, ?)
+        """;
+        PreparedStatement ps = conn.prepareStatement(query);
 
-                if (rs.next()) {
-                    order_id = rs.getInt("id");
-                }
+        ps.setInt(1, this.order_id);
+        ps.setInt(2, this.user_id);
+        ps.setInt(3, this.courier_id);
+        ps.setDate(4, this.purchase_date);
+        ps.setFloat(5, this.total_price);
+        ps.setString(6, this.order_status.toString());
+        ps.setDate(7, this.receive_date);
 
-                query =
-                    """
-                    INSERT INTO orders
-                    VALUES(?, ?, ?, ?, ?, ?, ?)
-                    """;
-                ps = conn.prepareStatement(query);
-                ps.setInt(1, order_id);
-                ps.setInt(2, user_id);
-                ps.setInt(3, Courier.assignCourier(conn));
-                ps.setDate(4, new Date(System.currentTimeMillis()));
-                ps.setFloat(5, total_price);
-                ps.setString(6, OrderStatus.BEING_PREPARED.name());
-                ps.setDate(7, Date.valueOf("9999-12-31"));
+        ps.executeUpdate();
 
-                ps.executeUpdate();
+        query =
+        """
+        SELECT quantity_stocked
+        FROM products
+        WHERE product_id = ?
+        """;
 
-                for (OrderContent product : cart) {
-                    product.insertOrderContent(order_id, conn);
-                    Product.updateQuantity(conn, product.getProductID(), product.getQuantity());
-                }
+        String update =
+        """
+        UPDATE products
+        SET quantity_stocked = ?, listed_status = ?
+        WHERE product_id = ?
+        """;
+
+        for (OrderContent product : cart) {
+            product.sendToDB(order_id, conn);
+
+            ps = conn.prepareStatement(query);
+            ps.setInt(1, product.getProductID());
+            ResultSet rs = ps.executeQuery();
+
+            int currQty = 0;
+            if (rs.next()) {
+                currQty = rs.getInt("quantity_stocked");
             }
-            else {
-                System.out.println("No available couriers for delivery.");
+
+            if (currQty - product.getQuantity()  < 0) {
+                throw new SQLException("Only " + currQty + " are in stock.");
             }
-        } catch (Exception e) {
-            System.out.println("Error during order generation: " + e);
+
+            PreparedStatement pstmt = conn.prepareStatement(update);
+            pstmt.setInt(1, (currQty - product.getQuantity()));
+            pstmt.setBoolean(2, ((currQty - product.getQuantity()) != 0));
+            pstmt.setInt(3, product.getProductID());
+
+            pstmt.executeUpdate();
         }
     }
     
@@ -102,6 +115,7 @@ public class Order {
     }
 
     public String toString() { return order_id + " " + purchase_date.toString() + " " + total_price; }
+
     public void setReceiveDate(Date date) {
         this.receive_date = date;
     }
