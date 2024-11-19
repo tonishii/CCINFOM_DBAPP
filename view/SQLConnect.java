@@ -14,8 +14,6 @@ public class SQLConnect extends JPanel {
     private JButton submitBtn;
     private JButton exitBtn;
 
-    private JLabel errorLbl;
-
     public SQLConnect() {
 
         this.setLayout(new GridBagLayout());
@@ -51,8 +49,6 @@ public class SQLConnect extends JPanel {
         this.passwordField = new JPasswordField();
         passwordField.setPreferredSize(new Dimension(300, 20));
 
-        this.errorLbl = new JLabel();
-
         this.submitBtn = new JButton("Submit");
         this.submitBtn.setFocusable(false);
         this.submitBtn.setContentAreaFilled(false);
@@ -73,10 +69,6 @@ public class SQLConnect extends JPanel {
         gbc.gridx = 1;
         gbc.ipady = 20;
         this.add(passwordField, gbc);
-        gbc.gridy = 2;
-        gbc.gridx = 1;
-        gbc.ipady = 40;
-        this.add(errorLbl, gbc);
         gbc.gridy = 3;
         gbc.gridx = 0;
         gbc.ipadx = 10;
@@ -90,8 +82,6 @@ public class SQLConnect extends JPanel {
         this.submitBtn.addActionListener(submitLtr);
         this.exitBtn.addActionListener(exitLtr);
     }
-
-    public void setErrorLbl(String text) { errorLbl.setText(text); }
 
     public String getUsername() { return usernameField.getText().trim(); }
     public String getPassword() { return passwordField.getText().trim(); }

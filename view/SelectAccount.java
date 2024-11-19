@@ -7,7 +7,6 @@ import model.User;
 
 import javax.swing.*;
 import javax.swing.border.TitledBorder;
-import javax.swing.plaf.FontUIResource;
 import java.awt.*;
 import java.awt.event.ActionListener;
 import java.util.Objects;
@@ -27,7 +26,6 @@ public class SelectAccount extends JPanel {
     private JButton submitLoginBtn;
 
     private JButton backLoginBtn;
-    private JLabel  errorLbl;
 
     public SelectAccount() {
         this.selectCardLayout = new CardLayout();
@@ -94,13 +92,10 @@ public class SelectAccount extends JPanel {
         backLoginBtn = new JButton("Back");
         backLoginBtn.setFocusable(false);
 
-        errorLbl = new JLabel();
-
         loginPage.add(textLbl);
         loginPage.add(idLoginField);
         loginPage.add(submitLoginBtn);
         loginPage.add(backLoginBtn);
-        loginPage.add(errorLbl);
 
         this.add(accountSelectPage, SELECTACCPAGE);
         this.add(loginPage, LOGINPAGE);
@@ -126,8 +121,6 @@ public class SelectAccount extends JPanel {
             default -> null;
         };
     }
-
-    public void setErrorLbl(String text) { errorLbl.setText(text); }
 
     public String getID() { return idLoginField.getText().trim(); }
 }

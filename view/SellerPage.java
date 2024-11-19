@@ -12,7 +12,6 @@ public class SellerPage extends JPanel implements AccountPage {
                        sellerAddressField;
     private JButton    submitSignUpBtn,
                        sellerBackBtn;
-    private JLabel     errorLbl;
 
     // Main page
     private JPanel     topPanel,
@@ -71,10 +70,6 @@ public class SellerPage extends JPanel implements AccountPage {
         sellerBackBtn.setFocusable(false);
         signUpPage.add(sellerBackBtn, gbc);
 
-        gbc.gridy = 5;
-        errorLbl = new JLabel();
-        signUpPage.add(errorLbl, gbc);
-
         return signUpPage;
     }
 
@@ -103,8 +98,6 @@ public class SellerPage extends JPanel implements AccountPage {
     public void nextMainPageName(String name) {
         this.mainCardLayout.show(bottomPanel, name);
     }
-
-    public void setErrorLbl(String text) { this.errorLbl.setText(text); }
 
     public String getSellerName() { return sellerNameField.getText().trim(); }
     public String getSellerAddress() { return sellerAddressField.getText().trim(); }

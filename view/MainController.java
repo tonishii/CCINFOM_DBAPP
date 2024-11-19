@@ -52,7 +52,6 @@ public class MainController {
             @Override
             public void windowClosing(WindowEvent e)
             {
-                System.out.println("closed");
                 try {
                     conn.close();
                 } catch (Exception ex) {
@@ -77,7 +76,7 @@ public class MainController {
                 this.mainMenuPage.nextPageName(MainFrame.SELECTACCPAGE);
 
             } catch (Exception e) {
-                connectPage.setErrorLbl("Error: " + e.getMessage());
+                JOptionPane.showMessageDialog(null, "Error: " + e.getMessage());
             }
 
         }, exitEvent -> {
@@ -88,7 +87,7 @@ public class MainController {
                 System.exit(0);
 
             } catch (Exception e) {
-                connectPage.setErrorLbl("Error: " + e.getMessage());
+                JOptionPane.showMessageDialog(null, "Error: " + e.getMessage());
             }
         });
     }
@@ -111,10 +110,10 @@ public class MainController {
 
                     mainMenuPage.nextPageName(account.toString());
                 } else {
-                    selectAccountPage.setErrorLbl("Error: Account was not found.");
+                    JOptionPane.showMessageDialog(null, "Error: Account was not found.");
                 }
             } catch (NumberFormatException e) {
-                selectAccountPage.setErrorLbl("Error: Enter valid ID.");
+                JOptionPane.showMessageDialog(null, "Error: Enter valid ID.");
             }
 
         }, backLoginEvent -> selectAccountPage.nextPageName(SelectAccount.SELECTACCPAGE)
@@ -122,7 +121,7 @@ public class MainController {
     }
 
     private void initUserListeners() {
-        userPage.initSignUpListeners(submitSignUpEvent -> {
+        userPage.initSignUpListeners(submitSignUpEvent -> { // Action: Pressing the submit button in the sign-up page
             String user_name = userPage.getUserName();
             String user_firstname = userPage.getUserFirstName();
             String user_lastname = userPage.getUserLastName();
@@ -134,7 +133,7 @@ public class MainController {
             Matcher matcher = pattern.matcher(user_phone_number);
 
             while (!matcher.matches()) {
-                userPage.setErrorLbl("Invalid Phone Number!\nRe-Enter phone number: ");
+                JOptionPane.showMessageDialog(null, "Error: Invalid phone number format.");
                 user_phone_number = userPage.getUserPhone();
                 matcher = pattern.matcher(user_phone_number);
             }
@@ -180,20 +179,25 @@ public class MainController {
                 userPage.nextPageName(AccountPage.MAINPAGE);
 
             } catch (Exception e){
-                userPage.setErrorLbl("Error: " + e.getMessage());
+                JOptionPane.showMessageDialog(null, "Error: " + e.getMessage());
             }
 
-        }, backSignUpEvent -> {
+        }, backSignUpEvent -> { // Action: Pressing the back button in the sign-up page
             mainMenuPage.nextPageName(MainFrame.SELECTACCPAGE);
             selectAccountPage.nextPageName(SelectAccount.SELECTACCPAGE);
             userPage.nextPageName(AccountPage.SIGNUPPAGE);
         });
 
-        userPage.initMainListeners(shopEvent -> {
+        userPage.initMainListeners(shopEvent -> { // Action: Pressing shop button
             userPage.nextMainPageName(UserPage.SHOPPAGE);
 
+            // Contains the mapping of the displayed text and
+            // the actual primary key used to identify the selected option
             Map<String, String> options = new LinkedHashMap<>();
+
             try {
+                // Check which browse by option was selected and
+                // Get all the options that the user can pick from
                 if (userPage.getBrowseByOption().equals("By shop")) {
                     options.putAll(((User) account).browseByShops(conn));
                 } else if (userPage.getBrowseByOption().equals("By product type")) {
@@ -203,39 +207,51 @@ public class MainController {
                 JOptionPane.showMessageDialog(null, "Error: " + e.getMessage());
             }
 
+            // Update the JList for with the options
             userPage.updateBrowseList(options);
-        }, cartEvent -> {
+
+        }, cartEvent -> { // Action: Pressing cart button
             userPage.nextMainPageName(UserPage.CARTPAGE);
 
             // update
-        }, ordersEvent -> {
+        }, ordersEvent -> { // Action: Pressing orders button
             userPage.nextMainPageName(UserPage.ORDERSPAGE);
 
             // update
-        }, profileEvent -> {
+        }, profileEvent -> { // Action: Pressing profile button
             userPage.nextMainPageName(UserPage.PROFILEPAGE);
             userPage.updateProfilePage((User) account);
 
-        }, logOutEvent -> {
+        }, logOutEvent -> { // Action: Pressing log out button
             mainMenuPage.nextPageName(MainFrame.SELECTACCPAGE);
             selectAccountPage.nextPageName(SelectAccount.SELECTACCPAGE);
             userPage.nextPageName(UserPage.SHOPPAGE);
 
-        }, addToCartEvent -> {
+        }, addToCartEvent -> { // Action: Pressing the add button in the shop page
             Product selectedProduct = userPage.getSelectedProduct();
 
             if (selectedProduct.isListed()) {
+
+                // Show a pop-up asking for the order quantity
                 int orderQuantity = userPage.getQuantity();
 
-                if (orderQuantity <= selectedProduct.getQuantity() && orderQuantity > 0) {
+                if (orderQuantity == 0) {
+                    return;
+                }
+
+                if (orderQuantity <= selectedProduct.getQuantity()) {
+                    // Add to cart
                     ((User) account).addProductToCart(
                     new OrderContent(selectedProduct.getProductID(), selectedProduct.getName(),orderQuantity, selectedProduct.getPrice()));
                 } else {
                     JOptionPane.showMessageDialog(null, "Error: Only " + selectedProduct.getQuantity() + " are in stock");
                 }
             }
-        }, browseChangeEvent -> {
+        }, browseChangeEvent -> { // Action: Changing the browse option in the shop page
+
+            // See shopEvent for explanation
             Map<String, String> options = new LinkedHashMap<>();
+
             try {
                 if (userPage.getBrowseByOption().equals("By shop")) {
                     options.putAll(((User) account).browseByShops(conn));
@@ -247,23 +263,24 @@ public class MainController {
             }
 
             userPage.updateBrowseList(options);
-        }, checkOutEvent -> {
+        }, checkOutEvent -> { // Action: Pressing check out button in the shopping cart page
 
-        }, removeItemEvent -> {
+        }, removeItemEvent -> { // Action: Pressing the remove item button in the shopping cart page
 
-        }, returnEvent -> {
+        }, returnEvent -> { // Action: Pressing the return item button in the orders page
 
-        }, rateEvent -> {
+        }, rateEvent -> { // Action: Pressing the return item button in the orders page
 
-        }, receiveEvent -> {
+        }, receiveEvent -> { // Action: Pressing the receive item button in the orders page
 
-        }, saveChangeEvent -> {
+        }, saveChangeEvent -> { // Action: Pressing the save changes button in the profile page
             User user = (User) account;
 
             int option = JOptionPane.showConfirmDialog(null, "Save changes?", "Edit Profile", JOptionPane.OK_CANCEL_OPTION);
 
             if (option == JOptionPane.OK_OPTION) {
                 try {
+                    // Retrieve the edited fields and update in the database
                     user.updateUser(
                         userPage.getEditedName(),
                         userPage.getEditedFirstName(),
@@ -280,9 +297,11 @@ public class MainController {
                 JOptionPane.showMessageDialog(null, "Edit cancelled...");
             }
 
-        }, browseSelectEvent -> {
+        }, browseSelectEvent -> { // Action: Pressing an option in the browse by options list in the shop page
             ArrayList<Product> products = new ArrayList<>();
+
             try {
+                // Retrieve the list of products for the user to shop from
                 if (userPage.getBrowseByOption().equals("By shop")) {
                     String query =
                     """
@@ -308,13 +327,14 @@ public class MainController {
 
                     products.addAll(((User) account).getSelectedProductList(pstmt));
                 }
-            } catch (Exception e) {
-                // ERROR
+            } catch (SQLException e) {
+                JOptionPane.showMessageDialog(null, "Error: " + e.getMessage());
             }
 
+            // Update the list of products using the resulting list
             userPage.updateProductsList(products);
 
-        }, productSelectEvent -> {
+        }, productSelectEvent -> { // Action: Pressing an product in the product list in the shop page
             Product selectedProduct = userPage.getSelectedProduct();
 
             userPage.setProductInfo(
@@ -327,7 +347,7 @@ public class MainController {
             "Listed: " + selectedProduct.isListed() + "<br/>" +
             "Description: " + selectedProduct.getDescription());
 
-        }, orderSelectEvent -> {
+        }, orderSelectEvent -> { // Action: Pressing an order in the orders list in the orders page
             System.out.println("HI3");
             // update orderLbl
         });
@@ -343,7 +363,7 @@ public class MainController {
             Matcher matcher = pattern.matcher(seller_phone_number);
 
             while (!matcher.matches()) {
-                sellerPage.setErrorLbl("Invalid Phone Number!\nRe-Enter phone number: ");
+                JOptionPane.showMessageDialog(null, "Error: Invalid phone number format.");
                 seller_phone_number = sellerPage.getSellerPhone();
                 matcher = pattern.matcher(seller_phone_number);
             }
@@ -385,8 +405,8 @@ public class MainController {
                 this.account = new Seller(seller_id, seller_name, seller_address, seller_phone_number, seller_creation_date, seller_verified_status);
                 sellerPage.nextPageName(AccountPage.MAINPAGE);
 
-            } catch (Exception e) {
-                sellerPage.setErrorLbl("Error during seller sign-up: " + e.getMessage());
+            } catch (SQLException e) {
+                JOptionPane.showMessageDialog(null, "Error: " + e.getMessage());
             }
 
         }, backSignUpEvent -> {
@@ -411,7 +431,7 @@ public class MainController {
                 Matcher matcher = pattern.matcher(courier_email_address);
 
                 while (!matcher.matches()) {
-                    System.out.print("Invalid Email!\n Re-Enter email address:  "); // THIS MUST BE CHANGED
+                    JOptionPane.showMessageDialog(null, "Error: Invalid email format.");
                     courier_email_address = courierPage.getCourierEmail();
                     matcher = pattern.matcher(courier_email_address);
                 }
@@ -453,8 +473,8 @@ public class MainController {
                 this.account = new Courier(courier_id, courier_name, courier_email_address, courier_address, courier_verified_status);
                 courierPage.nextPageName(AccountPage.MAINPAGE);
 
-            } catch (Exception e){
-                courierPage.setErrorLbl("Error: " + e.getMessage());
+            } catch (SQLException e){
+                JOptionPane.showMessageDialog(null, "Error: " + e.getMessage());
             }
 
         }, backSignUpEvent -> {

@@ -31,7 +31,6 @@ public class UserPage extends JPanel implements AccountPage {
 
     private JButton    submitSignUpBtn,
                        userBackBtn;
-    private JLabel     errorLbl;
 
     // Main page
     private JPanel     topPanel,
@@ -136,9 +135,6 @@ public class UserPage extends JPanel implements AccountPage {
         userBackBtn = new JButton("Back");
         userBackBtn.setFocusable(false);
         signUpPage.add(userBackBtn);
-
-        errorLbl = new JLabel();
-        signUpPage.add(errorLbl);
 
         return signUpPage;
     }
@@ -428,7 +424,6 @@ public class UserPage extends JPanel implements AccountPage {
 //        cartTable.setValueAt();
 //    }
 
-    public void setErrorLbl(String text) { this.errorLbl.setText(text); }
     public void setProductInfo(String text) { this.productInfoLabel.setText(text); }
     public void setOrderInfo(String text) { this.orderInfoLbl.setText(text); }
 

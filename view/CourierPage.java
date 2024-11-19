@@ -12,7 +12,6 @@ public class CourierPage extends JPanel implements AccountPage {
                        courierAddressField;
     private JButton    submitSignUpBtn,
                        courierBackBtn;
-    private JLabel     errorLbl;
 
     // Main page
     private JPanel     topPanel,
@@ -61,20 +60,16 @@ public class CourierPage extends JPanel implements AccountPage {
 
         gbc.gridy = 2;
         signUpPage.add(label,gbc);
-        signUpPage.add(courierAddressField,gbc);
+        signUpPage.add(courierAddressField, gbc);
 
         gbc.gridy = 3;
         submitSignUpBtn = new JButton("Submit");
         submitSignUpBtn.setFocusable(false);
-        signUpPage.add(submitSignUpBtn,gbc);
+        signUpPage.add(submitSignUpBtn, gbc);
 
         courierBackBtn = new JButton("Back");
         courierBackBtn.setFocusable(false);
-        signUpPage.add(courierBackBtn,gbc);
-
-        gbc.gridy = 4;
-        errorLbl = new JLabel();
-        signUpPage.add(errorLbl,gbc);
+        signUpPage.add(courierBackBtn, gbc);
 
         return signUpPage;
     }
@@ -129,8 +124,6 @@ public class CourierPage extends JPanel implements AccountPage {
     public void nextMainPageName(String name) {
         this.mainCardLayout.show(bottomPanel, name);
     }
-
-    public void setErrorLbl(String text) { this.errorLbl.setText(text); }
 
     public String getCourierName() { return courierNameField.getText().trim(); }
     public String getCourierEmail() { return courierEmailField.getText().trim(); }
