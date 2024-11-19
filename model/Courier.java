@@ -303,6 +303,7 @@ public class Courier implements Account {
             pstmt.setString(3, this.courier_address);
             pstmt.setInt(4, this.courier_id);
             pstmt.executeUpdate();
+            updateStatus();
         } catch (Exception e){
             System.out.println("Error updating name: " + e);
         }
