@@ -112,8 +112,6 @@ public class MainController {
                 mainMenuPage.nextPageName(account.toString());
             } catch (NumberFormatException e) {
                 JOptionPane.showMessageDialog(null, "Error: Enter valid ID.");
-            } catch (SQLException e) {
-                JOptionPane.showMessageDialog(null, "Error: " + e.getMessage());
             }
 
         }, backLoginEvent -> selectAccountPage.nextPageName(SelectAccount.SELECTACCPAGE)
@@ -234,7 +232,34 @@ public class MainController {
         }, ordersEvent -> { // Action: Pressing orders button
             userPage.nextMainPageName(UserPage.ORDERSPAGE);
 
-            // update
+            try {
+                // Check which category was selected and
+                // Get all the options that the user can pick from
+                if (userPage.getOrdersViewOption().equals("Orders")) {
+                    ArrayList<Order> orderList = ((User) account).getOrdersView(conn, ((User) account).getID());
+                    userPage.updateOrdersList(orderList);
+                } else if (userPage.getOrdersViewOption().equals("Returns")) {
+                    ArrayList<Return> returnList = ((User) account).getReturnsView(conn, ((User) account).getID());
+                    userPage.updateReturnsList(returnList);
+                }
+            } catch (SQLException e) {
+                JOptionPane.showMessageDialog(null, "Error: " + e.getMessage());
+            }
+        }, ordersViewChangeEvent -> { // Action: Changing the list view in orders
+            try {
+                // Check which category was selected and
+                // Get all the options that the user can pick from
+                if (userPage.getOrdersViewOption().equals("Orders")) {
+                    ArrayList<Order> orderList = ((User) account).getOrdersView(conn, ((User) account).getID());
+                    userPage.updateOrdersList(orderList);
+                } else if (userPage.getOrdersViewOption().equals("Returns")) {
+                    ArrayList<Return> returnList = ((User) account).getReturnsView(conn, ((User) account).getID());
+                    userPage.updateReturnsList(returnList);
+                }
+            } catch (SQLException e) {
+                JOptionPane.showMessageDialog(null, "Error: " + e.getMessage());
+            }
+            
         }, profileEvent -> { // Action: Pressing profile button
             userPage.nextMainPageName(UserPage.PROFILEPAGE);
             userPage.updateProfilePage((User) account);

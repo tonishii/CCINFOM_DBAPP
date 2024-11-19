@@ -1,20 +1,19 @@
 package view;
 
 import model.Order;
-import model.OrderContent;
 import model.Product;
 import model.User;
 
 import javax.swing.*;
 import javax.swing.border.TitledBorder;
 import javax.swing.event.ListSelectionListener;
-import javax.swing.table.TableCellEditor;
-import javax.swing.table.TableCellRenderer;
 import java.awt.*;
-import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ItemListener;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.Map;
+import model.Return;
 
 public class UserPage extends JPanel implements AccountPage {
     private CardLayout userCardLayout;
@@ -65,7 +64,7 @@ public class UserPage extends JPanel implements AccountPage {
     // Orders option
 
     private JComboBox<String> ordersBox;
-    private JList<Order>     ordersList;
+    private JList<String>     ordersList;
 
     private JLabel            orderInfoLbl;
     private JButton           returnBtn,
@@ -197,14 +196,11 @@ public class UserPage extends JPanel implements AccountPage {
         JPanel panel = new JPanel();
 
         JPanel infoPanel = new JPanel();
-        infoPanel.setSize(new Dimension(400, 300));
         infoPanel.setBorder(BorderFactory.createTitledBorder(BorderFactory.createLineBorder(Color.BLACK, 2),
     "Product information", TitledBorder.LEFT, TitledBorder.TOP, new Font("Montserrat", Font.PLAIN, 12)));
 
         productInfoLabel = new JLabel();
-        productInfoLabel.setSize(new Dimension(450, 250));
         infoPanel.add(productInfoLabel);
-        panel.add(infoPanel);
 
         JLabel label = new JLabel("Browse by: ");
         panel.add(label);
@@ -224,6 +220,7 @@ public class UserPage extends JPanel implements AccountPage {
         panel.add(browseByListPane);
 
         productList = new JList<>(new DefaultListModel<>());
+        productList.setCellRenderer(new DBAPPCellRenderer());
 
         productList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         productList.setFocusable(false);
@@ -245,19 +242,15 @@ public class UserPage extends JPanel implements AccountPage {
     public JPanel getCartPage() {
         JPanel panel = new JPanel();
 
-        OrderTableModel mdl = new OrderTableModel(new HashSet<>());
+        String[] columnHeader = {""};           // TENTATIVE
+        String[][] data = new String[25][2];
 
-        cartTable = new JTable(mdl);
+        cartTable = new JTable(data, columnHeader);
         cartTable.setDefaultEditor(Object.class, null);
-
-        cartTable.getColumnModel().getColumn(2).setCellEditor(new ButtonEditor(mdl, -1));
-        cartTable.getColumnModel().getColumn(4).setCellEditor(new ButtonEditor(mdl, 1));
-
-        cartTable.getColumnModel().getColumn(2).setCellRenderer(new ButtonRenderer("-"));
-        cartTable.getColumnModel().getColumn(4).setCellRenderer(new ButtonRenderer("+"));
+        cartTable.getTableHeader().setReorderingAllowed(false);
 
         JScrollPane cartTablePane = new JScrollPane(cartTable, JScrollPane.VERTICAL_SCROLLBAR_ALWAYS, JScrollPane.HORIZONTAL_SCROLLBAR_ALWAYS);
-        cartTablePane.setPreferredSize(new Dimension(550, 400));
+        cartTablePane.setPreferredSize(new Dimension(400, 300));
         panel.add(cartTablePane);
 
         checkOutBtn = new JButton("Check out");
@@ -280,11 +273,12 @@ public class UserPage extends JPanel implements AccountPage {
         JPanel panel = new JPanel();
 
         ordersList = new JList<>(new DefaultListModel<>());
+//        ordersList.setCellRenderer(new DBAPPCellRenderer());
 
         ordersList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         ordersList.setFocusable(false);
 
-        JScrollPane ordersListPane = new JScrollPane(productList);
+        JScrollPane ordersListPane = new JScrollPane(ordersList);
         ordersListPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
         ordersListPane.setPreferredSize(new Dimension(400, 300));
 
@@ -299,15 +293,15 @@ public class UserPage extends JPanel implements AccountPage {
         ordersBox = new JComboBox<>(orderTypes);
         panel.add(ordersBox);
 
-        returnBtn = new JButton("Return");
+        returnBtn = new JButton("Request Return");
         returnBtn.setFocusable(false);
         panel.add(returnBtn);
 
-        rateBtn = new JButton("Rate");
+        rateBtn = new JButton("Rate a Product");
         rateBtn.setFocusable(false);
         panel.add(rateBtn);
 
-        receiveBtn = new JButton("Receive");
+        receiveBtn = new JButton("Receive Order");
         receiveBtn.setFocusable(false);
         panel.add(receiveBtn);
 
@@ -365,30 +359,6 @@ public class UserPage extends JPanel implements AccountPage {
         profileLastNameField.setText(user.getLastName());
     }
 
-    public void updateBrowseList(Map<String, String> options) {
-        DefaultListModel<String> mdl = new DefaultListModel<>();
-        this.options = options;
-
-        for (String option : options.keySet()) {
-            mdl.addElement(option);
-        }
-        browseByList.setModel(mdl);
-    }
-
-    public void updateProductsList(ArrayList<Product> products) {
-        DefaultListModel<Product> mdl = new DefaultListModel<>();
-        for (Product product : products) {
-            mdl.addElement(product);
-        }
-        this.productList.setModel(mdl);
-        this.productListPane.setViewportView(productList);
-    }
-
-    public void updateCartTable(Set<OrderContent> shoppingCart) {
-        OrderTableModel mdl = new OrderTableModel(shoppingCart);
-        cartTable.setModel(mdl);
-    }
-
     public int getQuantity() {
         SpinnerNumberModel model = new SpinnerNumberModel(1, 0, Integer.MAX_VALUE, 1);
         JSpinner spinner = new JSpinner(model);
@@ -418,7 +388,7 @@ public class UserPage extends JPanel implements AccountPage {
 
     }
 
-    public void initMainListeners(ActionListener shopLtr, ActionListener cartLtr, ActionListener ordersLtr, ActionListener profLtr, ActionListener logOutLtr,
+    public void initMainListeners(ActionListener shopLtr, ActionListener cartLtr, ActionListener ordersLtr, ActionListener ordersBoxLtr, ActionListener profLtr, ActionListener logOutLtr,
                                   ActionListener addLtr, ItemListener browseByBoxLtr, ActionListener checkOutLtr, ActionListener removeLtr, ActionListener returnLtr, ActionListener rateLtr,
                                   ActionListener receiveLtr, ActionListener saveChangesLtr, ListSelectionListener browseByListLtr, ListSelectionListener productSelectLtr, ListSelectionListener orderSelectLtr) {
         shopBtn.addActionListener(shopLtr);
@@ -430,6 +400,8 @@ public class UserPage extends JPanel implements AccountPage {
         addToCartBtn.addActionListener(addLtr);
         browseByBox.addItemListener(browseByBoxLtr);
 
+        ordersBox.addActionListener(ordersBoxLtr);
+        
         checkOutBtn.addActionListener(checkOutLtr);
         removeBtn.addActionListener(removeLtr);
 
@@ -454,77 +426,77 @@ public class UserPage extends JPanel implements AccountPage {
         this.mainCardLayout.show(bottomPanel, name);
     }
 
+//    public void setDataValue() {      USE THIS FOR SETTING PRODUCTS IN THE CART TABLE
+//        cartTable.setValueAt();
+//    }
+
     public void setProductInfo(String text) { this.productInfoLabel.setText(text); }
     public void setOrderInfo(String text) { this.orderInfoLbl.setText(text); }
-
-    public ArrayList<OrderContent> getSelectedRecords() {
-        OrderTableModel mdl = (OrderTableModel) cartTable.getModel();
-        ArrayList<OrderContent> selectedRecords = new ArrayList<>();
-
-        for (int i = 0; i < mdl.getRowCount(); i++) {
-            if ((Boolean) mdl.getValueAt(i, 0)) {
-                selectedRecords.add(mdl.getOrderContent(i));
-            }
-        }
-
-        return selectedRecords;
-    }
 
     public String getUserName() { return userNameField.getText().trim(); }
     public String getUserFirstName() { return userFirstNameField.getText().trim(); }
     public String getUserLastName() { return userLastNameField.getText().trim(); }
     public String getUserAddress() { return userAddressField.getText().trim(); }
     public String getUserPhone() { return userPhoneField.getText().trim(); }
+
     public String getEditedName() { return profileNameField.getText().trim(); }
     public String getEditedPhone() { return profilePhoneField.getText().trim(); }
     public String getEditedAddress() { return profileAddressField.getText().trim(); }
     public String getEditedFirstName() { return profileFirstNameField.getText().trim(); }
     public String getEditedLastName() { return profileLastNameField.getText().trim(); }
+
     public String getBrowseByOption() { return (String) browseByBox.getSelectedItem(); }
     public Product getSelectedProduct() { return productList.getSelectedValue(); }
-    public String getSelectedOption() { return options.get(browseByList.getSelectedValue()); }
+    
+    public void updateBrowseList(Map<String, String> options) {
+        DefaultListModel<String> mdl = new DefaultListModel<>();
+        this.options = options;
 
-    static class ButtonRenderer extends JButton implements TableCellRenderer {
-        public ButtonRenderer(String text) {
-            setText(text);
-            setFocusPainted(false);
-            setContentAreaFilled(false);
+        for (String option : options.keySet()) {
+            mdl.addElement(option);
         }
-
-        @Override
-        public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
-            return this;
-        }
+        browseByList.setModel(mdl);
     }
 
-    static class ButtonEditor extends AbstractCellEditor implements TableCellEditor {
-        private final JButton button;
-        private final OrderTableModel tableModel;
-        private final int direction;
-        private int currentRow;
-
-        public ButtonEditor(OrderTableModel tableModel, int direction) {
-            this.tableModel = tableModel;
-            this.direction = direction;
-
-            button = new JButton(direction == -1 ? "-" : "+");
-            button.addActionListener(this::updateQuantity);
+    public void updateProductsList(ArrayList<Product> products) {
+        DefaultListModel<Product> mdl = new DefaultListModel<>();
+        for (Product product : products) {
+            mdl.addElement(product);
         }
+        this.productList.setModel(mdl);
+        this.productListPane.setViewportView(productList);
+    }
 
-        private void updateQuantity(ActionEvent e) {
-            tableModel.updateQuantity(currentRow, direction);
-            fireEditingStopped();
+    public String getSelectedOption() {
+        return options.get(browseByList.getSelectedValue());
+    }
+    
+    public String getOrdersViewOption() { return (String) ordersBox.getSelectedItem(); }
+    
+    public void updateOrdersList(ArrayList<Order> orders) {
+        DefaultListModel<String> mdl = new DefaultListModel<>();
+        this.options = new LinkedHashMap<>();
+        
+        for (Order order : orders) {
+            String display = "Order No. " + Integer.toString(order.getOrderID());
+            this.options.put(display, Integer.toString(order.getOrderID()));
+            mdl.addElement(display);
         }
-
-        @Override
-        public Component getTableCellEditorComponent(JTable table, Object value, boolean isSelected, int row, int column) {
-            currentRow = row;
-            return button;
+        
+        ordersList.setModel(mdl);
+    }
+    
+    public void updateReturnsList(ArrayList<Return> returns) {
+        DefaultListModel<String> mdl = new DefaultListModel<>();
+        this.options = new LinkedHashMap<>();
+        
+        for (Return r : returns) {
+            String display = "Order No. " + Integer.toString(r.getOrderID());
+            String value = Integer.toString(r.getOrderID()) + " " + Integer.toString(r.getProductID()); // value.split(" ") to get order id and product ig
+            this.options.put(display, value);
+            mdl.addElement(display);
         }
-
-        @Override
-        public Object getCellEditorValue() {
-            return null;
-        }
+        
+        ordersList.setModel(mdl);
     }
 }
