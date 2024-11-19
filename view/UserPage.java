@@ -1,9 +1,17 @@
 package view;
 
+import model.Order;
+import model.Product;
+import model.User;
+
 import javax.swing.*;
 import javax.swing.border.TitledBorder;
+import javax.swing.event.ListSelectionListener;
 import java.awt.*;
 import java.awt.event.ActionListener;
+import java.awt.event.ItemListener;
+import java.util.ArrayList;
+import java.util.Map;
 
 public class UserPage extends JPanel implements AccountPage {
     private CardLayout userCardLayout;
@@ -37,12 +45,13 @@ public class UserPage extends JPanel implements AccountPage {
                        ordersBtn,
                        profileBtn,
                        logOutBtn,
-                       addToCartBtn,
-                       viewItemBtn;
+                       addToCartBtn;
 
-    private JLabel     productInfoLabel;
-    private JComboBox<String> browseByBox;
-    private JList<String>     productList;
+    private JLabel              productInfoLabel;
+    private JComboBox<String>   browseByBox;
+    private JList<String>       browseByList;
+    private Map<String, String> options;
+    private JList<Product>      productList;
 
     // Cart option
 
@@ -54,7 +63,7 @@ public class UserPage extends JPanel implements AccountPage {
     // Orders option
 
     private JComboBox<String> ordersBox;
-    private JList<String>     ordersList;
+    private JList<Order>     ordersList;
 
     private JLabel            orderInfoLbl;
     private JButton           returnBtn,
@@ -63,8 +72,12 @@ public class UserPage extends JPanel implements AccountPage {
 
     // Profile option
 
-    private JTextField        nameField,
-                              addressField;
+    private JTextField        profileNameField,
+                              profilePhoneField,
+                              profileAddressField,
+                              profileFirstNameField,
+                              profileLastNameField;
+
     private JButton           saveChangesBtn;
 
     public UserPage() {
@@ -162,7 +175,7 @@ public class UserPage extends JPanel implements AccountPage {
         topPanel.add(logOutBtn);
 
         bottomPanel = new JPanel(mainCardLayout);
-
+        bottomPanel.setPreferredSize(new Dimension(800, 640));
         bottomPanel.setBorder(BorderFactory.createTitledBorder(BorderFactory.createLineBorder(Color.BLACK, 2),
     "User", TitledBorder.LEFT, TitledBorder.TOP, new Font("Montserrat", Font.PLAIN, 12)));
 
@@ -196,24 +209,32 @@ public class UserPage extends JPanel implements AccountPage {
         browseByBox = new JComboBox<>(browseOptions);
         panel.add(browseByBox);
 
+        browseByList = new JList<>(new DefaultListModel<>());
+        browseByList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        browseByList.setFocusable(false);
+
+        JScrollPane browseByListPane = new JScrollPane(browseByList);
+        browseByListPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
+        browseByListPane.setPreferredSize(new Dimension(300, 200));
+
+        panel.add(browseByListPane);
+
         productList = new JList<>(new DefaultListModel<>());
+        productList.setCellRenderer(new DBAPPCellRenderer());
+
         productList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         productList.setFocusable(false);
 
         JScrollPane productListPane = new JScrollPane(productList);
         productListPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
-        productListPane.setPreferredSize(new Dimension(400, 300));
+        productListPane.setPreferredSize(new Dimension(300, 200));
 
         panel.add(productListPane);
 
         addToCartBtn = new JButton("Add");
         addToCartBtn.setFocusable(false);
 
-        viewItemBtn = new JButton("View info");
-        viewItemBtn.setFocusable(false);
-
         panel.add(addToCartBtn);
-        panel.add(viewItemBtn);
 
         return panel;
     }
@@ -252,6 +273,8 @@ public class UserPage extends JPanel implements AccountPage {
         JPanel panel = new JPanel();
 
         ordersList = new JList<>(new DefaultListModel<>());
+        ordersList.setCellRenderer(new DBAPPCellRenderer());
+
         ordersList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         ordersList.setFocusable(false);
 
@@ -288,21 +311,74 @@ public class UserPage extends JPanel implements AccountPage {
     public JPanel getProfilePage() {
         JPanel panel = new JPanel();
 
-        JLabel lbl = new JLabel("Name: ");
-        nameField = new JTextField();
+        JLabel lbl = new JLabel("User details: ");
         panel.add(lbl);
-        panel.add(nameField);
+
+        lbl = new JLabel("Account name: ");
+        profileNameField = new JTextField();
+        profileNameField.setPreferredSize(new Dimension(200, 20));
+        panel.add(lbl);
+        panel.add(profileNameField);
+
+        lbl = new JLabel("Phone number: ");
+        profilePhoneField = new JTextField();
+        profilePhoneField.setPreferredSize(new Dimension(200, 20));
+        panel.add(lbl);
+        panel.add(profilePhoneField);
 
         lbl = new JLabel("Address: ");
-        addressField = new JTextField();
+        profileAddressField = new JTextField();
+        profileAddressField.setPreferredSize(new Dimension(200, 20));
         panel.add(lbl);
-        panel.add(addressField);
+        panel.add(profileAddressField);
+
+        lbl = new JLabel("First name: ");
+        profileFirstNameField = new JTextField();
+        profileFirstNameField.setPreferredSize(new Dimension(200, 20));
+        panel.add(lbl);
+        panel.add(profileFirstNameField);
+
+        lbl = new JLabel("Last name: ");
+        profileLastNameField = new JTextField();
+        profileLastNameField.setPreferredSize(new Dimension(200, 20));
+        panel.add(lbl);
+        panel.add(profileLastNameField);
 
         saveChangesBtn = new JButton("Save Changes");
         saveChangesBtn.setFocusable(false);
         panel.add(saveChangesBtn);
 
         return panel;
+    }
+
+    public void updateProfilePage(User user) {
+        profileNameField.setText(user.getUsername());
+        profilePhoneField.setText(user.getPhoneNumber());
+        profileAddressField.setText(user.getAddress());
+        profileFirstNameField.setText(user.getFirstName());
+        profileLastNameField.setText(user.getLastName());
+    }
+
+    public int getQuantity() {
+        SpinnerNumberModel model = new SpinnerNumberModel(1, 0, Integer.MAX_VALUE, 1);
+        JSpinner spinner = new JSpinner(model);
+
+        JFormattedTextField field = ((JSpinner.DefaultEditor) spinner.getEditor()).getTextField();
+        field.setEditable(false);
+        field.setFocusable(false);
+
+        JPanel panel = new JPanel();
+        panel.add(new JLabel("Enter Quantity:"));
+        panel.add(spinner);
+
+        int option = JOptionPane.showConfirmDialog(null, panel,
+    "Enter Quantity", JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
+
+        if (option == JOptionPane.OK_OPTION) {
+            return (int) spinner.getValue();
+        } else {
+            return 0;
+        }
     }
 
     @Override
@@ -313,8 +389,8 @@ public class UserPage extends JPanel implements AccountPage {
     }
 
     public void initMainListeners(ActionListener shopLtr, ActionListener cartLtr, ActionListener ordersLtr, ActionListener profLtr, ActionListener logOutLtr,
-    ActionListener addLtr, ActionListener viewInfoLtr, ActionListener checkOutLtr, ActionListener removeLtr, ActionListener returnLtr, ActionListener rateLtr,
-    ActionListener receiveLtr, ActionListener saveChangesLtr) {
+                                  ActionListener addLtr, ItemListener browseByBoxLtr, ActionListener checkOutLtr, ActionListener removeLtr, ActionListener returnLtr, ActionListener rateLtr,
+                                  ActionListener receiveLtr, ActionListener saveChangesLtr, ListSelectionListener browseByListLtr, ListSelectionListener productSelectLtr, ListSelectionListener orderSelectLtr) {
         shopBtn.addActionListener(shopLtr);
         cartBtn.addActionListener(cartLtr);
         ordersBtn.addActionListener(ordersLtr);
@@ -322,7 +398,7 @@ public class UserPage extends JPanel implements AccountPage {
         logOutBtn.addActionListener(logOutLtr);
 
         addToCartBtn.addActionListener(addLtr);
-        viewItemBtn.addActionListener(viewInfoLtr);
+        browseByBox.addItemListener(browseByBoxLtr);
 
         checkOutBtn.addActionListener(checkOutLtr);
         removeBtn.addActionListener(removeLtr);
@@ -332,6 +408,10 @@ public class UserPage extends JPanel implements AccountPage {
         receiveBtn.addActionListener(receiveLtr);
 
         saveChangesBtn.addActionListener(saveChangesLtr);
+
+        browseByList.getSelectionModel().addListSelectionListener(browseByListLtr);
+        productList.getSelectionModel().addListSelectionListener(productSelectLtr);
+        ordersList.getSelectionModel().addListSelectionListener(orderSelectLtr);
     }
 
     @Override
@@ -353,17 +433,39 @@ public class UserPage extends JPanel implements AccountPage {
     public void setOrderInfo(String text) { this.orderInfoLbl.setText(text); }
 
     public String getUserName() { return userNameField.getText().trim(); }
-    public String getUserFirstName() { return userNameField.getText().trim(); }
-    public String getUserLastName() { return userNameField.getText().trim(); }
-    public String getUserAddress() { return userNameField.getText().trim(); }
+    public String getUserFirstName() { return userFirstNameField.getText().trim(); }
+    public String getUserLastName() { return userLastNameField.getText().trim(); }
+    public String getUserAddress() { return userAddressField.getText().trim(); }
     public String getUserPhone() { return userPhoneField.getText().trim(); }
 
+    public String getEditedName() { return profileNameField.getText().trim(); }
+    public String getEditedPhone() { return profilePhoneField.getText().trim(); }
+    public String getEditedAddress() { return profileAddressField.getText().trim(); }
+    public String getEditedFirstName() { return profileFirstNameField.getText().trim(); }
+    public String getEditedLastName() { return profileLastNameField.getText().trim(); }
+
     public String getBrowseByOption() { return (String) browseByBox.getSelectedItem(); }
-    public String getSelectedProduct() { return productList.getSelectedValue(); }
+    public Product getSelectedProduct() { return productList.getSelectedValue(); }
 
-    public void addProductToList(String input) { ((DefaultListModel<String>) productList.getModel()).addElement(input); }
-    public void removeProductFromList(String input) { ((DefaultListModel<String>) productList.getModel()).removeElement(input); }
+    public void updateBrowseList(Map<String, String> options) {
+        DefaultListModel<String> mdl = new DefaultListModel<>();
+        this.options = options;
 
-    public void addOrdersToList(String input) { ((DefaultListModel<String>) ordersList.getModel()).addElement(input); }
-    public void removeOrdersFromList(String input) { ((DefaultListModel<String>) ordersList.getModel()).removeElement(input); }
+        for (String option : options.keySet()) {
+            mdl.addElement(option);
+        }
+        browseByList.setModel(mdl);
+    }
+
+    public void updateProductsList(ArrayList<Product> products) {
+        DefaultListModel<Product> mdl = new DefaultListModel<>();
+        for (Product product : products) {
+            mdl.addElement(product);
+        }
+        productList.setModel(mdl);
+    }
+
+    public String getSelectedOption() {
+        return options.get(browseByList.getSelectedValue());
+    }
 }

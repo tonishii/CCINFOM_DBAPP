@@ -100,7 +100,8 @@ public class Order {
         }      
         return oc;
     }
-    
+
+    public String toString() { return order_id + " " + purchase_date.toString() + " " + total_price; }
     public void setReceiveDate(Date date) {
         this.receive_date = date;
     }

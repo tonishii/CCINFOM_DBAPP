@@ -1,10 +1,9 @@
 package model;
 import enums.OrderStatus;
 
+import java.sql.Date;
 import java.time.Instant;
-import java.util.ArrayList;
-import java.util.Objects;
-import java.util.Scanner;
+import java.util.*;
 import java.sql.*;
 import java.text.SimpleDateFormat;
 import java.util.regex.Matcher;
@@ -21,6 +20,8 @@ public class User implements Account {
     private Date    user_creation_date;
     private boolean user_verified_status;
 
+    private ArrayList<OrderContent> shoppingCart;
+
     public User(int user_id, String user_name, String user_firstname, String user_lastname,
                 String user_address, String user_phone_number, Date user_creation_date) {
         this.user_id = user_id;
@@ -30,6 +31,8 @@ public class User implements Account {
         this.user_address = user_address;
         this.user_phone_number = user_phone_number;
         this.user_creation_date = user_creation_date;
+
+        this.shoppingCart = new ArrayList<>();
     }
 
     public User() {}
@@ -86,9 +89,6 @@ public class User implements Account {
             Select option:\s""");
 
             switch (scn.nextLine().trim()) {
-                case "1":
-                    shoppingCart.addAll(browseOptions(scn, conn));
-                    break;
                 case "2":
                     viewShoppingCart(scn, shoppingCart, conn);
                     break;
@@ -114,73 +114,7 @@ public class User implements Account {
                     rateProduct(scn, conn);
                     break;
                 case "7":
-                    try{
-                        boolean goBack = true;
-                        while (goBack) {
-                            System.out.printf("""
-                            User Details:
-                            [1] Name: %s
-                            [2] Phone Number: %s
-                            [3] Address: %s
-                            [4] First Name: %s
-                            [5] Last Name: %s
-                            [6] Go Back
-                            """,
-                            user_name,
-                            user_phone_number,
-                            user_address,
-                            user_firstname,
-                            user_lastname);
 
-                            System.out.print("Enter option to edit: ");
-
-                            switch (scn.nextLine()) {
-                                case "1":
-                                    System.out.print("Enter new user name: ");
-                                    this.user_name = scn.nextLine();
-                                    updateAccount(conn);
-                                    break;
-                                case "2":
-                                    System.out.print("Enter new phone number: ");
-                                    this.user_phone_number = scn.nextLine();
-                                    if (!user_phone_number.isEmpty()) {
-                                        Pattern pattern = Pattern.compile("^\\d{11}$");
-                                        Matcher matcher = pattern.matcher(user_phone_number);
-
-                                        while (!matcher.matches()) {
-                                            System.out.print("Invalid Phone Number!\nRe-Enter phone number: ");
-                                            user_phone_number = scn.nextLine();
-                                            matcher = pattern.matcher(user_phone_number);
-                                        }
-                                    }
-                                    updateAccount(conn);
-                                    break;
-                                case "3":
-                                    System.out.print("Enter new address: ");
-                                    this.user_address = scn.nextLine();
-                                    updateAccount(conn);
-                                    break;
-                                case "4":
-                                    System.out.print("Enter new first name: ");
-                                    this.user_firstname = scn.nextLine();
-                                    updateAccount(conn);
-                                    break;
-                                case "5":
-                                    System.out.print("Enter new last name: ");
-                                    this.user_lastname = scn.nextLine();
-                                    updateAccount(conn);
-                                    break;
-                                case "6":
-                                    goBack = false;
-                                    break;
-
-                                default:
-                                    System.out.print("Error: Enter valid option.");
-                            }
-                        }
-                    } catch (Exception e){
-                        System.out.println("Error during account editing: " + e.getMessage());
-                    }
                     break;
                 case "8":
                     return;
@@ -234,77 +168,8 @@ public class User implements Account {
         return ph;
     }
 
-    private ArrayList<OrderContent> browseOptions(Scanner scn, Connection conn) {
-        ArrayList<Product> productList = new ArrayList<>();
-        ArrayList<OrderContent> shoppingCart = new ArrayList<>();
-
-        try {
-            while (true) {
-                System.out.print("""
-                Browse by:
-                [1] Shops
-                [2] Product Type
-                [3] Go back
-                Select option:\s""");
-
-                // Get the list of products to choose from
-                switch (scn.nextLine().trim()) {
-                    case "1" -> browseByShops(scn, conn, productList);
-                    case "2" -> browseByProductType(scn, conn, productList);
-                    case "3" -> { return shoppingCart; }
-                    default -> System.out.println("Error: Enter a valid option.");
-                }
-
-                if (productList.isEmpty()) {
-                    System.out.println("No products found for the selected product type.");
-                    continue;
-                }
-
-                // Select a product to add to the cart
-                do {
-                    for (Product product : productList) {
-                        product.printForUser();
-                    }
-
-                    System.out.print("Enter the Product ID to order: ");
-                    int selectedProductId = scn.nextInt();
-                    scn.nextLine();
-
-                    Product selectedProduct = productList.stream()
-                            .filter(product -> product.getProductID() == selectedProductId)
-                            .findFirst()
-                            .orElse(null);
-
-                    assert selectedProduct != null;
-                    if (selectedProduct.isListed()) {
-                        while (true) {
-                            System.out.print("Enter order quantity: ");
-                            int orderQuantity = scn.nextInt();
-                            scn.nextLine();
-
-                            if (orderQuantity <= selectedProduct.getQuantity()) {
-                                shoppingCart.add(new OrderContent(selectedProductId, selectedProduct.getName(),orderQuantity, selectedProduct.getPrice()));
-                                break;
-                            } else {
-                                System.out.println("Error: Only " + selectedProduct.getQuantity() + " are in stock");
-                            }
-                        }
-                    }
-
-                    // Gives option to go back to the select browse by options
-                    System.out.print("Go back? y/n: ");
-                } while (!scn.nextLine().trim().equalsIgnoreCase("y"));
-            }
-        } catch (Exception e) {
-            System.out.println("An error occurred: " + e.getMessage());
-        }
-
-        return shoppingCart;
-    }
-
-    private void browseByShops(Scanner scn, Connection conn, ArrayList<Product> productList) throws SQLException {
-        productList.clear();
-        ArrayList<Integer> sellerIDList = new ArrayList<>();
+    public Map<String, String> browseByShops(Connection conn) throws SQLException {
+        Map<String, String> shopOptionList = new LinkedHashMap<>();
 
         String query = """
         SELECT products.seller_id, sellers.seller_name,
@@ -318,60 +183,20 @@ public class User implements Account {
         PreparedStatement pstmt = conn.prepareStatement(query);
         ResultSet resultSet = pstmt.executeQuery();
 
-        System.out.println("Seller ID | Seller Name | Product Count | Total Quantity");
-
         while (resultSet.next()) {
             int sellerId = resultSet.getInt("seller_id");
             String sellerName = resultSet.getString("seller_name");
             int productCount = resultSet.getInt("product_count");
             int totalQuantity = resultSet.getInt("total_quantity");
-            System.out.printf("%d | %s | %d | %d\n", sellerId, sellerName, productCount, totalQuantity);
-            sellerIDList.add(sellerId);
+
+            String displayText = "Shop: " + sellerName + " Number of Products: " + productCount + " Total quantity: " + totalQuantity;
+            shopOptionList.put(displayText, Integer.toString(sellerId));
         }
-
-        int selectedSellerID;
-        while (true) {
-            System.out.print("Select seller ID: ");
-            selectedSellerID = scn.nextInt();
-            scn.nextLine();
-
-            int finalSelectedSellerID = selectedSellerID;
-            if (sellerIDList.stream().anyMatch(sellerID -> sellerID == finalSelectedSellerID)) {
-                break;
-            } else {
-                System.out.println("Error: Enter valid product type.");
-            }
-        }
-
-        query =
-        """
-        SELECT product_id, product_name, product_price, product_type, average_rating, quantity_stocked, listed_status, description
-        FROM products
-        WHERE seller_id = ?;
-        """;
-
-        pstmt = conn.prepareStatement(query);
-        pstmt.setInt(1, selectedSellerID);
-        resultSet = pstmt.executeQuery();
-
-        while (resultSet.next()) {
-            productList.add(new Product(
-            resultSet.getInt("product_id"),
-            selectedSellerID,
-            resultSet.getString("product_name"),
-            resultSet.getFloat("product_price"),
-            resultSet.getString("product_type"),
-            resultSet.getFloat("average_rating"),
-            resultSet.getInt("quantity_stocked"),
-            resultSet.getBoolean("listed_status"),
-            resultSet.getString("description")
-            ));
-        }
+        return shopOptionList;
     }
 
-    private void browseByProductType(Scanner scn, Connection conn, ArrayList<Product> productList) throws SQLException {
-        productList.clear();
-        ArrayList<String> productTypeList = new ArrayList<>();
+    public Map<String, String> browseByProductType(Connection conn) throws SQLException {
+        Map<String, String> productTypeOptionList = new LinkedHashMap<>();
 
         String query =
         """
@@ -385,53 +210,38 @@ public class User implements Account {
         PreparedStatement pstmt = conn.prepareStatement(query);
         ResultSet resultSet = pstmt.executeQuery();
 
-        System.out.println("Product Type | Product Count | Total Quantity");
         while (resultSet.next()) {
             String productType = resultSet.getString("product_type");
             int productCount = resultSet.getInt("product_count");
             int totalQuantity = resultSet.getInt("total_quantity");
-            System.out.println(productType + " | " + productCount + " | " + totalQuantity);
 
-            productTypeList.add(productType);
+            String displayText = "Product type: " + productType + " Number of Products: " + productCount + " Total quantity: " + totalQuantity;
+            productTypeOptionList.put(displayText, productType);
         }
 
-        String selectedProductType;
-        while (true) {
-            System.out.print("Select product type: ");
-            selectedProductType = scn.nextLine().trim();
+        return productTypeOptionList;
+    }
 
-            String finalSelectedProductType = selectedProductType;
-            if (productTypeList.stream().anyMatch(productType -> Objects.equals(productType, finalSelectedProductType))) {
-                break;
-            } else {
-                System.out.println("Error: Enter valid product type.");
-            }
-        }
-
-        query =
-        """
-        SELECT product_id, seller_id, product_name, product_price, average_rating, quantity_stocked, listed_status, description
-        FROM products
-        WHERE product_type = ?;
-        """;
-
-        pstmt = conn.prepareStatement(query);
-        pstmt.setString(1, selectedProductType);
-        resultSet = pstmt.executeQuery();
+    public ArrayList<Product> getSelectedProductList(PreparedStatement pstmt) throws SQLException {
+        ArrayList<Product> productList = new ArrayList<>();
+        ResultSet resultSet = pstmt.executeQuery();
 
         while (resultSet.next()) {
+
             productList.add(new Product(
             resultSet.getInt("product_id"),
             resultSet.getInt("seller_id"),
             resultSet.getString("product_name"),
             resultSet.getFloat("product_price"),
-            selectedProductType,
+            resultSet.getString("product_type"),
             resultSet.getFloat("average_rating"),
             resultSet.getInt("quantity_stocked"),
             resultSet.getBoolean("listed_status"),
             resultSet.getString("description")
             ));
         }
+
+        return productList;
     }
 
     public void viewShoppingCart(Scanner scn, ArrayList<OrderContent> cart, Connection conn) {
@@ -669,11 +479,11 @@ public class User implements Account {
 
                 PreparedStatement pstmt;
                 String update =
-                        """
-                                UPDATE orders
-                                SET order_status = 'DELIVERED', receive_date = ?
-                                WHERE order_id = ?;
-                        """;
+                """
+                UPDATE orders
+                SET order_status = 'DELIVERED', receive_date = ?
+                WHERE order_id = ?;
+                """;
                 pstmt = conn.prepareStatement(update);
                 pstmt.setTimestamp(1, Timestamp.from(Instant.now()));
                 pstmt.setInt(2, id);
@@ -723,6 +533,35 @@ public class User implements Account {
 
     public String toString() {
         return "user";
+    }
+
+    public void addProductToCart(OrderContent orderContent) {
+        shoppingCart.add(orderContent);
+    }
+
+    public void updateUser(String user_name, String user_firstname, String user_lastname,
+                           String user_address, String user_phone_number, Connection conn) throws SQLException {
+        this.user_name = user_name;
+        this.user_firstname = user_firstname;
+        this.user_lastname = user_lastname;
+        this.user_address = user_address;
+        this.user_phone_number = user_phone_number;
+
+        String query =
+        """
+        UPDATE users SET user_name = ?, user_firstname = ?, user_lastname = ?, user_address = ?, user_phone_number = ? 
+        WHERE user_id = ?
+        """;
+
+        PreparedStatement preparedStatement = conn.prepareStatement(query);
+        preparedStatement.setString(1, this.user_name);
+        preparedStatement.setString(2, this.user_firstname);
+        preparedStatement.setString(3, this.user_lastname);
+        preparedStatement.setString(4, this.user_address);
+        preparedStatement.setString(5, this.user_phone_number);
+        preparedStatement.setInt(6, this.user_id);
+
+        preparedStatement.executeUpdate();
     }
 
     public void setUsername(String user_name) { this.user_name = user_name; }

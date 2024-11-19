@@ -127,6 +127,9 @@ public class Product {
         System.out.println("Rating Success!!");
     }
 
+    @Override
+    public String toString() { return product_name + " " + product_price + " " + quantity_stocked; }
+
     public void updateListedStatus() {
         this.listed_status = this.quantity_stocked != 0;
     }

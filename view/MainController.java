@@ -1,13 +1,14 @@
 package view;
 
-import model.Account;
-import model.Courier;
-import model.Seller;
-import model.User;
+import model.*;
 
+import javax.swing.*;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.sql.*;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -102,14 +103,18 @@ public class MainController {
             mainMenuPage.nextPageName(account.toString());
 
         }, submitLoginEvent -> {
-            if (account.login(Integer.parseInt(selectAccountPage.getID()), conn)) {
-                (account instanceof User ? userPage :
-                 account instanceof Seller ? sellerPage :
-                 courierPage).nextPageName(AccountPage.MAINPAGE);
+            try {
+                if (account.login(Integer.parseInt(selectAccountPage.getID()), conn)) {
+                    (account instanceof User ? userPage :
+                    account instanceof Seller ? sellerPage :
+                    courierPage).nextPageName(AccountPage.MAINPAGE);
 
-                mainMenuPage.nextPageName(account.toString());
-            } else {
-                selectAccountPage.setErrorLbl("Error: Account was not found");
+                    mainMenuPage.nextPageName(account.toString());
+                } else {
+                    selectAccountPage.setErrorLbl("Error: Account was not found.");
+                }
+            } catch (NumberFormatException e) {
+                selectAccountPage.setErrorLbl("Error: Enter valid ID.");
             }
 
         }, backLoginEvent -> selectAccountPage.nextPageName(SelectAccount.SELECTACCPAGE)
@@ -187,24 +192,60 @@ public class MainController {
         userPage.initMainListeners(shopEvent -> {
             userPage.nextMainPageName(UserPage.SHOPPAGE);
 
-            // GET THE LIST OF PRODUCTS AND REFLECT ON THE J-LIST
+            Map<String, String> options = new LinkedHashMap<>();
+            try {
+                if (userPage.getBrowseByOption().equals("By shop")) {
+                    options.putAll(((User) account).browseByShops(conn));
+                } else if (userPage.getBrowseByOption().equals("By product type")) {
+                    options.putAll(((User) account).browseByProductType(conn));
+                }
+            } catch (SQLException e) {
+                JOptionPane.showMessageDialog(null, "Error: " + e.getMessage());
+            }
+
+            userPage.updateBrowseList(options);
         }, cartEvent -> {
             userPage.nextMainPageName(UserPage.CARTPAGE);
 
+            // update
         }, ordersEvent -> {
             userPage.nextMainPageName(UserPage.ORDERSPAGE);
 
+            // update
         }, profileEvent -> {
             userPage.nextMainPageName(UserPage.PROFILEPAGE);
+            userPage.updateProfilePage((User) account);
 
         }, logOutEvent -> {
             mainMenuPage.nextPageName(MainFrame.SELECTACCPAGE);
             selectAccountPage.nextPageName(SelectAccount.SELECTACCPAGE);
 
         }, addToCartEvent -> {
+            Product selectedProduct = userPage.getSelectedProduct();
 
-        }, viewInfoEvent -> {
+            if (selectedProduct.isListed()) {
+                int orderQuantity = userPage.getQuantity();
 
+                if (orderQuantity <= selectedProduct.getQuantity() && orderQuantity > 0) {
+                    ((User) account).addProductToCart(
+                    new OrderContent(selectedProduct.getProductID(), selectedProduct.getName(),orderQuantity, selectedProduct.getPrice()));
+                } else {
+                    JOptionPane.showMessageDialog(null, "Error: Only " + selectedProduct.getQuantity() + " are in stock");
+                }
+            }
+        }, browseChangeEvent -> {
+            Map<String, String> options = new LinkedHashMap<>();
+            try {
+                if (userPage.getBrowseByOption().equals("By shop")) {
+                    options.putAll(((User) account).browseByShops(conn));
+                } else if (userPage.getBrowseByOption().equals("By product type")) {
+                    options.putAll(((User) account).browseByProductType(conn));
+                }
+            } catch (SQLException e) {
+                JOptionPane.showMessageDialog(null, "Error: " + e.getMessage());
+            }
+
+            userPage.updateBrowseList(options);
         }, checkOutEvent -> {
 
         }, removeItemEvent -> {
@@ -216,7 +257,78 @@ public class MainController {
         }, receiveEvent -> {
 
         }, saveChangeEvent -> {
+            User user = (User) account;
 
+            int option = JOptionPane.showConfirmDialog(null, "Save changes?", "Edit Profile", JOptionPane.OK_CANCEL_OPTION);
+
+            if (option == JOptionPane.OK_OPTION) {
+                try {
+                    user.updateUser(
+                        userPage.getEditedName(),
+                        userPage.getEditedFirstName(),
+                        userPage.getEditedLastName(),
+                        userPage.getEditedAddress(),
+                        userPage.getEditedPhone(),
+                        conn
+                    );
+                    JOptionPane.showMessageDialog(null, "Profile changed...");
+                } catch (SQLException e) {
+                    JOptionPane.showMessageDialog(null, "Error: " + e.getMessage());
+                }
+            } else {
+                JOptionPane.showMessageDialog(null, "Edit cancelled...");
+            }
+
+        }, browseSelectEvent -> {
+            ArrayList<Product> products = new ArrayList<>();
+            try {
+                if (userPage.getBrowseByOption().equals("By shop")) {
+                    String query =
+                    """
+                    SELECT product_id, seller_id, product_name, product_price, product_type, average_rating, quantity_stocked, listed_status, description
+                    FROM products
+                    WHERE seller_id = ?;
+                    """;
+                    PreparedStatement pstmt = conn.prepareStatement(query);
+                    pstmt.setInt(1, Integer.parseInt(userPage.getSelectedOption()));
+
+                    products.addAll(((User) account).getSelectedProductList(pstmt));
+
+                } else if (userPage.getBrowseByOption().equals("By product type")) {
+                    String query =
+                    """
+                    SELECT product_id, seller_id, product_name, product_price, product_type, average_rating, quantity_stocked, listed_status, description
+                    FROM products
+                    WHERE product_type = ?;
+                    """;
+
+                    PreparedStatement pstmt = conn.prepareStatement(query);
+                    pstmt.setString(1, userPage.getSelectedOption());
+
+                    products.addAll(((User) account).getSelectedProductList(pstmt));
+                }
+            } catch (Exception e) {
+                // ERROR
+            }
+
+            userPage.updateProductsList(products);
+
+        }, productSelectEvent -> {
+            Product selectedProduct = userPage.getSelectedProduct();
+
+            userPage.setProductInfo(
+            "<html>Product info<br/>" +
+            "Name: " + selectedProduct.getName() + "<br/>" +
+            "Price: " + selectedProduct.getPrice() + "<br/>" +
+            "Type: " + selectedProduct.getType() + "<br/>" +
+            "Rating: " + selectedProduct.getRating() + "<br/>" +
+            "Qty: " + selectedProduct.getQuantity() + "<br/>" +
+            "Listed: " + selectedProduct.isListed() + "<br/>" +
+            "Description: " + selectedProduct.getDescription());
+
+        }, orderSelectEvent -> {
+            System.out.println("HI3");
+            // update orderLbl
         });
     }
 
