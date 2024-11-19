@@ -135,17 +135,23 @@ public class MainController {
             String user_address = userPage.getUserAddress();
 
             String user_phone_number = userPage.getUserPhone();
-            Pattern pattern = Pattern.compile("^\\d{11}$");
-            Matcher matcher = pattern.matcher(user_phone_number);
 
-            while (!matcher.matches()) {
-                JOptionPane.showMessageDialog(null, "Error: Invalid phone number format.");
-                user_phone_number = userPage.getUserPhone();
-                matcher = pattern.matcher(user_phone_number);
+            if (!user_phone_number.isEmpty()) {
+                Pattern pattern = Pattern.compile("^\\d{11}$");
+                Matcher matcher = pattern.matcher(user_phone_number);
+
+                while (!matcher.matches()) {
+                    JOptionPane.showMessageDialog(null, "Error: Invalid phone number format.");
+                    user_phone_number = userPage.getUserPhone();
+                    matcher = pattern.matcher(user_phone_number);
+                }
             }
 
             Date user_creation_date = new Date(System.currentTimeMillis());
             boolean user_verified_status = false;
+
+            if (!user_phone_number.isEmpty() && !user_address.isEmpty())
+                user_verified_status = true;
 
             try {
                 String query =
@@ -441,17 +447,22 @@ public class MainController {
             String seller_address = sellerPage.getSellerAddress();
             String seller_phone_number = sellerPage.getSellerPhone();
 
-            Pattern pattern = Pattern.compile("^\\d{11}$");
-            Matcher matcher = pattern.matcher(seller_phone_number);
+            if (!seller_phone_number.isEmpty()) {
+                Pattern pattern = Pattern.compile("^\\d{11}$");
+                Matcher matcher = pattern.matcher(seller_phone_number);
 
-            while (!matcher.matches()) {
-                JOptionPane.showMessageDialog(null, "Error: Invalid phone number format.");
-                seller_phone_number = sellerPage.getSellerPhone();
-                matcher = pattern.matcher(seller_phone_number);
+                while (!matcher.matches()) {
+                    JOptionPane.showMessageDialog(null, "Error: Invalid phone number format.");
+                    seller_phone_number = sellerPage.getSellerPhone();
+                    matcher = pattern.matcher(seller_phone_number);
+                }
             }
 
             Date seller_creation_date = new Date(System.currentTimeMillis());
             boolean seller_verified_status = false;
+
+            if (!seller_phone_number.isEmpty() && !seller_address.isEmpty())
+                seller_verified_status = true;
 
             try {
                 String query =
@@ -520,6 +531,10 @@ public class MainController {
             }
 
             boolean courier_verified_status = false;
+
+            if (!courier_email_address.isEmpty() && !courier_address.isEmpty())
+                courier_verified_status = true;
+
 
             try {
                 String query =
