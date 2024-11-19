@@ -283,20 +283,22 @@ public class Courier implements Account {
     public void updateAccount(Connection conn) {
         try {
             String update =
-            """
-            UPDATE couriers
-            SET courier_name = ?
-                courier_email_address = ?
-                courier_address = ?
-            WHERE courier_id = ?;
-            """;
+                    """
+                    UPDATE couriers
+                    SET courier_name = ?,
+                        courier_email_address = ?,
+                        courier_address = ?,
+                        courier_verified_status = ?
+                    WHERE courier_id = ?;
+                    """;
             PreparedStatement pstmt = conn.prepareStatement(update);
             pstmt.setString(1, this.courier_name);
             pstmt.setString(2, this.courier_email_address);
             pstmt.setString(3, this.courier_address);
-            pstmt.setInt(4, this.courier_id);
-            pstmt.executeUpdate();
             updateStatus();
+            pstmt.setBoolean(4, this.courier_verified_status);
+            pstmt.setInt(5, this.courier_id);
+            pstmt.executeUpdate();
         } catch (Exception e){
             System.out.println("Error updating name: " + e);
         }

@@ -382,8 +382,8 @@ public class Seller implements Account {
     }
 
     public void updateStatus() {
-        // checking fields
-        this.seller_verified_status = true;
+        if (this.seller_phone_number != null && this.seller_address != null)
+            this.seller_verified_status = true;
     }
 
     @Override
@@ -395,13 +395,16 @@ public class Seller implements Account {
                     SET seller_name = ?,
                         seller_address = ?,
                         seller_phone_number = ?
+                        seller_verified_status = ?
                     WHERE seller_id = ?;
                     """;
             PreparedStatement pstmt = conn.prepareStatement(update);
             pstmt.setString(1, this.seller_name);
             pstmt.setString(2, this.seller_address);
             pstmt.setString(3, this.seller_phone_number);
-            pstmt.setInt(4, this.seller_id);
+            pstmt.setInt(5, this.seller_id);
+            updateStatus();
+            pstmt.setBoolean(4, this.seller_verified_status);
             pstmt.executeUpdate();
         } catch (Exception e){
             System.out.println("Error updating name: " + e);
