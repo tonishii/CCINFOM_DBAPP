@@ -396,7 +396,7 @@ public class MainController {
                 if (option == JOptionPane.OK_OPTION) {
                     String orderInp = userPage.getReturnOrderInp();
                     String productInp = userPage.getReturnProdInp();
-                    String reason = userPage.getReturnReason();
+                    String reason = userPage.getComboBoxVal();
                     String desc = userPage.getReturnDesc();
                     
                     if (orderInp.trim().isEmpty() || productInp.trim().isEmpty()) { // When an input field is not filled up
@@ -406,7 +406,8 @@ public class MainController {
                         try {
                             int order_id = Integer.parseInt(orderInp.trim());
                             int product_id = Integer.parseInt(productInp.trim());
-                            if (Return.requestReturn(conn, product_id, order_id, reason, desc)) {
+                            
+                            if (Return.requestReturn(conn, product_id, order_id, ((User) account).getID(), reason, desc)) {
                                 JOptionPane.showMessageDialog(null, "Return request was successful.");
                             }
                             else {
@@ -422,9 +423,45 @@ public class MainController {
             }
 
         }, rateEvent -> { // Action: Pressing the return item button in the orders page
-            JOptionPane.showConfirmDialog(null, userPage.getRatingPanel(), "Rate a Product", JOptionPane.OK_CANCEL_OPTION);
+            try {
+                ArrayList<OrderContent> itemsList = ((User) account).getOrderItems(conn, ((User) account).getID());
+                userPage.ordersListToProducts(itemsList);
+                int option = JOptionPane.showConfirmDialog(null, userPage.getRatingPanel(), "Rate a Product", JOptionPane.OK_CANCEL_OPTION);
+                if (option == JOptionPane.OK_OPTION) {
+                    String orderInp = userPage.getReturnOrderInp();
+                    String productInp = userPage.getReturnProdInp();
+                    int rating = userPage.getSpinnerVal();
+                    if (orderInp.trim().isEmpty() || productInp.trim().isEmpty()) { // When an input field is not filled up
+                        JOptionPane.showMessageDialog(null, "Please fill out the required input fields:\nOrder ID\nProduct ID");
+                    }
+                    else {
+                        try {
+                            int order_id = Integer.parseInt(orderInp.trim());
+                            int product_id = Integer.parseInt(productInp.trim());
+
+                            if (OrderContent.rateProduct(conn, order_id, product_id, ((User) account).getID(), rating)) {
+                                JOptionPane.showMessageDialog(null, "Rating was successful.");
+                            }
+                            else {
+                                JOptionPane.showMessageDialog(null, "Rating was unsuccessful.");
+                            }
+                        } catch (NumberFormatException e) {
+                            JOptionPane.showMessageDialog(null, "Invalid ID input/s.");
+                        }
+                    }
+                }
+            } catch (Exception e) {
+                JOptionPane.showMessageDialog(null, "Error: " + e);
+            }
+            
         }, receiveEvent -> { // Action: Pressing the receive item button in the orders page
-            JOptionPane.showConfirmDialog(null, userPage.getReceiveOrderPanel(), "Receive Order", JOptionPane.OK_CANCEL_OPTION);
+            try {
+                ArrayList<OrderContent> itemsList = ((User) account).getOrderItems(conn, ((User) account).getID());
+                userPage.ordersListToProducts(itemsList);
+                JOptionPane.showConfirmDialog(null, userPage.getReceiveOrderPanel(), "Receive Order", JOptionPane.OK_CANCEL_OPTION);
+            } catch (Exception e) {
+                JOptionPane.showMessageDialog(null, "Error: " + e);
+            }
         }, saveChangeEvent -> { // Action: Pressing the save changes button in the profile page
             User user = (User) account;
 
@@ -513,7 +550,6 @@ public class MainController {
  
                 if (userPage.getOrdersViewOption().equals("Orders") && val != null) {
                     int order_id = Integer.parseInt(val);
-                    
                     try {
                         String query = 
                             """
@@ -556,7 +592,6 @@ public class MainController {
                     String ids[] = val.split(" ");
                     int order_id = Integer.parseInt(ids[0]);
                     int product_id = Integer.parseInt(ids[1]);
-                    
                     try {
                         String query = 
                             """

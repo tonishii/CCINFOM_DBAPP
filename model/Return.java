@@ -26,18 +26,31 @@ public class Return {
         this.return_status = return_status;
     }
     
-    public static boolean requestReturn(Connection conn, int product_id, int order_id, String reason, String description) {
+    public static boolean requestReturn(Connection conn, int product_id, int order_id, int user_id, String reason, String description) {
         if (Courier.assignCourier(conn) == -1) {
             return false;
         }
         
         try {
             String query = 
+                    """
+                    SELECT 1
+                    FROM orders o
+                    JOIN order_contents oc ON o.order_id = oc.order_id
+                    WHERE o.user_id = ?
+                    """;
+            PreparedStatement ps = conn.prepareStatement(query);
+            ps.setInt(1, user_id);
+            ResultSet rs =  ps.executeQuery();
+            
+            if (!(rs.next())) return false;
+            
+            query = 
                 """
                 INSERT INTO `returns`
-                VALUES(?, ?, ?, ?, ?, ?)
+                VALUES(?, ?, ?, ?, ?, ?, ?)
                 """;
-            PreparedStatement ps = conn.prepareStatement(query);
+            ps = conn.prepareStatement(query);
             ps.setInt(1, order_id);
             ps.setInt(2, product_id);
             ps.setInt(3, Courier.assignCourier(conn));
@@ -49,6 +62,7 @@ public class Return {
             ps.executeUpdate();
             } catch (Exception e) {
                 System.out.println("Error in requesting return: " + e);
+                return false;
             }
         return true;
     }

@@ -58,18 +58,19 @@ public class Product {
         }
     }
 
-    public void updateRating(Connection conn, int productId) throws SQLException {
+    public static void updateRating(Connection conn, int productId) throws SQLException {
         String query =
                 """
-                SELECT AVG(DISTINCT od.product_rating)
+                SELECT AVG(DISTINCT od.product_rating) AS product_rating
                 FROM order_contents od
-                WHERE od.product_id = 10 AND od.product_rating IS NOT NULL;
+                WHERE od.product_id = ? AND od.product_rating IS NOT NULL;
                 """;
         PreparedStatement pstmt = conn.prepareStatement(query);
         pstmt.setInt(1, productId);
         ResultSet resultSet = pstmt.executeQuery();
-        while (resultSet.next()){
-            resultSet.getFloat("product_rating");
+        float rating = 0.0f;
+        if (resultSet.next()){
+            rating = resultSet.getFloat("product_rating");
         }
 
         query =
@@ -79,7 +80,7 @@ public class Product {
                 WHERE product_id = ?;
                 """;
         pstmt = conn.prepareStatement(query);
-        pstmt.setFloat(1, resultSet.getFloat("product_rating"));
+        pstmt.setFloat(1, rating);
         pstmt.setInt(2, productId);
         pstmt.executeUpdate();
         System.out.println("Rating Success!!");

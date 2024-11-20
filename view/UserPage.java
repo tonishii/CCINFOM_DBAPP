@@ -73,12 +73,14 @@ public class UserPage extends JPanel implements AccountPage {
                               rateBtn,
                               receiveBtn;
     
-    // For request return panel
+    // For request return, receive order, and product rating panels
     
     private JTextField          orderInp,
                                 prodInp;
-    private JComboBox<String>   rsnComboBox;
+    private JComboBox<String>   comboBox;
+    private JComboBox<Integer>  intComboBox;
     private JTextArea           descInp;
+    private JSpinner            spinner;
 
     // Profile option
 
@@ -301,6 +303,10 @@ public class UserPage extends JPanel implements AccountPage {
         orderInfoLbl = new JLabel();
 
         JPanel infoPanel = new JPanel();
+        
+        infoPanel.setBorder(BorderFactory.createTitledBorder(BorderFactory.createLineBorder(Color.BLACK, 2),
+        "Details", TitledBorder.LEFT, TitledBorder.TOP, new Font("Montserrat", Font.PLAIN, 12)));
+
         infoPanel.add(orderInfoLbl);       // USE THIS FOR SETTING THE ORDER INFO PACK IT INTO ONE STRING
         
         panel.add(infoPanel);
@@ -477,7 +483,7 @@ public class UserPage extends JPanel implements AccountPage {
         this.options = new LinkedHashMap<>();
         
         for (Return r : returns) {
-            String display = "Order No. " + Integer.toString(r.getOrderID());
+            String display = "Order No. " + Integer.toString(r.getOrderID()) + ",  Product No. " + Integer.toString(r.getProductID());
             String value = Integer.toString(r.getOrderID()) + " " + Integer.toString(r.getProductID()); // value.split(" ") to get order id and product ig
             this.options.put(display, value);
             mdl.addElement(display);
@@ -489,7 +495,7 @@ public class UserPage extends JPanel implements AccountPage {
     public String getSelectedOrder() {
         return ordersList.getSelectedValue();
     }
-    // CHANGES STARTS HERE
+
     public String getMappedValue(String val) {
         return this.options.get(val);
     }
@@ -550,12 +556,12 @@ public class UserPage extends JPanel implements AccountPage {
         reqRet.add(prodInp, gbc);
         
         String reasons[] = {"Damaged Item", "Wrong Item",  "Change of Mind", "Counterfeit Item"};
-        this.rsnComboBox = new JComboBox<>(reasons);
+        comboBox = new JComboBox<>(reasons);
         gbc.gridx = 1;
         gbc.gridy = 2;
-        reqRet.add(rsnComboBox, gbc);
+        reqRet.add(comboBox, gbc);
         
-        this.descInp = new JTextArea(5, 5);
+        descInp = new JTextArea(5, 5);
         gbc.gridx = 0;
         gbc.gridy = 4;
         gbc.gridwidth = 2;
@@ -565,8 +571,8 @@ public class UserPage extends JPanel implements AccountPage {
         return reqRet;
     }
     
-    public String getReturnReason() {
-        return (String) this.rsnComboBox.getSelectedItem();
+    public String getComboBoxVal() {
+        return (String) this.comboBox.getSelectedItem();
     }
     
     public String getReturnDesc() {
@@ -588,16 +594,37 @@ public class UserPage extends JPanel implements AccountPage {
         JPanel rate = new JPanel();
         rate.setLayout(new GridBagLayout());
         
-        JLabel rateLbl = new JLabel("Rating: ");
+        JLabel orderLbl = new JLabel("Order ID: ");
         gbc.gridx = 0;
         gbc.gridy = 0;
+        rate.add(orderLbl, gbc);
+        
+        JLabel prodLbl = new JLabel("Product ID: ");
+        gbc.gridx = 0;
+        gbc.gridy = 1;
+        rate.add(prodLbl, gbc);
+        
+        JLabel rateLbl = new JLabel("Rating: ");
+        gbc.gridx = 0;
+        gbc.gridy = 2;
         rate.add(rateLbl, gbc);
         
-        SpinnerModel sm = new SpinnerNumberModel(0, 0, 5, 1);
-        JSpinner rating = new JSpinner(sm);
+        orderInp = new JTextField(5);
         gbc.gridx = 1;
         gbc.gridy = 0;
-        rate.add(rating, gbc);
+        rate.add(orderInp, gbc);
+        
+        prodInp = new JTextField(5);
+        gbc.gridx = 1;
+        gbc.gridy = 1;
+        rate.add(prodInp, gbc);
+        
+        SpinnerModel sm = new SpinnerNumberModel(0, 0, 5, 1);
+        spinner = new JSpinner(sm);
+        gbc.gridx = 1;
+        gbc.gridy = 2;
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+        rate.add(spinner, gbc);
         
         return rate;
     }
@@ -609,57 +636,78 @@ public class UserPage extends JPanel implements AccountPage {
         JPanel receiveOrd = new JPanel();
         receiveOrd.setLayout(new GridBagLayout());
         
+        JLabel orderLbl = new JLabel("Order ID: ");
+        gbc.gridx = 0;
+        gbc.gridy = 0;
+        receiveOrd.add(orderLbl, gbc);
+        
         JLabel lbl = new JLabel("ENTER DATE");
         lbl.setFont(new Font("Verdana", Font.BOLD, 12));
         gbc.gridx = 0;
-        gbc.gridy = 0;
+        gbc.gridy = 1;
         gbc.gridwidth = 2;
         receiveOrd.add(lbl, gbc);
         
         JLabel monthLbl = new JLabel("Month: ");
         gbc.gridx = 0;
-        gbc.gridy = 1;
+        gbc.gridy = 2;
         gbc.gridwidth = 1;
         receiveOrd.add(monthLbl, gbc);
         
         JLabel dayLbl = new JLabel("Day: ");
         gbc.gridx = 0;
-        gbc.gridy = 2;
+        gbc.gridy = 3;
         gbc.gridwidth = 1;
         receiveOrd.add(dayLbl, gbc);
         
         JLabel yearLbl = new JLabel("Year: ");
         gbc.gridx = 0;
-        gbc.gridy = 3;
+        gbc.gridy = 4;
         gbc.gridwidth = 1;
         receiveOrd.add(yearLbl, gbc);
         
+        orderInp = new JTextField(5);
+        gbc.gridx = 1;
+        gbc.gridy = 0;
+        receiveOrd.add(orderInp, gbc);
+        
         String months[] = {"January", "February", "March", "April", "May", "June", "July",
                             "August", "September", "October", "November", "December"};
-        JComboBox<String> monthComboBox = new JComboBox<>(months);
-        gbc.gridx = 1;
-        gbc.gridy = 1;
-        gbc.gridwidth = 1;
-        receiveOrd.add(monthComboBox, gbc);
-
-        JComboBox<Integer> dayComboBox = new JComboBox<>();
-        for (int i = 1; i <= 31; i++) {
-            dayComboBox.addItem(i);
-        }
+        comboBox = new JComboBox<>(months);
         gbc.gridx = 1;
         gbc.gridy = 2;
         gbc.gridwidth = 1;
-        receiveOrd.add(dayComboBox, gbc);
-        
-        JTextField yearInp = new JTextField(5);
+        receiveOrd.add(comboBox, gbc);
+
+        intComboBox = new JComboBox<>();
+        for (int i = 1; i <= 31; i++) {
+            intComboBox.addItem(i);
+        }
         gbc.gridx = 1;
         gbc.gridy = 3;
         gbc.gridwidth = 1;
-        receiveOrd.add(yearInp, gbc);
+        receiveOrd.add(intComboBox, gbc);
+        
+        SpinnerModel sm = new SpinnerNumberModel(2024, 2020, 2050, 1);
+        spinner = new JSpinner(sm);
+        spinner.setEditor(new JSpinner.NumberEditor(spinner, "#"));
+        gbc.gridx = 1;
+        gbc.gridy = 4;
+        gbc.gridwidth = 1;
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+        receiveOrd.add(spinner, gbc);
         
         return receiveOrd;
     }
-    // CHANGES ENDS HERE
+    
+    public int getSpinnerVal() {
+        return (int) this.spinner.getValue();
+    }
+    
+    public int getIntComboBoxVal() {
+        return (int) this.intComboBox.getSelectedItem();
+    }
+
     @Override
     public void nextPageName(String name) {
         this.userCardLayout.show(this, name);
