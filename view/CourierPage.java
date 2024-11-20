@@ -3,7 +3,6 @@ package view;
 import model.Courier;
 import model.Order;
 import model.Return;
-import model.User;
 
 import javax.swing.*;
 import javax.swing.border.TitledBorder;
@@ -39,11 +38,15 @@ public class CourierPage extends JPanel implements AccountPage {
                         logOutBtn,
                         saveBtn;
 
-    private JTable      ongoingTable,
-                        returnsTable;
+    private JTable      ongoingOrdersTable,
+                        ongoingReturnsTable,
+                        activityOrdersTable,
+                        activityReturnsTable;
 
-    private JScrollPane ongoingPane,
-                        returnsPane;
+    private JScrollPane ongoingOrdersPane,
+                        ongoingReturnsPane,
+                        activityOrdersPane,
+                        activityReturnsPane;
 
     private CardLayout mainCardLayout;
 
@@ -133,6 +136,7 @@ public class CourierPage extends JPanel implements AccountPage {
 
         bottomPanel.add(getOngoingOrdersPage(), ONGOINGORDERSPAGE);
         bottomPanel.add(getEditPage(), EDITPAGE);
+        bottomPanel.add(getActivityPage(), ACTIVITYPAGE);
 
         courierPage.add(topPanel);
         courierPage.add(bottomPanel);
@@ -148,30 +152,67 @@ public class CourierPage extends JPanel implements AccountPage {
         JLabel ongoingOrdersLabel = new JLabel("Ongoing Orders:");
 
         OrderClassTableModel oCTM = new OrderClassTableModel(new ArrayList<>());
-        ongoingTable = new JTable(oCTM);
-        ongoingTable.setDefaultEditor(Object.class, null);
+        ongoingOrdersTable = new JTable(oCTM);
+        ongoingOrdersTable.setDefaultEditor(Object.class, null);
 
-        this.ongoingPane = new JScrollPane(ongoingTable, JScrollPane.VERTICAL_SCROLLBAR_ALWAYS, JScrollPane.HORIZONTAL_SCROLLBAR_ALWAYS);
-        ongoingPane.setPreferredSize(new Dimension(550, 200));
+        this.ongoingOrdersPane = new JScrollPane(ongoingOrdersTable, JScrollPane.VERTICAL_SCROLLBAR_ALWAYS, JScrollPane.HORIZONTAL_SCROLLBAR_ALWAYS);
+        ongoingOrdersPane.setPreferredSize(new Dimension(550, 200));
 
         JLabel ongoingReturnsLabel = new JLabel("Ongoing Returns:");
 
         ReturnTableModel rTM = new ReturnTableModel(new ArrayList<>());
-        returnsTable = new JTable(rTM);
-        returnsTable.setDefaultEditor(Object.class, null);
+        ongoingReturnsTable = new JTable(rTM);
+        ongoingReturnsTable.setDefaultEditor(Object.class, null);
 
-        this.returnsPane = new JScrollPane(returnsTable, JScrollPane.VERTICAL_SCROLLBAR_ALWAYS, JScrollPane.HORIZONTAL_SCROLLBAR_ALWAYS);
-        returnsPane.setPreferredSize(new Dimension(550, 200));
+        this.ongoingReturnsPane = new JScrollPane(ongoingReturnsTable, JScrollPane.VERTICAL_SCROLLBAR_ALWAYS, JScrollPane.HORIZONTAL_SCROLLBAR_ALWAYS);
+        ongoingReturnsPane.setPreferredSize(new Dimension(550, 200));
 
         oOPage.add(ongoingOrdersLabel, gbc);
         gbc.gridy = 1;
-        oOPage.add(ongoingPane, gbc);
+        oOPage.add(ongoingOrdersPane, gbc);
         gbc.gridy = 2;
         oOPage.add(ongoingReturnsLabel, gbc);
         gbc.gridy = 3;
-        oOPage.add(returnsPane, gbc);
+        oOPage.add(ongoingReturnsPane, gbc);
 
         return oOPage;
+    }
+
+    public JPanel getActivityPage() {
+        JPanel activityPanel = new JPanel(new GridBagLayout());
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.insets = new Insets(5, 5, 5, 5);
+
+        JLabel activityMainLabel = new JLabel("Activity Report");
+        JLabel activityOrdersLabel = new JLabel("Completed Orders:");
+
+        OrderClassTableModel oCTM = new OrderClassTableModel(new ArrayList<>());
+        activityOrdersTable = new JTable(oCTM);
+        activityOrdersTable.setDefaultEditor(Object.class, null);
+
+        this.activityOrdersPane = new JScrollPane(activityOrdersTable, JScrollPane.VERTICAL_SCROLLBAR_ALWAYS, JScrollPane.HORIZONTAL_SCROLLBAR_ALWAYS);
+        activityOrdersPane.setPreferredSize(new Dimension(550, 200));
+
+        JLabel activityReturnsLabel = new JLabel("Completed Returns:");
+
+        ReturnTableModel rTM = new ReturnTableModel(new ArrayList<>());
+        activityReturnsTable = new JTable(rTM);
+        activityReturnsTable.setDefaultEditor(Object.class, null);
+
+        this.activityReturnsPane = new JScrollPane(activityReturnsTable, JScrollPane.VERTICAL_SCROLLBAR_ALWAYS, JScrollPane.HORIZONTAL_SCROLLBAR_ALWAYS);
+        activityReturnsPane.setPreferredSize(new Dimension(550, 200));
+
+        activityPanel.add(activityMainLabel, gbc);
+        gbc.gridy = 1;
+        activityPanel.add(activityOrdersLabel, gbc);
+        gbc.gridy = 2;
+        activityPanel.add(activityOrdersPane, gbc);
+        gbc.gridy = 3;
+        activityPanel.add(activityReturnsLabel, gbc);
+        gbc.gridy = 4;
+        activityPanel.add(activityReturnsPane, gbc);
+
+        return activityPanel;
     }
 
     public JPanel getEditPage() {
@@ -241,14 +282,26 @@ public class CourierPage extends JPanel implements AccountPage {
 
     public void updateOOTable(ArrayList<Order> orders) {
         OrderClassTableModel mdl = new OrderClassTableModel(orders);
-        ongoingTable.setModel(mdl);
-        ongoingPane.setViewportView(ongoingTable);
+        ongoingOrdersTable.setModel(mdl);
+        ongoingOrdersPane.setViewportView(ongoingOrdersTable);
     }
 
     public void updateORTable(ArrayList<Return> returns) {
         ReturnTableModel mdl = new ReturnTableModel(returns);
-        returnsTable.setModel(mdl);
-        returnsPane.setViewportView(returnsTable);
+        ongoingReturnsTable.setModel(mdl);
+        ongoingReturnsPane.setViewportView(ongoingReturnsTable);
+    }
+
+    public void updateAOTable(ArrayList<Order> orders) {
+        OrderClassTableModel mdl = new OrderClassTableModel(orders);
+        activityOrdersTable.setModel(mdl);
+        activityOrdersPane.setViewportView(activityOrdersTable);
+    }
+
+    public void updateARTable(ArrayList<Return> returns) {
+        ReturnTableModel mdl = new ReturnTableModel(returns);
+        activityReturnsTable.setModel(mdl);
+        activityReturnsPane.setViewportView(activityReturnsTable);
     }
 
     public String getCourierName() { return courierNameField.getText().trim(); }

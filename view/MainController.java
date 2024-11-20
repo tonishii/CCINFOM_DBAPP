@@ -756,17 +756,19 @@ public class MainController {
         });
 
         courierPage.initMainListeners(orderLtr -> {
-            courierPage.updateOOTable(((Courier)account).showOngoingOrders(conn));
-            courierPage.updateORTable(((Courier)account).showOngoingReturns(conn));
-            courierPage.nextMainPageName(CourierPage.ONGOINGORDERSPAGE);
+                courierPage.updateOOTable(((Courier)account).showOngoingOrders(conn));
+                courierPage.updateORTable(((Courier)account).showOngoingReturns(conn));
+                courierPage.nextMainPageName(CourierPage.ONGOINGORDERSPAGE);
             }, actEvent -> {
-            // courierPage.nextPageName(CourierPage.ACTIVITYPAGE);
+                courierPage.updateAOTable(((Courier)account).showCompletedOrders(conn));
+                courierPage.updateARTable(((Courier)account).showCompletedReturns(conn));
+                courierPage.nextMainPageName(CourierPage.ACTIVITYPAGE);
             }, editEvent -> {
-            courierPage.nextMainPageName(CourierPage.EDITPAGE);
-            courierPage.updateProfilePage((Courier) account);
+                courierPage.nextMainPageName(CourierPage.EDITPAGE);
+                courierPage.updateProfilePage((Courier) account);
             }, logOutEvent -> {
-            mainMenuPage.nextPageName(MainFrame.SELECTACCPAGE);
-            selectAccountPage.nextPageName(SelectAccount.SELECTACCPAGE);
+                mainMenuPage.nextPageName(MainFrame.SELECTACCPAGE);
+                selectAccountPage.nextPageName(SelectAccount.SELECTACCPAGE);
         });
     }
 }
