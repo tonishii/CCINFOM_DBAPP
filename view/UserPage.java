@@ -539,12 +539,12 @@ public class UserPage extends JPanel implements AccountPage {
         gbc.gridy = 3;
         reqRet.add(descLbl, gbc);
         
-        orderInp = new JTextField();
+        orderInp = new JTextField(5);
         gbc.gridx = 1;
         gbc.gridy = 0;
         reqRet.add(orderInp, gbc);
         
-        prodInp = new JTextField();
+        prodInp = new JTextField(5);
         gbc.gridx = 1;
         gbc.gridy = 1;
         reqRet.add(prodInp, gbc);

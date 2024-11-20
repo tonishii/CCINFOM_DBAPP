@@ -26,16 +26,10 @@ public class Return {
         this.return_status = return_status;
     }
     
-    public static void requestReturn(Scanner scn, Connection conn, int product_id, int order_id) {
+    public static boolean requestReturn(Connection conn, int product_id, int order_id, String reason, String description) {
         if (Courier.assignCourier(conn) == -1) {
-            System.out.println("No available couriers for return requests.");
-            return;
+            return false;
         }
-        System.out.println("[REASON FOR RETURN]\n[1] Damaged Item\n[2] Wrong Item\n[3] Change of Mind\n[4] Counterfeit Item");
-        System.out.print("Choice: ");
-        String reason = scn.nextLine().trim();
-        System.out.print("Return description: ");
-        String desc = scn.nextLine();
         
         try {
             String query = 
@@ -47,30 +41,16 @@ public class Return {
             ps.setInt(1, order_id);
             ps.setInt(2, product_id);
             ps.setInt(3, Courier.assignCourier(conn));
-            ps.setString(5, desc);
+            ps.setString(4, reason);
+            ps.setString(5, description);
             ps.setDate(6, Date.valueOf("9999-12-31"));
             ps.setString(7, ReturnStatus.PROCESSING.name());
-
-            switch (reason) {
-                case "1":
-                    ps.setString(4, ReturnReason.DAMAGED.getVal());
-                    break;
-                case "2":
-                    ps.setString(4, ReturnReason.WRONG.getVal());
-                    break;
-                case "3":
-                    ps.setString(4, ReturnReason.CHANGEOFMIND.getVal());
-                    break;
-                case "4":
-                    ps.setString(4, ReturnReason.COUNTERFEIT.getVal());
-                    break;
-                default: System.out.println("Invalid input.");
-            }
             
             ps.executeUpdate();
             } catch (Exception e) {
                 System.out.println("Error in requesting return: " + e);
             }
+        return true;
     }
     
     public void approveReturn(Connection conn, int product_id, int order_id) {

@@ -399,14 +399,19 @@ public class MainController {
                     String reason = userPage.getReturnReason();
                     String desc = userPage.getReturnDesc();
                     
-                    if (orderInp == null || productInp == null || desc == null) { // When an input field is not filled up
-                        JOptionPane.showMessageDialog(null, "Please fill out all of the input fields.");
+                    if (orderInp.trim().isEmpty() || productInp.trim().isEmpty()) { // When an input field is not filled up
+                        JOptionPane.showMessageDialog(null, "Please fill out the required input fields:\nOrder ID\nProduct ID");
                     }
                     else {
                         try {
-                            int order_id = Integer.parseInt(orderInp);
-                            int product_id = Integer.parseInt(productInp);
-                            
+                            int order_id = Integer.parseInt(orderInp.trim());
+                            int product_id = Integer.parseInt(productInp.trim());
+                            if (Return.requestReturn(conn, product_id, order_id, reason, desc)) {
+                                JOptionPane.showMessageDialog(null, "Return request was successful.");
+                            }
+                            else {
+                                JOptionPane.showMessageDialog(null, "Return request was unsuccessful.");
+                            }
                         } catch (NumberFormatException e) {
                             JOptionPane.showMessageDialog(null, "Invalid ID input/s.");
                         }
@@ -503,13 +508,10 @@ public class MainController {
             "Description: " + selectedProduct.getDescription());
 
         }, orderSelectEvent -> { // Action: Pressing an order in the orders list in the orders page
-            System.out.println("HI3");
-            // update orderLbl
-            // CHANGES STARTS HERE
             if (!orderSelectEvent.getValueIsAdjusting()) {
                 String val = userPage.getMappedValue(userPage.getSelectedOrder());
  
-                if (userPage.getOrdersViewOption().equals("Orders")) {
+                if (userPage.getOrdersViewOption().equals("Orders") && val != null) {
                     int order_id = Integer.parseInt(val);
                     
                     try {
@@ -550,7 +552,7 @@ public class MainController {
                     
                     
                 }
-                else if (userPage.getOrdersViewOption().equals("Returns")) {
+                else if (userPage.getOrdersViewOption().equals("Returns") && val != null) {
                     String ids[] = val.split(" ");
                     int order_id = Integer.parseInt(ids[0]);
                     int product_id = Integer.parseInt(ids[1]);
@@ -583,7 +585,6 @@ public class MainController {
                     }
                 }
             }
-            // CHANGES END HERE
         });
     }
 
