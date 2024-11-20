@@ -746,10 +746,14 @@ public class MainController {
         });
 
         courierPage.initMainListeners(orderLtr -> {
-            courierPage.updateOOTable(((Courier)account).ShowOngoingOrders(conn));
-            courierPage.nextPageName(CourierPage.ONGOINGORDERSPAGE);
-            }, profileEvent -> {
-
+            courierPage.updateOOTable(((Courier)account).showOngoingOrders(conn));
+            courierPage.updateORTable(((Courier)account).showOngoingReturns(conn));
+            courierPage.nextMainPageName(CourierPage.ONGOINGORDERSPAGE);
+            }, actEvent -> {
+            // courierPage.nextPageName(CourierPage.ACTIVITYPAGE);
+            }, editEvent -> {
+            courierPage.nextMainPageName(CourierPage.EDITPAGE);
+            courierPage.updateProfilePage((Courier) account);
             }, logOutEvent -> {
             mainMenuPage.nextPageName(MainFrame.SELECTACCPAGE);
             selectAccountPage.nextPageName(SelectAccount.SELECTACCPAGE);

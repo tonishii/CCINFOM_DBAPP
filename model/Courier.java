@@ -63,7 +63,6 @@ public class Courier implements Account {
             Select option:\s""");
 
             switch (scn.nextLine().trim()) {
-                case "1" -> showOngoingOrders(conn);
 
                 case "2" -> generateActivityReport(conn);
 
@@ -188,7 +187,7 @@ public class Courier implements Account {
         }
     }
 
-    public ArrayList<Order> ShowOngoingOrders(Connection conn) {
+    public ArrayList<Order> showOngoingOrders(Connection conn) {
         ArrayList<Order> orderList = new ArrayList<>();
         try {
             String orderQuery = """
@@ -220,7 +219,7 @@ public class Courier implements Account {
         try {
             String returnQuery =
                     """
-                    SELECT r.order_id, r.product_id, r.return_reason, r.return_description, r.return_date, r.return_status
+                    SELECT *
                     FROM returns r
                     WHERE r.courier_id = ?;
                     """;
@@ -246,62 +245,62 @@ public class Courier implements Account {
         return returns;
     }
 
-    public void showOngoingOrders(Connection conn) {
-        try {
-            String orderQuery =
-            """
-            SELECT order_id, user_id, purchase_date, total_price, order_status, receive_date
-            FROM orders
-            WHERE courier_id = ? AND order_status NOT IN ('Completed', 'Delivered');
-            """;
-
-            String returnQuery =
-            """
-            SELECT r.order_id, r.product_id, r.return_reason, r.return_description, r.return_date, r.return_status
-            FROM returns r
-            WHERE r.courier_id = ?;
-            """;
-
-            PreparedStatement ordersStmt = conn.prepareStatement(orderQuery);
-            ordersStmt.setInt(1, this.courier_id);
-            ResultSet ordersResultSet = ordersStmt.executeQuery();
-
-            PreparedStatement returnsStmt = conn.prepareStatement(returnQuery);
-            returnsStmt.setInt(1, this.courier_id);
-            ResultSet returnsResultSet = returnsStmt.executeQuery();
-
-            System.out.println("Ongoing Orders:");
-            System.out.println("Order ID | User ID | Purchase Date | Total Price | Order Status | Receive Date");
-            while (ordersResultSet.next()) {
-                int orderId = ordersResultSet.getInt("order_id");
-                int userId = ordersResultSet.getInt("user_id");
-                Date purchaseDate = ordersResultSet.getDate("purchase_date");
-                float totalPrice = ordersResultSet.getFloat("total_price");
-                String orderStatus = ordersResultSet.getString("order_status");
-                Date receiveDate = ordersResultSet.getDate("receive_date");
-
-                System.out.printf("%5d    | %4d    |   %s  | %9.2f  | %s |  %s\n",
-                orderId, userId, purchaseDate, totalPrice, orderStatus, receiveDate);
-            }
-
-            System.out.println("\nOngoing Returns:");
-            System.out.println("Order ID | Product ID | Return Reason | Return Description | Return Date | Return Status");
-            while (returnsResultSet.next()) {
-                int orderId = returnsResultSet.getInt("order_id");
-                int productId = returnsResultSet.getInt("product_id");
-                String returnReason = returnsResultSet.getString("return_reason");
-                String returnDescription = returnsResultSet.getString("return_description");
-                Date returnDate = returnsResultSet.getDate("return_date");
-                String returnStatus = returnsResultSet.getString("return_status");
-
-                System.out.printf("%d | %d | %s | %s | %s | %s\n",
-                orderId, productId, returnReason, returnDescription, returnDate, returnStatus);
-            }
-
-        } catch (Exception e) {
-            System.err.println("Error: " + e.getMessage());
-        }
-    }
+//    public void showOngoingOrdersDeprecated(Connection conn) {
+//        try {
+//            String orderQuery =
+//            """
+//            SELECT order_id, user_id, purchase_date, total_price, order_status, receive_date
+//            FROM orders
+//            WHERE courier_id = ? AND order_status NOT IN ('Completed', 'Delivered');
+//            """;
+//
+//            String returnQuery =
+//            """
+//            SELECT r.order_id, r.product_id, r.return_reason, r.return_description, r.return_date, r.return_status
+//            FROM returns r
+//            WHERE r.courier_id = ?;
+//            """;
+//
+//            PreparedStatement ordersStmt = conn.prepareStatement(orderQuery);
+//            ordersStmt.setInt(1, this.courier_id);
+//            ResultSet ordersResultSet = ordersStmt.executeQuery();
+//
+//            PreparedStatement returnsStmt = conn.prepareStatement(returnQuery);
+//            returnsStmt.setInt(1, this.courier_id);
+//            ResultSet returnsResultSet = returnsStmt.executeQuery();
+//
+//            System.out.println("Ongoing Orders:");
+//            System.out.println("Order ID | User ID | Purchase Date | Total Price | Order Status | Receive Date");
+//            while (ordersResultSet.next()) {
+//                int orderId = ordersResultSet.getInt("order_id");
+//                int userId = ordersResultSet.getInt("user_id");
+//                Date purchaseDate = ordersResultSet.getDate("purchase_date");
+//                float totalPrice = ordersResultSet.getFloat("total_price");
+//                String orderStatus = ordersResultSet.getString("order_status");
+//                Date receiveDate = ordersResultSet.getDate("receive_date");
+//
+//                System.out.printf("%5d    | %4d    |   %s  | %9.2f  | %s |  %s\n",
+//                orderId, userId, purchaseDate, totalPrice, orderStatus, receiveDate);
+//            }
+//
+//            System.out.println("\nOngoing Returns:");
+//            System.out.println("Order ID | Product ID | Return Reason | Return Description | Return Date | Return Status");
+//            while (returnsResultSet.next()) {
+//                int orderId = returnsResultSet.getInt("order_id");
+//                int productId = returnsResultSet.getInt("product_id");
+//                String returnReason = returnsResultSet.getString("return_reason");
+//                String returnDescription = returnsResultSet.getString("return_description");
+//                Date returnDate = returnsResultSet.getDate("return_date");
+//                String returnStatus = returnsResultSet.getString("return_status");
+//
+//                System.out.printf("%d | %d | %s | %s | %s | %s\n",
+//                orderId, productId, returnReason, returnDescription, returnDate, returnStatus);
+//            }
+//
+//        } catch (Exception e) {
+//            System.err.println("Error: " + e.getMessage());
+//        }
+//    }
 
     public void updateStatus() {
         if (this.courier_address != null && this.courier_email_address != null)
