@@ -1,7 +1,6 @@
 package view;
 
 import javax.swing.*;
-import javax.swing.border.Border;
 import javax.swing.border.LineBorder;
 import javax.swing.border.TitledBorder;
 import java.awt.*;
@@ -245,13 +244,13 @@ public class SellerPage extends JPanel implements AccountPage {
     }
 
     public void setInvisibleBtns(int n){
-        if (n==1) {
+        if (n == 1) {
             approveBtn.setVisible(true);
             rejectBtn.setVisible(true);
             addBtn.setVisible(false);
             removeBtn.setVisible(false);
             editBtn.setVisible(false);
-        }else{
+        } else {
             addBtn.setVisible(true);
             removeBtn.setVisible(true);
             editBtn.setVisible(true);

@@ -2,20 +2,16 @@ package view;
 
 import javax.swing.*;
 import javax.swing.border.TitledBorder;
-import javax.swing.plaf.FontUIResource;
 import java.awt.*;
 import java.awt.event.ActionListener;
 
 public class SQLConnect extends JPanel {
-    private JLabel userLbl;
-    private JLabel passLbl;
-    private JTextField usernameField;
-    private JPasswordField passwordField;
-    private JButton submitBtn;
-    private JButton exitBtn;
+    private final JTextField usernameField;
+    private final JPasswordField passwordField;
+    private final JButton submitBtn;
+    private final JButton exitBtn;
 
     public SQLConnect() {
-
         this.setLayout(new GridBagLayout());
         this.setPreferredSize(new Dimension(800, 640));
 
@@ -29,18 +25,12 @@ public class SQLConnect extends JPanel {
         gbc.weightx = GridBagConstraints.RELATIVE;
         gbc.weighty = GridBagConstraints.RELATIVE;
 
-        this.userLbl = new JLabel("Username: ");
+        JLabel userLbl = new JLabel("Username: ");
         userLbl.setFont(new Font("Verdana", Font.BOLD, 18));
-        userLbl.setVisible(true);
-        userLbl.setHorizontalTextPosition(JLabel.CENTER);
-        userLbl.setVerticalTextPosition(JLabel.TOP);
         userLbl.setForeground(Color.BLACK);
 
-        this.passLbl = new JLabel("Password: ");
+        JLabel passLbl = new JLabel("Password: ");
         passLbl.setFont(new Font("Verdana", Font.BOLD, 18));
-        passLbl.setVisible(true);
-        passLbl.setHorizontalTextPosition(JLabel.CENTER);
-        passLbl.setVerticalTextPosition(JLabel.TOP);
         passLbl.setForeground(Color.BLACK);
 
         this.usernameField = new JTextField();
@@ -53,6 +43,7 @@ public class SQLConnect extends JPanel {
         this.submitBtn.setFocusable(false);
         this.submitBtn.setContentAreaFilled(false);
         this.submitBtn.setPreferredSize(new Dimension(100, 40));
+
         this.exitBtn = new JButton("Exit");
         this.exitBtn.setFocusable(false);
         this.exitBtn.setContentAreaFilled(false);
@@ -71,8 +62,6 @@ public class SQLConnect extends JPanel {
         this.add(passwordField, gbc);
         gbc.gridy = 3;
         gbc.gridx = 0;
-        gbc.ipadx = 10;
-        gbc.ipady = 10;
         this.add(submitBtn, gbc);
         gbc.gridx = 1;
         this.add(exitBtn, gbc);
@@ -88,6 +77,7 @@ public class SQLConnect extends JPanel {
         usernameField.setText("");
         passwordField.setText("");
     }
+
     public String getUsername() { return usernameField.getText().trim(); }
-    public String getPassword() { return passwordField.getText().trim(); }
+    public String getPassword() { return new String(passwordField.getPassword()).trim(); }
 }

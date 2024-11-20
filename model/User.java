@@ -442,23 +442,7 @@ public class User implements Account {
         preparedStatement.executeUpdate();
     }
 
-    public void setUsername(String user_name) { this.user_name = user_name; }
-    public void setFirstName(String user_firstname) { this.user_firstname = user_firstname; }
-    public void setLastName(String user_lastname) { this.user_lastname = user_lastname; }
-    public void setAddress(String user_address) { this.user_address = user_address; }
-    public void setPhoneNumber(String user_phone_number) { this.user_phone_number = user_phone_number; }
-    public int getID() { return this.user_id; }
-    public Set<OrderContent> getShoppingCart() { return this.shoppingCart; }
-    public String getUsername() { return this.user_name; }
-    public String getFirstName() { return this.user_firstname; }
-    public String getLastName() { return this.user_lastname; }
-    public String getAddress() { return this.user_address; }
-    public String getPhoneNumber() { return this.user_phone_number; }
-    public Date getCreationDate() { return this.user_creation_date; }
-    public boolean getStatus() { return this.user_verified_status; }
-    
-    
-        public ArrayList<Order> getOrdersView(Connection conn, int user_id) throws SQLException {
+    public ArrayList<Order> getOrdersView(Connection conn, int user_id) throws SQLException {
         ArrayList<Order> orders = new ArrayList<>();
 
         String query =
@@ -473,13 +457,13 @@ public class User implements Account {
         ResultSet rs = ps.executeQuery();
 
         while (rs.next()) {
-            orders.add(new Order(rs.getInt("order_id"), user_id, rs.getInt("courier_id"), rs.getDate("purchase_date"), 
-                        rs.getFloat("total_price"), OrderStatus.valueOf(rs.getString("order_status")), rs.getDate("receive_date")));
+            orders.add(new Order(rs.getInt("order_id"), user_id, rs.getInt("courier_id"), rs.getDate("purchase_date"),
+                    rs.getFloat("total_price"), OrderStatus.valueOf(rs.getString("order_status")), rs.getDate("receive_date")));
         }
 
         return orders;
     }
-    
+
     public ArrayList<Return> getReturnsView(Connection conn, int user_id) throws SQLException {
         ArrayList<Return> returns = new ArrayList<>();
 
@@ -497,9 +481,24 @@ public class User implements Account {
 
         while (rs.next()) {
             returns.add(new Return(rs.getInt("r.order_id"), rs.getInt("r.product_id"), rs.getInt("r.courier_id"), ReturnReason.convertVal(rs.getString("r.return_reason")),
-                        rs.getString("r.return_description"), rs.getDate("r.return_date"), ReturnStatus.valueOf(rs.getString("r.return_status"))));
+                    rs.getString("r.return_description"), rs.getDate("r.return_date"), ReturnStatus.valueOf(rs.getString("r.return_status"))));
         }
 
         return returns;
     }
+
+    public void setUsername(String user_name) { this.user_name = user_name; }
+    public void setFirstName(String user_firstname) { this.user_firstname = user_firstname; }
+    public void setLastName(String user_lastname) { this.user_lastname = user_lastname; }
+    public void setAddress(String user_address) { this.user_address = user_address; }
+    public void setPhoneNumber(String user_phone_number) { this.user_phone_number = user_phone_number; }
+    public int getID() { return this.user_id; }
+    public Set<OrderContent> getShoppingCart() { return this.shoppingCart; }
+    public String getUsername() { return this.user_name; }
+    public String getFirstName() { return this.user_firstname; }
+    public String getLastName() { return this.user_lastname; }
+    public String getAddress() { return this.user_address; }
+    public String getPhoneNumber() { return this.user_phone_number; }
+    public Date getCreationDate() { return this.user_creation_date; }
+    public boolean getStatus() { return this.user_verified_status; }
 }

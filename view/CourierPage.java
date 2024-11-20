@@ -1,14 +1,12 @@
 package view;
 
 import model.Order;
-import model.OrderContent;
 
 import javax.swing.*;
 import javax.swing.border.TitledBorder;
 import java.awt.*;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
-import java.util.Set;
 
 public class CourierPage extends JPanel implements AccountPage {
     private CardLayout courierCardLayout;

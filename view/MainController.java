@@ -1,12 +1,14 @@
 package view;
 
 import model.*;
+import enums.OrderStatus;
 
 import javax.swing.*;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.sql.*;
 import java.util.ArrayList;
+import java.util.Set;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.regex.Matcher;
@@ -47,11 +49,9 @@ public class MainController {
         mainMenuPage.addToCenterPanel(courierPage, MainFrame.COURIERPAGE);
         initCourierListeners();
 
-        mainMenuPage.addWindowListener(new WindowAdapter()
-        {
+        mainMenuPage.addWindowListener(new WindowAdapter() {
             @Override
-            public void windowClosing(WindowEvent e)
-            {
+            public void windowClosing(WindowEvent e) {
                 try {
                     conn.close();
                 } catch (Exception ex) {
@@ -99,6 +99,11 @@ public class MainController {
 
         }, signUpEvent -> {
             this.account = selectAccountPage.getAccountType();
+
+            (account instanceof User ? userPage :
+            account instanceof Seller ? sellerPage :
+            courierPage).nextPageName(AccountPage.SIGNUPPAGE);
+
             mainMenuPage.nextPageName(account.toString());
 
         }, submitLoginEvent -> {
@@ -108,8 +113,12 @@ public class MainController {
                 (account instanceof User ? userPage :
                 account instanceof Seller ? sellerPage :
                 courierPage).nextPageName(AccountPage.MAINPAGE);
-
                 mainMenuPage.nextPageName(account.toString());
+
+                if (account instanceof User) {
+                    userPage.updateBrowseList(((User) account).browseByShops(conn));
+                }
+
             } catch (NumberFormatException e) {
                 JOptionPane.showMessageDialog(null, "Error: Enter valid ID.");
             } catch (SQLException e) {
@@ -121,12 +130,11 @@ public class MainController {
             try {
                 connectPage.clearTextFields();
                 conn.close();
-            }
-            catch (Exception e) {
+            } catch (SQLException e) {
                 JOptionPane.showMessageDialog(null, "Error:");
             }
             mainMenuPage.nextPageName(MainFrame.CONNECTPAGE);
-                });
+        });
     }
 
     private void initUserListeners() {
@@ -195,10 +203,11 @@ public class MainController {
                     this.account = new User(user_id, user_name, user_firstname, user_lastname, user_address, user_phone_number, user_creation_date);
                     userPage.nextPageName(AccountPage.MAINPAGE);
 
-                } catch (Exception e){
+                } catch (SQLException e){
                     JOptionPane.showMessageDialog(null, "Error: " + e.getMessage());
                 }
             }
+
         }, backSignUpEvent -> { // Action: Pressing the back button in the sign-up page
             mainMenuPage.nextPageName(MainFrame.SELECTACCPAGE);
             selectAccountPage.nextPageName(SelectAccount.SELECTACCPAGE);
@@ -229,8 +238,8 @@ public class MainController {
 
         }, cartEvent -> { // Action: Pressing cart button
             userPage.nextMainPageName(UserPage.CARTPAGE);
+            userPage.updateCartTable(((User) account).getShoppingCart());
 
-            // update
         }, ordersEvent -> { // Action: Pressing orders button
             userPage.nextMainPageName(UserPage.ORDERSPAGE);
 
@@ -261,7 +270,7 @@ public class MainController {
             } catch (SQLException e) {
                 JOptionPane.showMessageDialog(null, "Error: " + e.getMessage());
             }
-            
+
         }, profileEvent -> { // Action: Pressing profile button
             userPage.nextMainPageName(UserPage.PROFILEPAGE);
             userPage.updateProfilePage((User) account);
@@ -272,10 +281,10 @@ public class MainController {
             userPage.nextPageName(UserPage.SHOPPAGE);
 
         }, addToCartEvent -> { // Action: Pressing the add button in the shop page
+            User user = (User) account;
             Product selectedProduct = userPage.getSelectedProduct();
 
             if (selectedProduct.isListed()) {
-
                 // Show a pop-up asking for the order quantity
                 int orderQuantity = userPage.getQuantity();
 
@@ -285,12 +294,12 @@ public class MainController {
 
                 if (orderQuantity <= selectedProduct.getQuantity()) {
                     // Add to cart
-                    ((User) account).addProductToCart(
-                    new OrderContent(selectedProduct.getProductID(), selectedProduct.getName(),orderQuantity, selectedProduct.getPrice()));
+                    user.addProductToCart(new OrderContent(selectedProduct.getProductID(), selectedProduct.getName(),orderQuantity, selectedProduct.getPrice()));
                 } else {
-                    JOptionPane.showMessageDialog(null, "Error: Only " + selectedProduct.getQuantity() + " are in stock");
+                    JOptionPane.showMessageDialog(null, "Error: Only " + selectedProduct.getQuantity() + " are in stock.");
                 }
             }
+
         }, browseChangeEvent -> { // Action: Changing the browse option in the shop page
 
             // See shopEvent for explanation
@@ -305,11 +314,79 @@ public class MainController {
             } catch (SQLException e) {
                 JOptionPane.showMessageDialog(null, "Error: " + e.getMessage());
             }
-
             userPage.updateBrowseList(options);
         }, checkOutEvent -> { // Action: Pressing check out button in the shopping cart page
+            ArrayList<OrderContent> selectedProducts = userPage.getSelectedRecords();
+
+            float totalPrice = 0f;
+
+            for (OrderContent product : selectedProducts) {
+                totalPrice += product.getPriceEach() * product.getQuantity();
+            }
+
+            int choice = JOptionPane.showConfirmDialog(null,
+    "Total: " + totalPrice + " PHP. Proceed? ", "Checkout", JOptionPane.YES_NO_OPTION);
+
+            try {
+                if (choice == JOptionPane.OK_OPTION) {
+                    Set<OrderContent> shoppingCart = ((User) account).getShoppingCart();
+
+                    String query =
+                    """
+                    SELECT IFNULL(MAX(order_id), 0) + 1 AS id
+                    FROM orders
+                    """;
+
+                    PreparedStatement ps = conn.prepareStatement(query);
+                    ResultSet rs = ps.executeQuery();
+
+                    int order_id = 1;
+                    if (rs.next()) {
+                        order_id = rs.getInt("id");
+                    }
+
+                    Order order = new Order(
+                        order_id,
+                        ((User) account).getID(),
+                        Courier.assignCourier(conn),
+                        new Date(System.currentTimeMillis()),
+                        totalPrice,
+                        OrderStatus.BEING_PREPARED,
+                        Date.valueOf("9999-12-31"));
+
+                    order.sendToDB(conn, shoppingCart);
+
+                    // Remove all selected products in the shopping cart
+                    shoppingCart.removeIf(cartProduct ->
+                    selectedProducts.stream()
+                    .anyMatch(selectedProduct -> selectedProduct.getProductID() == cartProduct.getProductID()));
+
+                    // Update in the page
+                    userPage.updateCartTable(shoppingCart);
+
+                } else {
+                    JOptionPane.showMessageDialog(null, "Aborting Checkout...");
+                }
+            } catch (SQLException e) {
+                JOptionPane.showMessageDialog(null, "Error: " + e.getMessage());
+            }
 
         }, removeItemEvent -> { // Action: Pressing the remove item button in the shopping cart page
+            ArrayList<OrderContent> selectedProducts = userPage.getSelectedRecords();
+
+            int choice = JOptionPane.showConfirmDialog(null, "Are you sure?", "Remove items", JOptionPane.YES_NO_OPTION);
+
+            Set<OrderContent> shoppingCart = ((User) account).getShoppingCart();
+            if (choice == JOptionPane.OK_OPTION) {
+                ((User) account).getShoppingCart().removeIf(cartProduct ->
+                selectedProducts.stream()
+                .anyMatch(selectedProduct -> selectedProduct.getProductID() == cartProduct.getProductID()));
+            } else {
+                JOptionPane.showMessageDialog(null, "Aborting remove...");
+            }
+
+            // Update in the page
+            userPage.updateCartTable(shoppingCart);
 
         }, returnEvent -> { // Action: Pressing the return item button in the orders page
 
@@ -342,6 +419,10 @@ public class MainController {
             }
 
         }, browseSelectEvent -> { // Action: Pressing an option in the browse by options list in the shop page
+            if (userPage.getSelectedOption() == null) {
+                return;
+            }
+
             ArrayList<Product> products = new ArrayList<>();
 
             try {
@@ -378,8 +459,12 @@ public class MainController {
             // Update the list of products using the resulting list
             userPage.updateProductsList(products);
 
-        }, productSelectEvent -> { // Action: Pressing an product in the product list in the shop page
+        }, productSelectEvent -> { // Action: Pressing a product in the product list in the shop page
             Product selectedProduct = userPage.getSelectedProduct();
+
+            if (selectedProduct == null) {
+                return;
+            }
 
             userPage.setProductInfo(
             "<html>Product info<br/>" +
@@ -507,10 +592,7 @@ public class MainController {
                     }
                 }
 
-                boolean courier_verified_status = false;
-
-                if (!courier_email_address.isEmpty() && !courier_address.isEmpty())
-                    courier_verified_status = true;
+                boolean courier_verified_status = !courier_email_address.isEmpty() && !courier_address.isEmpty();
 
 
                 try {
@@ -559,7 +641,7 @@ public class MainController {
         });
 
         courierPage.initMainListeners(orderLtr -> {
-            courierPage.updateOOTable(((Courier)account).ShowOngoingOrders(conn));
+            courierPage.updateOOTable(((Courier) account).ShowOngoingOrders(conn));
             courierPage.nextPageName(CourierPage.ONGOINGORDERSPAGE);
             }, profileEvent -> {
 
