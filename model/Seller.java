@@ -2,6 +2,9 @@ package model;
 
 import java.sql.*;
 import java.time.Year;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.Scanner;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -410,6 +413,62 @@ public class Seller implements Account {
             System.out.println("Error updating name: " + e);
         }
     }
+
+    public ArrayList<Product> productList(Connection conn) throws SQLException {
+        ArrayList<Product> productLists = new ArrayList<>();
+
+        String query = """
+        SELECT *
+        FROM products p
+        WHERE p.seller_id = ?;
+        """;
+
+        PreparedStatement pstmt = conn.prepareStatement(query);
+        pstmt.setInt(1, this.seller_id);
+        ResultSet resultSet = pstmt.executeQuery();
+
+        while (resultSet.next()) {
+            int prodId = resultSet.getInt("product_id");
+            int sellerId = resultSet.getInt("seller_id");
+            String seller = resultSet.getString("product_name");
+            Float price = resultSet.getFloat("product_price");
+            String type = resultSet.getString("product_type");
+            Float rating = resultSet.getFloat("average_rating");
+            int quantity = resultSet.getInt("quantity_stocked");
+            boolean status = resultSet.getBoolean("listed_status");
+            String desc = resultSet.getString("description");
+            productLists.add(new Product(prodId,sellerId,seller,price,type,rating,quantity,status,desc));
+        }
+        return productLists;
+    }
+
+    public Map<String,String> refundList(Connection conn) throws SQLException {
+        Map<String,String> refundLists = new LinkedHashMap<>();
+
+        String query = """
+        SELECT r.order_id, r.product_id, u.user_id, u.user_name, p.product_name
+        FROM returns r
+        LEFT JOIN products p ON r.product_id = p.product_id
+        LEFT JOIN orders o ON r.order_id = o.order_id
+        LEFT JOIN users u ON o.user_id = u.user_id
+        WHERE p.seller_id = ? AND r.return_status = 'PROCESSING';
+        """;
+
+        PreparedStatement pstmt = conn.prepareStatement(query);
+        pstmt.setInt(1, this.seller_id);
+        ResultSet resultSet = pstmt.executeQuery();
+
+        while (resultSet.next()) {
+            int orderId = resultSet.getInt("order_id");
+            int prodId = resultSet.getInt("product_id");
+            int userId = resultSet.getInt("user_id");
+            String uName = resultSet.getString("user_name");
+            String prodName = resultSet.getString("product_name");
+            refundLists.put("Order Id: "+orderId+" Product Id: "+prodId, Integer.toString(orderId)+" "+Integer.toString(prodId));
+        }
+        return refundLists;
+    }
+
 
     @Override
     public String toString() {
