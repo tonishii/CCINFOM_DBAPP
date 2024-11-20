@@ -672,6 +672,15 @@ public class MainController {
             sellerPage.nextPageName(SellerPage.SIGNUP);
         }, listChangeEvent -> {
             sellerPage.setInvisibleBtns(sellerPage.getSellerCRBox());
+            try {
+                if (sellerPage.getSellerCRBox().equals("Products")) {
+                    sellerPage.updateSellerProductList(((Seller) account).productList(this.conn));
+                }else if (sellerPage.getSellerCRBox().equals("Refunds")){
+                    sellerPage.updateSellerRefundList(((Seller) account).refundList(this.conn));
+                }
+            } catch (SQLException e) {
+                JOptionPane.showMessageDialog(null, "Error: " + e.getMessage());
+            }
         });
     }
 

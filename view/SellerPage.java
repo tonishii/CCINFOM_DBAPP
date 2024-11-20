@@ -1,10 +1,16 @@
 package view;
 
+import model.Product;
+import model.Return;
+
 import javax.swing.*;
 import javax.swing.border.LineBorder;
 import javax.swing.border.TitledBorder;
 import java.awt.*;
 import java.awt.event.ActionListener;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 public class SellerPage extends JPanel implements AccountPage {
     private CardLayout sellerCardLayout;
@@ -17,6 +23,8 @@ public class SellerPage extends JPanel implements AccountPage {
                        sellerAddressField;
     private JButton    submitSignUpBtn,
                        sellerBackBtn;
+
+    private Map<String, String> lists;
 
     private JTextArea  productRefundInfo;
 
@@ -230,7 +238,6 @@ public class SellerPage extends JPanel implements AccountPage {
         editAccBtn.addActionListener(editAccLtr);
         logoutBtn.addActionListener(logoutLtr);
         sellerCRBox.addActionListener(selCRLtr);
-
     }
 
     @Override
@@ -243,14 +250,39 @@ public class SellerPage extends JPanel implements AccountPage {
         this.mainCardLayout.show(bottomPanel, name);
     }
 
-    public void setInvisibleBtns(int n){
-        if (n == 1) {
+    public void updateSellerProductList(ArrayList<Product> lists){
+        DefaultListModel<String> mdl = new DefaultListModel<>();
+        this.lists = new LinkedHashMap<>();
+
+        for (Product option : lists)
+        {
+            String display = "ID: " + Integer.toString(option.getProductID()) + " Name: " + option.getName();
+            mdl.addElement(display);
+            this.lists.put(display, Integer.toString(option.getProductID()));
+        }
+
+        sellerCRList.setModel(mdl);
+    }
+
+    public void updateSellerRefundList(Map<String,String> lists){
+        DefaultListModel<String> mdl = new DefaultListModel<>();
+        this.lists = lists;
+
+        for (String option : lists.keySet()) {
+            mdl.addElement(option);
+        }
+
+        sellerCRList.setModel(mdl);
+    }
+
+    public void setInvisibleBtns(String n){
+        if (n.equals("Refunds")) {
             approveBtn.setVisible(true);
             rejectBtn.setVisible(true);
             addBtn.setVisible(false);
             removeBtn.setVisible(false);
             editBtn.setVisible(false);
-        } else {
+        } else if (n.equals("Products")) {
             addBtn.setVisible(true);
             removeBtn.setVisible(true);
             editBtn.setVisible(true);
@@ -258,7 +290,9 @@ public class SellerPage extends JPanel implements AccountPage {
             rejectBtn.setVisible(false);
         }
     }
-    public int getSellerCRBox(){ return this.sellerCRBox.getSelectedIndex(); }
+
+    public String getSelectedOption(){return lists.get(sellerCRList.getSelectedValue());}
+    public String getSellerCRBox(){ return (String) this.sellerCRBox.getSelectedItem(); }
     public String getSellerName() { return sellerNameField.getText().trim(); }
     public String getSellerAddress() { return sellerAddressField.getText().trim(); }
     public String getSellerPhone() { return sellerPhoneField.getText().trim(); }
