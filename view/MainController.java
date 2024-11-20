@@ -7,11 +7,9 @@ import javax.swing.*;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.sql.*;
+import java.sql.Date;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Set;
-import java.util.LinkedHashMap;
-import java.util.Map;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -715,6 +713,81 @@ public class MainController {
                 }
             } catch (SQLException e) {
                 JOptionPane.showMessageDialog(null, "Error: " + e.getMessage());
+            }
+        }, listSelectEvent ->{
+            if (sellerPage.getSellerCRBox().equals("Products")) {
+                if (sellerPage.getSelectedOption()!=null) {
+                    List<Integer> Ids = Arrays.stream(sellerPage.getSelectedOption()
+                                    .split(" "))
+                            .map(Integer::parseInt)
+                            .toList();
+
+                    Product product;
+
+                    try {
+                        String query = """
+                                       SELECT *
+                                       FROM products
+                                       WHERE product_id = ? AND seller_id = ?
+                                       LIMIT 1;
+                                       """;
+                        PreparedStatement pstmt = conn.prepareStatement(query);
+                        pstmt.setInt(1, Ids.get(0));
+                        pstmt.setInt(2, Ids.get(1));
+                        product = ((Seller)account).getSellerProduct(pstmt);
+
+                        sellerPage.setProductRefundInfo(
+                                " Product Info \n" +
+                                "Product ID: " + product.getProductID() + "\n" +
+                                "Product Name: " + product.getName() + "\n" +
+                                "Product Price: " + product.getPrice() + "\n" +
+                                "Product Quantity: " + product.getQuantity() + "\n" +
+                                "Product Rating: " + product.getRating() + "\n" +
+                                "Product Listed: " + product.isListed() + "\n" +
+                                "Product Type: " + product.getDescription() + "\n" +
+                                "Product Description: " + product.getType()
+                        );
+
+                    } catch (SQLException e) {
+                        JOptionPane.showMessageDialog(null, "Error: " + e.getMessage());
+                    }
+                }
+            }else if (sellerPage.getSellerCRBox().equals("Refunds")){
+                if (sellerPage.getSelectedOption()!=null) {
+                    List<Integer> Ids = Arrays.stream(sellerPage.getSelectedOption()
+                                    .split(" "))
+                            .map(Integer::parseInt)
+                            .toList();
+
+                    Return refund;
+
+                    try {
+                        String query = """
+                                       SELECT *
+                                       FROM returns
+                                       WHERE order_id = ? AND product_id = ?
+                                       LIMIT 1;
+                                       """;
+                        PreparedStatement pstmt = conn.prepareStatement(query);
+                        pstmt.setInt(1, Ids.get(0));
+                        pstmt.setInt(2, Ids.get(1));
+                        refund = ((Seller)account).getSellerRefund(pstmt);
+
+                        sellerPage.setProductRefundInfo(
+                                "Refund Info \n" +
+                                "Order ID: " + refund.getOrderID() + "\n" +
+                                "Product ID: " + refund.getProductID() + "\n" +
+                                "Courier ID: " + refund.getCourierID() + "\n" +
+                                "Return Reason: " + refund.getReason() + "\n" +
+                                "Product Rating: " + refund.getDescription() + "\n" +
+                                "Product Listed: " + refund.getDate() + "\n" +
+                                "Product Type: " + refund.getStatus() + "\n"
+                        );
+
+                    } catch (SQLException e) {
+                        JOptionPane.showMessageDialog(null, "Error: " + e.getMessage());
+                    }
+                }
             }
         });
     }

@@ -6,6 +6,7 @@ import model.Return;
 import javax.swing.*;
 import javax.swing.border.LineBorder;
 import javax.swing.border.TitledBorder;
+import javax.swing.event.ListSelectionListener;
 import java.awt.*;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
@@ -233,11 +234,12 @@ public class SellerPage extends JPanel implements AccountPage {
     }
 
     public void initMainListeners(ActionListener genLtr, ActionListener editAccLtr, ActionListener logoutLtr,
-                                  ActionListener selCRLtr){
+                                  ActionListener selCRLtr, ListSelectionListener textLtr){
         genBtn.addActionListener(genLtr);
         editAccBtn.addActionListener(editAccLtr);
         logoutBtn.addActionListener(logoutLtr);
         sellerCRBox.addActionListener(selCRLtr);
+        sellerCRList.addListSelectionListener(textLtr);
     }
 
     @Override
@@ -258,7 +260,7 @@ public class SellerPage extends JPanel implements AccountPage {
         {
             String display = "ID: " + Integer.toString(option.getProductID()) + " Name: " + option.getName();
             mdl.addElement(display);
-            this.lists.put(display, Integer.toString(option.getProductID()));
+            this.lists.put(display, Integer.toString(option.getProductID()) + " " + Integer.toString(option.getSellerID()));
         }
 
         sellerCRList.setModel(mdl);
@@ -273,6 +275,10 @@ public class SellerPage extends JPanel implements AccountPage {
         }
 
         sellerCRList.setModel(mdl);
+    }
+
+    public void setProductRefundInfo(String text){
+        productRefundInfo.setText(text);
     }
 
     public void setInvisibleBtns(String n){
@@ -291,7 +297,11 @@ public class SellerPage extends JPanel implements AccountPage {
         }
     }
 
-    public String getSelectedOption(){return lists.get(sellerCRList.getSelectedValue());}
+    public String getSelectedOption(){
+        if (!(sellerCRList.getSelectedValue() == null))
+            return lists.get(sellerCRList.getSelectedValue());
+        return null;
+    }
     public String getSellerCRBox(){ return (String) this.sellerCRBox.getSelectedItem(); }
     public String getSellerName() { return sellerNameField.getText().trim(); }
     public String getSellerAddress() { return sellerAddressField.getText().trim(); }

@@ -1,5 +1,8 @@
 package model;
 
+import enums.ReturnReason;
+import enums.ReturnStatus;
+
 import java.sql.*;
 import java.time.Year;
 import java.util.ArrayList;
@@ -469,6 +472,43 @@ public class Seller implements Account {
         return refundLists;
     }
 
+    public Product getSellerProduct(PreparedStatement pstmt) throws SQLException {
+        Product product = null;
+
+        ResultSet rstmt = pstmt.executeQuery();
+
+        if (rstmt.next()){
+            product = new Product(rstmt.getInt("product_id"),
+                    rstmt.getInt("seller_id"),
+                    rstmt.getString("product_name"),
+                    rstmt.getFloat("product_price"),
+                    rstmt.getString("product_type"),
+                    rstmt.getFloat("average_rating"),
+                    rstmt.getInt("quantity_stocked"),
+                    rstmt.getBoolean("listed_status"),
+                    rstmt.getString("description"));
+        }
+
+        return product;
+    }
+
+    public Return getSellerRefund(PreparedStatement pstmt) throws SQLException {
+        Return refund = null;
+
+        ResultSet rstmt = pstmt.executeQuery();
+
+        if (rstmt.next()){
+            refund = new Return(rstmt.getInt("order_id"),
+                    rstmt.getInt("product_id"),
+                    rstmt.getInt("courier_id"),
+                    ReturnReason.convertVal(rstmt.getString("return_reason")),
+                    rstmt.getString("return_description"),
+                    rstmt.getDate("return_date"),
+                    ReturnStatus.valueOf(rstmt.getString("return_status")));
+        }
+
+        return refund;
+    }
 
     @Override
     public String toString() {
