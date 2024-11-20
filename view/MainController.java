@@ -7,6 +7,7 @@ import javax.swing.*;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.sql.*;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Set;
 import java.util.LinkedHashMap;
@@ -207,7 +208,6 @@ public class MainController {
                     JOptionPane.showMessageDialog(null, "Error: " + e.getMessage());
                 }
             }
-
         }, backSignUpEvent -> { // Action: Pressing the back button in the sign-up page
             mainMenuPage.nextPageName(MainFrame.SELECTACCPAGE);
             selectAccountPage.nextPageName(SelectAccount.SELECTACCPAGE);
@@ -270,7 +270,7 @@ public class MainController {
             } catch (SQLException e) {
                 JOptionPane.showMessageDialog(null, "Error: " + e.getMessage());
             }
-
+            
         }, profileEvent -> { // Action: Pressing profile button
             userPage.nextMainPageName(UserPage.PROFILEPAGE);
             userPage.updateProfilePage((User) account);
@@ -387,13 +387,39 @@ public class MainController {
 
             // Update in the page
             userPage.updateCartTable(shoppingCart);
-
+            
         }, returnEvent -> { // Action: Pressing the return item button in the orders page
+            try {
+                ArrayList<OrderContent> itemsList = ((User) account).getOrderItems(conn, ((User) account).getID());
+                userPage.ordersListToProducts(itemsList);
+                int option = JOptionPane.showConfirmDialog(null, userPage.getRequestReturnPanel(), "Request Return", JOptionPane.OK_CANCEL_OPTION);
+                if (option == JOptionPane.OK_OPTION) {
+                    String orderInp = userPage.getReturnOrderInp();
+                    String productInp = userPage.getReturnProdInp();
+                    String reason = userPage.getReturnReason();
+                    String desc = userPage.getReturnDesc();
+                    
+                    if (orderInp == null || productInp == null || desc == null) { // When an input field is not filled up
+                        JOptionPane.showMessageDialog(null, "Please fill out all of the input fields.");
+                    }
+                    else {
+                        try {
+                            int order_id = Integer.parseInt(orderInp);
+                            int product_id = Integer.parseInt(productInp);
+                            
+                        } catch (NumberFormatException e) {
+                            JOptionPane.showMessageDialog(null, "Invalid ID input/s.");
+                        }
+                    }
+                }
+            } catch (Exception e) {
+                JOptionPane.showMessageDialog(null, "Error: " + e);
+            }
 
         }, rateEvent -> { // Action: Pressing the return item button in the orders page
-
+            JOptionPane.showConfirmDialog(null, userPage.getRatingPanel(), "Rate a Product", JOptionPane.OK_CANCEL_OPTION);
         }, receiveEvent -> { // Action: Pressing the receive item button in the orders page
-
+            JOptionPane.showConfirmDialog(null, userPage.getReceiveOrderPanel(), "Receive Order", JOptionPane.OK_CANCEL_OPTION);
         }, saveChangeEvent -> { // Action: Pressing the save changes button in the profile page
             User user = (User) account;
 
@@ -479,6 +505,85 @@ public class MainController {
         }, orderSelectEvent -> { // Action: Pressing an order in the orders list in the orders page
             System.out.println("HI3");
             // update orderLbl
+            // CHANGES STARTS HERE
+            if (!orderSelectEvent.getValueIsAdjusting()) {
+                String val = userPage.getMappedValue(userPage.getSelectedOrder());
+ 
+                if (userPage.getOrdersViewOption().equals("Orders")) {
+                    int order_id = Integer.parseInt(val);
+                    
+                    try {
+                        String query = 
+                            """
+                            SELECT o.order_status, c.courier_name, p.product_name, o.purchase_date, s.seller_name, oc.item_quantity, oc.subtotal
+                            FROM orders o
+                            JOIN order_contents oc ON o.order_id = oc.order_id
+                            JOIN couriers c ON c.courier_id = o.courier_id
+                            JOIN products p ON oc.product_id = p.product_id
+                            JOIN sellers s ON s.seller_id = p.seller_id
+                            WHERE o.order_id = ?
+                            """;
+                        PreparedStatement ps = conn.prepareStatement(query);
+                        ps.setInt(1, order_id);
+                        ResultSet rs = ps.executeQuery();
+                        
+                        SimpleDateFormat sdf = new SimpleDateFormat("MMMM dd yyyy");
+                        
+                        if (rs.next()) {
+                            float total = 0.0f;
+                            String text = "<html><b>Order Status:</b> " + rs.getString("o.order_status") + "<br><b>Courier:</b> " + rs.getString("c.courier_name");
+                            text += "<br><b>Date of Purchase:</b> " + sdf.format(rs.getDate("o.purchase_date"));
+                            text += "<br><br><b>[ITEMS ORDERED]</b>";
+                            
+                            do {
+                                text += "<br><br>" + rs.getString("p.product_name") + " from " + rs.getString("s.seller_name") + "<br>Quantity: " + Integer.toString(rs.getInt("oc.item_quantity"));
+                                total += rs.getFloat("oc.subtotal");
+                            } while (rs.next());
+                            
+                            text += "<br><br><b>TOTAL:</b> PHP " + String.format("%.2f", total) + "</html>";
+                            
+                            userPage.setOrderInfoLbl(text);
+                        }
+                    } catch (Exception e) {
+                        JOptionPane.showMessageDialog(null, "Error: " + e.getMessage());
+                    }
+                    
+                    
+                }
+                else if (userPage.getOrdersViewOption().equals("Returns")) {
+                    String ids[] = val.split(" ");
+                    int order_id = Integer.parseInt(ids[0]);
+                    int product_id = Integer.parseInt(ids[1]);
+                    
+                    try {
+                        String query = 
+                            """
+                            SELECT p.product_name, s.seller_name, c.courier_name, r.return_status
+                            FROM `returns` r
+                            JOIN orders o ON o.order_id = r.order_id
+                            JOIN products p  ON r.product_id = p.product_id
+                            JOIN couriers c ON r.courier_id = c.courier_id
+                            JOIN sellers s ON p.seller_id = s.seller_id
+                            WHERE p.product_id = ?
+                            AND o.order_id = ?
+                            """;
+                        PreparedStatement ps = conn.prepareStatement(query);
+                        ps.setInt(1, product_id);
+                        ps.setInt(2, order_id);
+                        ResultSet rs = ps.executeQuery();
+                        
+                        if (rs.next())  {
+                            String text = "<html><b>Item:</b> " + rs.getString("p.product_name") + "<br><b>Seller:</b> " + rs.getString("s.seller_name");
+                            text  += "<br><b>Courier:</b> " + rs.getString("c.courier_name") + "<br><b>Status:</b> " + rs.getString("r.return_status") +  "</html>";
+                            
+                            userPage.setOrderInfoLbl(text);
+                        }
+                    } catch (Exception e) {
+                        JOptionPane.showMessageDialog(null, "Error: " + e.getMessage());
+                    }
+                }
+            }
+            // CHANGES END HERE
         });
     }
 
@@ -641,7 +746,7 @@ public class MainController {
         });
 
         courierPage.initMainListeners(orderLtr -> {
-            courierPage.updateOOTable(((Courier) account).ShowOngoingOrders(conn));
+            courierPage.updateOOTable(((Courier)account).ShowOngoingOrders(conn));
             courierPage.nextPageName(CourierPage.ONGOINGORDERSPAGE);
             }, profileEvent -> {
 

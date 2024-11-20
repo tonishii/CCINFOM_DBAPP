@@ -72,6 +72,13 @@ public class UserPage extends JPanel implements AccountPage {
     private JButton           returnBtn,
                               rateBtn,
                               receiveBtn;
+    
+    // For request return panel
+    
+    private JTextField          orderInp,
+                                prodInp;
+    private JComboBox<String>   rsnComboBox;
+    private JTextArea           descInp;
 
     // Profile option
 
@@ -225,6 +232,7 @@ public class UserPage extends JPanel implements AccountPage {
         panel.add(browseByListPane);
 
         productList = new JList<>(new DefaultListModel<>());
+
         productList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         productList.setFocusable(false);
 
@@ -294,6 +302,8 @@ public class UserPage extends JPanel implements AccountPage {
 
         JPanel infoPanel = new JPanel();
         infoPanel.add(orderInfoLbl);       // USE THIS FOR SETTING THE ORDER INFO PACK IT INTO ONE STRING
+        
+        panel.add(infoPanel);
 
         String[] orderTypes = { "Orders", "Returns" };
         ordersBox = new JComboBox<>(orderTypes);
@@ -429,8 +439,9 @@ public class UserPage extends JPanel implements AccountPage {
 
         addToCartBtn.addActionListener(addLtr);
         browseByBox.addItemListener(browseByBoxLtr);
-
+        
         ordersBox.addActionListener(ordersBoxLtr);
+
 
         checkOutBtn.addActionListener(checkOutLtr);
         removeBtn.addActionListener(removeLtr);
@@ -445,7 +456,210 @@ public class UserPage extends JPanel implements AccountPage {
         productList.getSelectionModel().addListSelectionListener(productSelectLtr);
         ordersList.getSelectionModel().addListSelectionListener(orderSelectLtr);
     }
+    
+    public String getOrdersViewOption() { return (String) ordersBox.getSelectedItem(); }
+    
+    public void updateOrdersList(ArrayList<Order> orders) {
+        DefaultListModel<String> mdl = new DefaultListModel<>();
+        this.options = new LinkedHashMap<>();
+        
+        for (Order order : orders) {
+            String display = "Order No. " + Integer.toString(order.getOrderID());
+            this.options.put(display, Integer.toString(order.getOrderID()));
+            mdl.addElement(display);
+        }
+        
+        ordersList.setModel(mdl);
+    }
+    
+    public void updateReturnsList(ArrayList<Return> returns) {
+        DefaultListModel<String> mdl = new DefaultListModel<>();
+        this.options = new LinkedHashMap<>();
+        
+        for (Return r : returns) {
+            String display = "Order No. " + Integer.toString(r.getOrderID());
+            String value = Integer.toString(r.getOrderID()) + " " + Integer.toString(r.getProductID()); // value.split(" ") to get order id and product ig
+            this.options.put(display, value);
+            mdl.addElement(display);
+        }
+        
+        ordersList.setModel(mdl);
+    }
+    
+    public String getSelectedOrder() {
+        return ordersList.getSelectedValue();
+    }
+    // CHANGES STARTS HERE
+    public String getMappedValue(String val) {
+        return this.options.get(val);
+    }
+    
+    public void setOrderInfoLbl(String text) {
+        orderInfoLbl.setText(text);
+    }
+    
+    public void ordersListToProducts(ArrayList<OrderContent> items) {
+        DefaultListModel<String> mdl = new DefaultListModel<>();
+//        this.options = new LinkedHashMap<>();
+        
+        for (OrderContent item : items) {
+            String display = "Order ID: " + Integer.toString(item.getOrderID()) + ", Product ID: " + Integer.toString(item.getProductID()) + ", Product Name: " + item.getProductName();
+//            String value = Integer.toString(item.getOrderID()) + " " + Integer.toString(item.getProductID());
+//            this.options.put(display, value);
+            mdl.addElement(display);
+        }
+        
+        ordersList.setModel(mdl);
+    }
+    
+    public JPanel getRequestReturnPanel() {
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.insets = new Insets(5, 5, 5, 5);
+        
+        JPanel reqRet = new JPanel();
+        reqRet.setLayout(new GridBagLayout());
+        
+        JLabel orderLbl = new JLabel("Order ID: ");
+        gbc.gridx = 0;
+        gbc.gridy = 0;
+        reqRet.add(orderLbl, gbc);
+        
+        JLabel prodLbl = new JLabel("Product ID: ");
+        gbc.gridx = 0;
+        gbc.gridy = 1;
+        reqRet.add(prodLbl, gbc);
+        
+        JLabel rsnLbl = new JLabel("Reason: ");
+        gbc.gridx = 0;
+        gbc.gridy = 2;
+        reqRet.add(rsnLbl, gbc);
+        
+        JLabel descLbl = new JLabel("Description: ");
+        gbc.gridx = 0;
+        gbc.gridy = 3;
+        reqRet.add(descLbl, gbc);
+        
+        orderInp = new JTextField();
+        gbc.gridx = 1;
+        gbc.gridy = 0;
+        reqRet.add(orderInp, gbc);
+        
+        prodInp = new JTextField();
+        gbc.gridx = 1;
+        gbc.gridy = 1;
+        reqRet.add(prodInp, gbc);
+        
+        String reasons[] = {"Damaged Item", "Wrong Item",  "Change of Mind", "Counterfeit Item"};
+        this.rsnComboBox = new JComboBox<>(reasons);
+        gbc.gridx = 1;
+        gbc.gridy = 2;
+        reqRet.add(rsnComboBox, gbc);
+        
+        this.descInp = new JTextArea(5, 5);
+        gbc.gridx = 0;
+        gbc.gridy = 4;
+        gbc.gridwidth = 2;
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+        reqRet.add(descInp, gbc);
+        
+        return reqRet;
+    }
+    
+    public String getReturnReason() {
+        return (String) this.rsnComboBox.getSelectedItem();
+    }
+    
+    public String getReturnDesc() {
+        return this.descInp.getText();
+    }
+    
+    public String getReturnOrderInp() {
+        return this.orderInp.getText();
+    }
+    
+    public String getReturnProdInp() {
+        return this.prodInp.getText();
+    }
+    
+    public JPanel getRatingPanel() {
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.insets = new Insets(5, 5, 5, 5);
+        
+        JPanel rate = new JPanel();
+        rate.setLayout(new GridBagLayout());
+        
+        JLabel rateLbl = new JLabel("Rating: ");
+        gbc.gridx = 0;
+        gbc.gridy = 0;
+        rate.add(rateLbl, gbc);
+        
+        SpinnerModel sm = new SpinnerNumberModel(0, 0, 5, 1);
+        JSpinner rating = new JSpinner(sm);
+        gbc.gridx = 1;
+        gbc.gridy = 0;
+        rate.add(rating, gbc);
+        
+        return rate;
+    }
+    
+    public JPanel getReceiveOrderPanel() {
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.insets = new Insets(5, 5, 5, 5);
+        
+        JPanel receiveOrd = new JPanel();
+        receiveOrd.setLayout(new GridBagLayout());
+        
+        JLabel lbl = new JLabel("ENTER DATE");
+        lbl.setFont(new Font("Verdana", Font.BOLD, 12));
+        gbc.gridx = 0;
+        gbc.gridy = 0;
+        gbc.gridwidth = 2;
+        receiveOrd.add(lbl, gbc);
+        
+        JLabel monthLbl = new JLabel("Month: ");
+        gbc.gridx = 0;
+        gbc.gridy = 1;
+        gbc.gridwidth = 1;
+        receiveOrd.add(monthLbl, gbc);
+        
+        JLabel dayLbl = new JLabel("Day: ");
+        gbc.gridx = 0;
+        gbc.gridy = 2;
+        gbc.gridwidth = 1;
+        receiveOrd.add(dayLbl, gbc);
+        
+        JLabel yearLbl = new JLabel("Year: ");
+        gbc.gridx = 0;
+        gbc.gridy = 3;
+        gbc.gridwidth = 1;
+        receiveOrd.add(yearLbl, gbc);
+        
+        String months[] = {"January", "February", "March", "April", "May", "June", "July",
+                            "August", "September", "October", "November", "December"};
+        JComboBox<String> monthComboBox = new JComboBox<>(months);
+        gbc.gridx = 1;
+        gbc.gridy = 1;
+        gbc.gridwidth = 1;
+        receiveOrd.add(monthComboBox, gbc);
 
+        JComboBox<Integer> dayComboBox = new JComboBox<>();
+        for (int i = 1; i <= 31; i++) {
+            dayComboBox.addItem(i);
+        }
+        gbc.gridx = 1;
+        gbc.gridy = 2;
+        gbc.gridwidth = 1;
+        receiveOrd.add(dayComboBox, gbc);
+        
+        JTextField yearInp = new JTextField(5);
+        gbc.gridx = 1;
+        gbc.gridy = 3;
+        gbc.gridwidth = 1;
+        receiveOrd.add(yearInp, gbc);
+        
+        return receiveOrd;
+    }
+    // CHANGES ENDS HERE
     @Override
     public void nextPageName(String name) {
         this.userCardLayout.show(this, name);
@@ -497,35 +711,6 @@ public class UserPage extends JPanel implements AccountPage {
         public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
             return this;
         }
-    }
-
-    public String getOrdersViewOption() { return (String) ordersBox.getSelectedItem(); }
-
-    public void updateOrdersList(ArrayList<Order> orders) {
-        DefaultListModel<String> mdl = new DefaultListModel<>();
-        this.options = new LinkedHashMap<>();
-
-        for (Order order : orders) {
-            String display = "Order No. " + Integer.toString(order.getOrderID());
-            this.options.put(display, Integer.toString(order.getOrderID()));
-            mdl.addElement(display);
-        }
-
-        ordersList.setModel(mdl);
-    }
-
-    public void updateReturnsList(ArrayList<Return> returns) {
-        DefaultListModel<String> mdl = new DefaultListModel<>();
-        this.options = new LinkedHashMap<>();
-
-        for (Return r : returns) {
-            String display = "Order No. " + Integer.toString(r.getOrderID());
-            String value = Integer.toString(r.getOrderID()) + " " + Integer.toString(r.getProductID()); // value.split(" ") to get order id and product ig
-            this.options.put(display, value);
-            mdl.addElement(display);
-        }
-
-        ordersList.setModel(mdl);
     }
 
     static class ButtonEditor extends AbstractCellEditor implements TableCellEditor {

@@ -5,6 +5,7 @@ import java.sql.*;
 import java.util.Objects;
 
 public class OrderContent {
+    private int order_id;
     private int product_id;
     private String productName;
     private int quantity;
@@ -15,6 +16,12 @@ public class OrderContent {
         this.productName = name;
         this.quantity = quantity;
         this.priceEach = price;
+    }
+    
+    public OrderContent(int order_id, int product_id, String name) {
+        this.order_id = order_id;
+        this.product_id = product_id;
+        this.productName = name;
     }
     
     public void sendToDB(int order_id, Connection conn) throws SQLException {
@@ -38,6 +45,7 @@ public class OrderContent {
     public int getQuantity() { return this.quantity; }
     public float getPriceEach() { return this.priceEach; }
     public String getProductName() { return this.productName; }
+    public int getOrderID() { return this.order_id; }
 
     @Override
     public boolean equals(Object o) {
