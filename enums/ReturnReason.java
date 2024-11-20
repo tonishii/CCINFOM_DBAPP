@@ -6,20 +6,20 @@ public enum ReturnReason {
     CHANGEOFMIND("Change of Mind"),
     COUNTERFEIT("Counterfeit Item");
     
-    private String val;
+    private final String value;
     
-    ReturnReason(String val) {
-        this.val = val;
+    ReturnReason(String value) {
+        this.value = value;
     }
     
     public String getVal() {
-        return this.val;
+        return this.value;
     }
     
     // sql enum value to java enum value
     public static ReturnReason convertVal(String val) {
         for (ReturnReason reason : values()) {
-            if (reason.val.equals(val))
+            if (reason.value.equals(val))
                 return reason;
         }
         throw new IllegalArgumentException("Unknown return reason: " + val);
