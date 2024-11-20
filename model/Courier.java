@@ -221,7 +221,8 @@ public class Courier implements Account {
                     """
                     SELECT *
                     FROM returns r
-                    WHERE r.courier_id = ?;
+                    WHERE r.courier_id = ?
+                    AND r.return_status = 'PROCESSING';
                     """;
 
             PreparedStatement returnsStmt = conn.prepareStatement(returnQuery);
@@ -233,7 +234,7 @@ public class Courier implements Account {
                     returnsResultSet.getInt("order_id"),
                     returnsResultSet.getInt("product_id"),
                     returnsResultSet.getInt("courier_id"),
-                    ReturnReason.valueOf(returnsResultSet.getString("return_reason")),
+                    ReturnReason.convertVal(returnsResultSet.getString("return_reason")),
                     returnsResultSet.getString("return_description"),
                     returnsResultSet.getDate("return_date"),
                     ReturnStatus.valueOf(returnsResultSet.getString("return_status"))
