@@ -392,8 +392,8 @@ public class MainController {
                 userPage.ordersListToProducts(itemsList);
                 int option = JOptionPane.showConfirmDialog(null, userPage.getRequestReturnPanel(), "Request Return", JOptionPane.OK_CANCEL_OPTION);
                 if (option == JOptionPane.OK_OPTION) {
-                    String orderInp = userPage.getReturnOrderInp();
-                    String productInp = userPage.getReturnProdInp();
+                    String orderInp = userPage.getOrderInp();
+                    String productInp = userPage.getProdInp();
                     String reason = userPage.getComboBoxVal();
                     String desc = userPage.getReturnDesc();
                     
@@ -426,8 +426,8 @@ public class MainController {
                 userPage.ordersListToProducts(itemsList);
                 int option = JOptionPane.showConfirmDialog(null, userPage.getRatingPanel(), "Rate a Product", JOptionPane.OK_CANCEL_OPTION);
                 if (option == JOptionPane.OK_OPTION) {
-                    String orderInp = userPage.getReturnOrderInp();
-                    String productInp = userPage.getReturnProdInp();
+                    String orderInp = userPage.getOrderInp();
+                    String productInp = userPage.getProdInp();
                     int rating = userPage.getSpinnerVal();
                     if (orderInp.trim().isEmpty() || productInp.trim().isEmpty()) { // When an input field is not filled up
                         JOptionPane.showMessageDialog(null, "Please fill out the required input fields:\nOrder ID\nProduct ID");
@@ -456,7 +456,28 @@ public class MainController {
             try {
                 ArrayList<OrderContent> itemsList = ((User) account).getOrderItems(conn, ((User) account).getID());
                 userPage.ordersListToProducts(itemsList);
-                JOptionPane.showConfirmDialog(null, userPage.getReceiveOrderPanel(), "Receive Order", JOptionPane.OK_CANCEL_OPTION);
+                int option = JOptionPane.showConfirmDialog(null, userPage.getReceiveOrderPanel(), "Receive Order", JOptionPane.OK_CANCEL_OPTION);
+                if (option == JOptionPane.OK_OPTION) {
+                    String orderInp = userPage.getOrderInp();
+
+                    if (orderInp.trim().isEmpty()) { // When an input field is not filled up
+                        JOptionPane.showMessageDialog(null, "Please fill out the required input fields:\nOrder ID\nProduct ID");
+                    }
+                    else {
+                        try {
+                            int order_id = Integer.parseInt(orderInp.trim());
+
+                            if (Order.receiveOrder(conn, order_id, ((User) account).getID())) {
+                                JOptionPane.showMessageDialog(null, "Order successfully received.");
+                            }
+                            else {
+                                JOptionPane.showMessageDialog(null, "Failed to receive order.");
+                            }
+                        } catch (NumberFormatException e) {
+                            JOptionPane.showMessageDialog(null, "Invalid ID input.");
+                        }
+                    }
+                }
             } catch (Exception e) {
                 JOptionPane.showMessageDialog(null, "Error: " + e);
             }

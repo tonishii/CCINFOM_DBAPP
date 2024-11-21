@@ -37,10 +37,12 @@ public class Return {
                     SELECT 1
                     FROM orders o
                     JOIN order_contents oc ON o.order_id = oc.order_id
-                    WHERE o.user_id = ?
+                    WHERE o.user_id = ? AND o.order_status = 'DELIVERED'
+                    AND oc.product_id = ?
                     """;
             PreparedStatement ps = conn.prepareStatement(query);
             ps.setInt(1, user_id);
+            ps.setInt(2, product_id);
             ResultSet rs =  ps.executeQuery();
             
             if (!(rs.next())) return false;
@@ -72,7 +74,8 @@ public class Return {
             String query = 
                     """
                     UPDATE `returns`
-                    SET return_status = 'REFUNDED'
+                    SET return_status = 'REFUNDED',
+                    return_date = NOW()
                     WHERE product_id = ?
                     AND order_id = ?
                     """;

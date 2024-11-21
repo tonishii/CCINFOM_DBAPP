@@ -116,6 +116,41 @@ public class Order {
 
     public String toString() { return order_id + " " + purchase_date.toString() + " " + total_price; }
 
+    public static boolean receiveOrder(Connection conn, int order_id, int user_id) {
+        try {
+            String query = 
+                    """
+                    SELECT 1
+                    FROM orders
+                    WHERE order_id = ? AND user_id = ?
+                    AND order_status = 'FOR_DELIVERY'
+                    """;
+            PreparedStatement ps = conn.prepareStatement(query);
+            ps.setInt(1, order_id);
+            ps.setInt(2, user_id);
+            ResultSet rs = ps.executeQuery();
+            
+            if (!(rs.next())) return false;
+            
+            query = 
+                    """
+                    UPDATE orders 
+                    SET order_status = 'DELIVERED',
+                    receive_date = NOW()
+                    WHERE order_id = ?
+                    """;
+            ps = conn.prepareStatement(query);
+            ps.setInt(1, order_id);
+            
+            ps.executeUpdate();
+        } catch (Exception e) {
+            System.out.println("Error while receiving order: " + e);
+            return false;
+        }
+        
+        return true;
+    }
+    
     public void setReceiveDate(Date date) {
         this.receive_date = date;
     }
