@@ -380,6 +380,20 @@ public class UserPage extends JPanel implements AccountPage {
         profileFirstNameField.setText(user.getFirstName());
         profileLastNameField.setText(user.getLastName());
     }
+    
+    public void refreshUserPage() {
+        Component comps[] = this.getComponents();
+        for (Component comp : comps) {
+            if (comp.getName() != null && (comp.getName().equals("signup") || comp.getName().equals("main"))) {
+                this.remove(comp);
+            }
+        }
+
+        this.add(getSignUpPage(), "signup");
+        this.add(getMainPage(), "main");
+        this.revalidate();
+        this.repaint();
+    }
 
     public void updateBrowseList(Map<String, String> options) {
         DefaultListModel<String> mdl = new DefaultListModel<>();

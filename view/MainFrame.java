@@ -2,6 +2,7 @@ package view;
 
 import javax.swing.*;
 import java.awt.*;
+import javax.swing.table.DefaultTableModel;
 
 public class MainFrame extends JFrame {
     private final CardLayout centerCardLayout;
@@ -33,5 +34,57 @@ public class MainFrame extends JFrame {
 
     public void addToCenterPanel(JPanel panel, String name) {
         this.centerPanel.add(panel, name);
+    }
+    
+    public static void clearInputs(Container cont) {
+        for (Component comp : cont.getComponents()) {
+            if (comp instanceof JTextField) {
+                ((JTextField) comp).setText("");
+                System.out.println("text field");
+            }
+                
+            else if (comp instanceof JPasswordField) {
+                ((JTextField) comp).setText("");
+                System.out.println("password field");
+            }
+            
+            else if (comp instanceof JLabel) {
+                ((JLabel) comp).setText("");
+                System.out.println("label");
+            }
+            
+            else if (comp instanceof JTextArea) {
+                ((JTextArea) comp).setText("");
+                System.out.println("text area");
+            }
+                
+            else if (comp instanceof JCheckBox) {
+                ((JCheckBox) comp).setSelected(false);
+                System.out.println("checkbox");
+            }
+                
+            else if (comp instanceof JComboBox) {
+                ((JComboBox<?>) comp).setSelectedIndex(0);
+                System.out.println("combo box");
+            }
+                
+            else if (comp instanceof JTable) {
+                JTable table = (JTable) comp;
+                table.setModel(new DefaultTableModel());
+                System.out.println("table");
+            }
+            else if (comp instanceof JList) {
+                JList<?> list = (JList<?>) comp;
+                if (list.getModel() instanceof DefaultListModel) {
+                    DefaultListModel<?> model = (DefaultListModel<?>) list.getModel();
+                    model.clear();
+                    System.out.println("list");
+                }
+            }
+            else if (comp instanceof Container) {
+                 clearInputs((Container) comp);
+                 System.out.println("called");
+            }
+        }
     }
 }

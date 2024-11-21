@@ -123,4 +123,7 @@ public class SelectAccount extends JPanel {
     }
 
     public String getID() { return idLoginField.getText().trim(); }
+    public void clearText() {
+        this.idLoginField.setText("");
+    }
 }

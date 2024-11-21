@@ -93,6 +93,7 @@ public class MainController {
 
     private void initSelectListeners() {
         selectAccountPage.initSelectListeners(loginEvent -> {
+            selectAccountPage.clearText();
             this.account = selectAccountPage.getAccountType();
             selectAccountPage.nextPageName(SelectAccount.LOGINPAGE);
 
@@ -106,7 +107,6 @@ public class MainController {
             mainMenuPage.nextPageName(account.toString());
 
         }, submitLoginEvent -> {
-
             try {
                 account.login(Integer.parseInt(selectAccountPage.getID()), conn);
                 (account instanceof User ? userPage :
@@ -274,10 +274,12 @@ public class MainController {
             userPage.updateProfilePage((User) account);
 
         }, logOutEvent -> { // Action: Pressing log out button
+            MainFrame.clearInputs(userPage);
+            userPage.refreshUserPage(); // Labels of information disappear when clearInputs is called
+            initUserListeners();
             mainMenuPage.nextPageName(MainFrame.SELECTACCPAGE);
             selectAccountPage.nextPageName(SelectAccount.SELECTACCPAGE);
-            userPage.nextPageName(UserPage.SHOPPAGE);
-
+            userPage.nextMainPageName(UserPage.SHOPPAGE);
         }, addToCartEvent -> { // Action: Pressing the add button in the shop page
             User user = (User) account;
             Product selectedProduct = userPage.getSelectedProduct();
