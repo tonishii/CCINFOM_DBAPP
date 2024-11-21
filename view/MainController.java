@@ -717,9 +717,10 @@ public class MainController {
             selectAccountPage.nextPageName(SelectAccount.SELECTACCPAGE);
             sellerPage.nextPageName(SellerPage.SIGNUP);
         }, editAccountEvent -> {
-            mainMenuPage.nextPageName(MainFrame.SELECTACCPAGE);
-            selectAccountPage.nextPageName(SelectAccount.SELECTACCPAGE);
-            sellerPage.nextPageName(SellerPage.SIGNUP);
+            int result = sellerPage.showEditAccountOptionPane();
+            if (result==JOptionPane.OK_OPTION){
+
+            }
         }, logoutEvent -> {
             mainMenuPage.nextPageName(MainFrame.SELECTACCPAGE);
             selectAccountPage.nextPageName(SelectAccount.SELECTACCPAGE);
@@ -810,6 +811,10 @@ public class MainController {
                     }
                 }
             }
+        }, addEvent -> {
+            sellerPage.showAddProductOptionPane();
+        }, editProdEvent ->{
+            sellerPage.showEditProductOptionPane();
         });
     }
 

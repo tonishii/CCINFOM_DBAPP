@@ -21,7 +21,12 @@ public class SellerPage extends JPanel implements AccountPage {
 
     private JTextField sellerNameField,
                        sellerPhoneField,
-                       sellerAddressField;
+                       sellerAddressField,
+                       productName,
+                       productPrice,
+                       productType,
+                       productQuantity,
+                       productDesc;
     private JButton    submitSignUpBtn,
                        sellerBackBtn;
 
@@ -214,17 +219,106 @@ public class SellerPage extends JPanel implements AccountPage {
         panelCenter.add(approveBtn,gbc);
 
         gbc.gridy = 3;
-        panelCenter.add(removeBtn, gbc);
+        panelCenter.add(editBtn, gbc);
         panelCenter.add(rejectBtn,gbc);
 
         gbc.gridy = 4;
-        panelCenter.add(editBtn, gbc);
+        panelCenter.add(removeBtn, gbc);
 
         gbc.weighty = 1.0;
 
         panel.add(panelCenter);
 
         return panel;
+    }
+
+    public int showEditAccountOptionPane(){
+        JPanel panel = new JPanel( new GridBagLayout());
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.insets = new Insets(0, 4 ,5 ,4);
+        sellerNameField = new JTextField();
+        sellerNameField.setPreferredSize(new Dimension(200, 20));
+        sellerAddressField = new JTextField();
+        sellerAddressField.setPreferredSize(new Dimension(200, 20));
+        sellerPhoneField = new JTextField();
+        sellerPhoneField.setPreferredSize(new Dimension(200, 20));
+        gbc.gridy=0;
+        panel.add(new JLabel("Name: "),gbc);
+        panel.add(sellerNameField, gbc);
+        gbc.gridy=1;
+        panel.add(new JLabel("Address: "),gbc);
+        panel.add(sellerAddressField, gbc);
+        gbc.gridy=2;
+        panel.add(new JLabel("Phone: "),gbc);
+        panel.add(sellerPhoneField, gbc);
+
+        return JOptionPane.showConfirmDialog(null, panel, "Edit Account", JOptionPane.OK_CANCEL_OPTION);
+    }
+
+    public int showAddProductOptionPane(){
+        JPanel panel = new JPanel( new GridBagLayout());
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.insets = new Insets(0, 4 ,5 ,4);
+        productName = new JTextField();
+        productName.setPreferredSize(new Dimension(200, 20));
+        productPrice = new JTextField();
+        productPrice.setPreferredSize(new Dimension(200, 20));
+        productType = new JTextField();
+        productType.setPreferredSize(new Dimension(200, 20));
+        productQuantity = new JTextField();
+        productQuantity.setPreferredSize(new Dimension(200, 20));
+        productDesc = new JTextField();
+        productDesc.setPreferredSize(new Dimension(200, 20));
+        gbc.gridy=0;
+        panel.add(new JLabel("Product Name: "),gbc);
+        panel.add(productName, gbc);
+        gbc.gridy=1;
+        panel.add(new JLabel("Product Price: "),gbc);
+        panel.add(productPrice, gbc);
+        gbc.gridy=2;
+        panel.add(new JLabel("Product Type: "),gbc);
+        panel.add(productType, gbc);
+        gbc.gridy=3;
+        panel.add(new JLabel("Product Quantity: "),gbc);
+        panel.add(productQuantity, gbc);
+        gbc.gridy=4;
+        panel.add(new JLabel("Product Description: "),gbc);
+        panel.add(productDesc, gbc);
+
+        return JOptionPane.showConfirmDialog(null, panel, "Add Product", JOptionPane.OK_CANCEL_OPTION);
+    }
+
+    public int showEditProductOptionPane(){
+        JPanel panel = new JPanel( new GridBagLayout());
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.insets = new Insets(0, 4 ,5 ,4);
+        productName = new JTextField();
+        productName.setPreferredSize(new Dimension(200, 20));
+        productPrice = new JTextField();
+        productPrice.setPreferredSize(new Dimension(200, 20));
+        productType = new JTextField();
+        productType.setPreferredSize(new Dimension(200, 20));
+        productQuantity = new JTextField();
+        productQuantity.setPreferredSize(new Dimension(200, 20));
+        productDesc = new JTextField();
+        productDesc.setPreferredSize(new Dimension(200, 20));
+        gbc.gridy=0;
+        panel.add(new JLabel("Product Name: "),gbc);
+        panel.add(productName, gbc);
+        gbc.gridy=1;
+        panel.add(new JLabel("Product Price: "),gbc);
+        panel.add(productPrice, gbc);
+        gbc.gridy=2;
+        panel.add(new JLabel("Product Type: "),gbc);
+        panel.add(productType, gbc);
+        gbc.gridy=3;
+        panel.add(new JLabel("Product Quantity: "),gbc);
+        panel.add(productQuantity, gbc);
+        gbc.gridy=4;
+        panel.add(new JLabel("Product Description: "),gbc);
+        panel.add(productDesc, gbc);
+
+        return JOptionPane.showConfirmDialog(null, panel, "Edit Product", JOptionPane.OK_CANCEL_OPTION);
     }
 
     @Override
@@ -234,12 +328,15 @@ public class SellerPage extends JPanel implements AccountPage {
     }
 
     public void initMainListeners(ActionListener genLtr, ActionListener editAccLtr, ActionListener logoutLtr,
-                                  ActionListener selCRLtr, ListSelectionListener textLtr){
+                                  ActionListener selCRLtr, ListSelectionListener textLtr, ActionListener addLtr,
+                                  ActionListener editProdLtr){
         genBtn.addActionListener(genLtr);
         editAccBtn.addActionListener(editAccLtr);
         logoutBtn.addActionListener(logoutLtr);
         sellerCRBox.addActionListener(selCRLtr);
         sellerCRList.addListSelectionListener(textLtr);
+        addBtn.addActionListener(addLtr);
+        editBtn.addActionListener(editProdLtr);
     }
 
     @Override
@@ -306,4 +403,9 @@ public class SellerPage extends JPanel implements AccountPage {
     public String getSellerName() { return sellerNameField.getText().trim(); }
     public String getSellerAddress() { return sellerAddressField.getText().trim(); }
     public String getSellerPhone() { return sellerPhoneField.getText().trim(); }
+    public String getProductName() { return productName.getText().trim(); }
+    public String getProductPrice() { return productPrice.getText().trim(); }
+    public String getProductType() { return productType.getText().trim(); }
+    public String getProductQuantity() { return productQuantity.getText().trim(); }
+    public String getProductDesc() { return productDesc.getText().trim(); }
 }
