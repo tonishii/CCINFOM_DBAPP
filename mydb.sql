@@ -45,8 +45,6 @@ CREATE TABLE IF NOT EXISTS `mydb`.`order_contents` (
   `subtotal` FLOAT,
   `product_rating` INT NULL,
   PRIMARY KEY (`order_id`, `product_id`),
-  UNIQUE INDEX `order_id_UNIQUE` (`order_id` ASC),
-  INDEX `product_id_idx` (`product_id` ASC),
   CONSTRAINT `order_id`
     FOREIGN KEY (`order_id`)
     REFERENCES `mydb`.`orders` (`order_id`)
@@ -71,7 +69,7 @@ CREATE TABLE IF NOT EXISTS `mydb`.`orders` (
   `courier_id` INT UNSIGNED NOT NULL,
   `purchase_date` DATETIME NOT NULL,
   `total_price` FLOAT,
-  `order_status` ENUM('BEING_PREPARED', 'FOR_DELIVERY', 'DELIVERED', 'REFUNDED') NOT NULL,
+  `order_status` ENUM('BEING_PREPARED', 'FOR_DELIVERY', 'DELIVERED') NOT NULL,
   `receive_date` DATETIME NOT NULL,
   PRIMARY KEY (`order_id`),
   UNIQUE INDEX `order_id_UNIQUE` (`order_id` ASC),
@@ -127,7 +125,7 @@ CREATE TABLE IF NOT EXISTS `mydb`.`returns` (
   `return_reason` ENUM('Damaged Item', 'Wrong Item', 'Change of Mind', 'Counterfeit Item') NOT NULL,
   `return_description` TEXT NULL,
   `return_date` DATETIME NOT NULL,
-  `return_status` ENUM('PROCESSING', 'REFUNDED') NOT NULL,
+  `return_status` ENUM('PROCESSING', 'REJECTED', 'REFUNDED') NOT NULL,
   PRIMARY KEY (`order_id`, `product_id`),
   INDEX `product_id_idx` (`product_id` ASC),
   INDEX `courier_id_idx` (`courier_id` ASC),
