@@ -165,6 +165,15 @@ public class SellerPage extends JPanel implements AccountPage {
         cancelBtn = new JButton("Cancel");
         cancelBtn.setFocusable(false);
 
+        saveProfileBtn = new JButton("Save Profile");
+        saveProfileBtn.setFocusable(false);
+
+        addProductBtn = new JButton("Add Product");
+        addProductBtn.setFocusable(false);
+
+        saveProductBtn = new JButton("Save Product");
+        saveProductBtn.setFocusable(false);
+
         // top panel
         JPanel panelCenter = new JPanel(new GridBagLayout());
         gbc.insets = new Insets(0, 4 ,5 ,4);
@@ -277,6 +286,7 @@ public class SellerPage extends JPanel implements AccountPage {
         panel.add(new JLabel("Phone: "),gbc);
         panel.add(sellerPhoneField, gbc);
         gbc.gridy=3;
+        panel.add(saveProfileBtn, gbc);
         panel.add(cancelBtn, gbc);
 
         newWindow.add(panel);
@@ -328,6 +338,7 @@ public class SellerPage extends JPanel implements AccountPage {
         panel.add(new JLabel("Product Description: "),gbc);
         panel.add(productDesc, gbc);
         gbc.gridy=5;
+        panel.add(addProductBtn, gbc);
         panel.add(cancelBtn, gbc);
 
         newWindow.add(panel);
@@ -379,6 +390,7 @@ public class SellerPage extends JPanel implements AccountPage {
         panel.add(new JLabel("Product Description: "),gbc);
         panel.add(productDesc, gbc);
         gbc.gridy=5;
+        panel.add(saveProductBtn, gbc);
         panel.add(cancelBtn, gbc);
 
         newWindow.add(panel);
@@ -396,7 +408,9 @@ public class SellerPage extends JPanel implements AccountPage {
 
     public void initMainListeners(ActionListener genLtr, ActionListener editAccLtr, ActionListener logoutLtr,
                                   ActionListener selCRLtr, ListSelectionListener textLtr, ActionListener addLtr,
-                                  ActionListener editProdLtr, ActionListener cancelLtr){
+                                  ActionListener editProdLtr, ActionListener cancelLtr, ActionListener saveProfileLtr,
+                                  ActionListener addProductLtr, ActionListener saveProductLtr, ActionListener removeProductLtr,
+                                  ActionListener approveLtr, ActionListener rejectLtr){
         genBtn.addActionListener(genLtr);
         editAccBtn.addActionListener(editAccLtr);
         logoutBtn.addActionListener(logoutLtr);
@@ -405,6 +419,12 @@ public class SellerPage extends JPanel implements AccountPage {
         addBtn.addActionListener(addLtr);
         editBtn.addActionListener(editProdLtr);
         cancelBtn.addActionListener(cancelLtr);
+        saveProfileBtn.addActionListener(saveProfileLtr);
+        addProductBtn.addActionListener(addProductLtr);
+        saveProductBtn.addActionListener(saveProductLtr);
+        removeBtn.addActionListener(removeProductLtr);
+        approveBtn.addActionListener(approveLtr);
+        rejectBtn.addActionListener(rejectLtr);
     }
 
     @Override
@@ -450,6 +470,14 @@ public class SellerPage extends JPanel implements AccountPage {
         sellerNameField.setText(seller.getName());
         sellerPhoneField.setText(seller.getPhoneNumber());
         sellerAddressField.setText(seller.getAddress());
+    }
+
+    public void updateEditProduct(Product product){
+        productName.setText(product.getName());
+        productPrice.setText(Float.toString(product.getPrice()));
+        productType.setText(product.getType());
+        productQuantity.setText(Integer.toString(product.getQuantity()));
+        productDesc.setText(product.getDescription());
     }
 
     public void setDisableButtons(){
@@ -501,6 +529,8 @@ public class SellerPage extends JPanel implements AccountPage {
         newWindow.dispose();
         setEnableButtons();
     }
+
+    public void setBackSellerBox(){ this.sellerCRBox.setSelectedIndex(0); }
     public String getSellerCRBox(){ return (String) this.sellerCRBox.getSelectedItem(); }
     public String getSellerName() { return sellerNameField.getText().trim(); }
     public String getSellerAddress() { return sellerAddressField.getText().trim(); }

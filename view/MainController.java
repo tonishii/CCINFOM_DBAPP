@@ -1,5 +1,7 @@
 package view;
 
+import enums.ReturnReason;
+import enums.ReturnStatus;
 import model.*;
 import enums.OrderStatus;
 
@@ -116,6 +118,9 @@ public class MainController {
 
                     if (account instanceof User) {
                         userPage.updateBrowseList(((User) account).browseByShops(conn));
+                    }
+                    else if (account instanceof Seller){
+                        sellerPage.updateSellerProductList(((Seller) account).productList(this.conn));
                     }
                 }
                 else JOptionPane.showMessageDialog(null, "Account does not exist.");
@@ -712,7 +717,6 @@ public class MainController {
         }, backSignUpEvent -> {
             mainMenuPage.nextPageName(MainFrame.SELECTACCPAGE);
             selectAccountPage.nextPageName(SelectAccount.SELECTACCPAGE);
-
             sellerPage.nextPageName(AccountPage.SIGNUPPAGE);
         });
         sellerPage.initMainListeners(generateEvent -> {
@@ -737,6 +741,7 @@ public class MainController {
             mainMenuPage.nextPageName(MainFrame.SELECTACCPAGE);
             selectAccountPage.nextPageName(SelectAccount.SELECTACCPAGE);
             sellerPage.nextPageName(SellerPage.SIGNUP);
+            sellerPage.setBackSellerBox();
         }, listChangeEvent -> {
             sellerPage.setInvisibleBtns(sellerPage.getSellerCRBox());
             try {
@@ -842,10 +847,191 @@ public class MainController {
             }
             */
         }, editProdEvent -> {
-            sellerPage.showEditProduct();
-            sellerPage.setDisableButtons();
+
+            if (sellerPage.getSelectedOption()!=null) {
+                sellerPage.showEditProduct();
+                sellerPage.setDisableButtons();
+                try {
+                    List<Integer> Ids = Arrays.stream(sellerPage.getSelectedOption()
+                                    .split(" "))
+                            .map(Integer::parseInt)
+                            .toList();
+
+                    Product product;
+
+                    String query = """
+                            SELECT *
+                            FROM products
+                            WHERE product_id = ? AND seller_id = ?
+                            LIMIT 1;
+                            """;
+                    PreparedStatement pstmt = conn.prepareStatement(query);
+                    pstmt.setInt(1, Ids.get(0));
+                    pstmt.setInt(2, Ids.get(1));
+                    product = ((Seller) account).getSellerProduct(pstmt);
+                    sellerPage.updateEditProduct(product);
+                } catch (SQLException e) {
+                    JOptionPane.showMessageDialog(null, "Error: " + e.getMessage());
+                }
+            }else{
+                JOptionPane.showMessageDialog(null, "No Product Selected!", "Failure", JOptionPane.ERROR_MESSAGE);
+            }
         }, cancelEvent -> {
             sellerPage.disposeNewWindow();
+        }, saveProfileEvent -> {
+            switch (JOptionPane.showConfirmDialog(null, "Are you sure?", "Prompt", JOptionPane.OK_CANCEL_OPTION)){
+                case JOptionPane.OK_OPTION -> {
+                    sellerPage.updateEditAccount((Seller) account);
+                    ((Seller) account).setName(sellerPage.getSellerName());
+                    ((Seller) account).setAddress(sellerPage.getSellerAddress());
+                    ((Seller) account).setPhoneNumber(sellerPage.getSellerPhone());
+                    ((Seller) account).updateAccount(conn);
+                    sellerPage.disposeNewWindow();
+                }
+            }
+        }, addProductEvent -> {
+            switch (JOptionPane.showConfirmDialog(null, "Are you sure?", "Prompt", JOptionPane.OK_CANCEL_OPTION)){
+                case JOptionPane.OK_OPTION -> {
+                    if (sellerPage.getSelectedOption()!=null) {
+                        Product product = new Product();
+                        product.setSellerID(((Seller)account).getID());
+                        product.setName(sellerPage.getProductName());
+                        product.setPrice(Float.parseFloat(sellerPage.getProductPrice()));
+                        product.setDescription(sellerPage.getProductDesc());
+                        product.setQuantity(Integer.parseInt(sellerPage.getProductQuantity()));
+                        product.setType(sellerPage.getProductType());
+                        product.isListed();
+                        product.sendToDB(conn);
+                    }
+                    try {
+                        sellerPage.updateSellerProductList(((Seller) account).productList(this.conn));
+                    } catch (SQLException e) {
+                        throw new RuntimeException(e);
+                    }
+                    sellerPage.disposeNewWindow();
+                }
+            }
+        }, saveProductEvent -> {
+            switch (JOptionPane.showConfirmDialog(null, "Are you sure?", "Prompt", JOptionPane.OK_CANCEL_OPTION)){
+                case JOptionPane.OK_OPTION -> {
+                    List<Integer> Ids = Arrays.stream(sellerPage.getSelectedOption()
+                                    .split(" "))
+                            .map(Integer::parseInt)
+                            .toList();
+
+                    try {
+                        String query = """
+                                UPDATE products
+                                SET product_name = ?
+                                    product_price = ?
+                                    product_type = ?
+                                    quantity_stocked = ?
+                                    description = ?
+                                    listed_status = ?
+                                WHERE product_id = ? AND seller_id = ?
+                                LIMIT 1;
+                                """;
+                        PreparedStatement pstmt = conn.prepareStatement(query);
+                        ((Product) account).setQuantity(Integer.parseInt(sellerPage.getProductQuantity()));
+                        pstmt.setString(1, sellerPage.getProductName());
+                        pstmt.setFloat(2, Float.parseFloat(sellerPage.getProductPrice()));
+                        pstmt.setString(3, sellerPage.getProductType());
+                        pstmt.setInt(4, Integer.parseInt(sellerPage.getProductQuantity()));
+                        pstmt.setString(5, sellerPage.getProductDesc());
+                        pstmt.setBoolean(6, ((Product) account).isListed());
+                        pstmt.setInt(7, Ids.get(0));
+                        pstmt.setInt(8, Ids.get(1));
+                        pstmt.executeUpdate();
+                        sellerPage.updateSellerProductList(((Seller) account).productList(this.conn));
+                    }catch (SQLException e) {
+                        JOptionPane.showMessageDialog(null, "Error: " + e.getMessage());
+                    }
+                    sellerPage.disposeNewWindow();
+                }
+            }
+        }, removeProductEvent -> {
+            if (sellerPage.getSelectedOption()!=null) {
+                try {
+                    List<Integer> Ids = Arrays.stream(sellerPage.getSelectedOption()
+                                    .split(" "))
+                            .map(Integer::parseInt)
+                            .toList();
+
+                    Product product;
+
+                    String query = """
+                            UPDATE products
+                            SET listed_status = ?
+                            WHERE product_id = ? AND seller_id = ?
+                            """;
+                    PreparedStatement pstmt = conn.prepareStatement(query);
+                    pstmt.setBoolean(2, false);
+                    pstmt.setInt(2, Ids.get(0));
+                    pstmt.setInt(3, Ids.get(1));
+                    sellerPage.updateSellerProductList(((Seller) account).productList(this.conn));
+                } catch (SQLException e) {
+                    JOptionPane.showMessageDialog(null, "Error: " + e.getMessage());
+                }
+            }else{
+                JOptionPane.showMessageDialog(null, "No Product Selected!", "Failure", JOptionPane.ERROR_MESSAGE);
+            }
+        }, approveReturnEvent -> {
+            if (sellerPage.getSelectedOption()!=null) {
+                switch (JOptionPane.showConfirmDialog(null, "Are you sure?", "Prompt", JOptionPane.OK_CANCEL_OPTION)){
+                    case JOptionPane.OK_OPTION -> {
+                        List<Integer> Ids = Arrays.stream(sellerPage.getSelectedOption()
+                                        .split(" "))
+                                        .map(Integer::parseInt)
+                                        .toList();
+                        try {
+                            String query = """
+                                    UPDATE returns
+                                    SET return_status = ?
+                                    WHERE order_id = ? AND product_id = ?;
+                                    """;
+                            PreparedStatement pstmt = conn.prepareStatement(query);
+                            pstmt.setString(1, ReturnStatus.REFUNDED.toString());
+                            pstmt.setInt(2, Ids.get(0));
+                            pstmt.setInt(3, Ids.get(1));
+                            pstmt.executeUpdate();
+                            sellerPage.updateSellerRefundList(((Seller) account).refundList(this.conn));
+                        }catch (SQLException e) {
+                            JOptionPane.showMessageDialog(null, "Error: " + e.getMessage());
+                        }
+                    }
+                }
+            }else{
+                JOptionPane.showMessageDialog(null, "No Refund Selected!", "Failure", JOptionPane.ERROR_MESSAGE);
+            }
+        }, rejectReturnEvent -> {
+            if (sellerPage.getSelectedOption()!=null) {
+                switch (JOptionPane.showConfirmDialog(null, "Are you sure?", "Prompt", JOptionPane.OK_CANCEL_OPTION)){
+                    case JOptionPane.OK_OPTION -> {
+                        List<Integer> Ids = Arrays.stream(sellerPage.getSelectedOption()
+                                        .split(" "))
+                                .map(Integer::parseInt)
+                                .toList();
+                        try {
+                            String query = """
+                                    UPDATE returns
+                                    SET return_status = ?
+                                        return_date = '9999-12-31'
+                                    WHERE order_id = ? AND product_id = ?;
+                                    """;
+                            PreparedStatement pstmt = conn.prepareStatement(query);
+                            pstmt.setString(1, ReturnStatus.REJECTED.toString());
+                            pstmt.setInt(2, Ids.get(0));
+                            pstmt.setInt(3, Ids.get(1));
+                            pstmt.executeUpdate();
+                            sellerPage.updateSellerRefundList(((Seller) account).refundList(this.conn));
+                        }catch (SQLException e) {
+                            JOptionPane.showMessageDialog(null, "Error: " + e.getMessage());
+                        }
+                    }
+                }
+            }else{
+                JOptionPane.showMessageDialog(null, "No Refund Selected!", "Failure", JOptionPane.ERROR_MESSAGE);
+            }
         });
     }
 
