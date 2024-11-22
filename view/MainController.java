@@ -1038,63 +1038,57 @@ public class MainController {
             String courier_name = courierPage.getCourierName();
             String courier_email_address = courierPage.getCourierEmail();
             String courier_address = courierPage.getCourierAddress();
-            
+            boolean noError = true;
+
             if (courier_name.isEmpty())
                 JOptionPane.showMessageDialog(null, "Please fill out the required fields:\nName");
             else {
                 if (!courier_email_address.isEmpty()) {
-                    String regex = "^[\\w!#$%&'*+/=?`{|}~^-]+(?:\\.[\\w!#$%&'*+/=?`{|}~^-]+)" +
-                            "*@(?:[a-zA-Z0-9-]+\\.)+[a-zA-Z]{2,6}";
-
-                    Pattern pattern = Pattern.compile(regex);
-                    Matcher matcher = pattern.matcher(courier_email_address);
-
-                    if (!matcher.matches()) {
-                        JOptionPane.showMessageDialog(null, "Error: Invalid email format.");
-                        return;
-                    }
+                    noError = emailChecker(courier_email_address);
                 }
 
                 boolean courier_verified_status = !courier_email_address.isEmpty() && !courier_address.isEmpty();
 
+                if (noError) {
+                    try {
+                        String query =
+                        """
+                        INSERT INTO couriers (courier_id, courier_name, courier_email_address, courier_address, courier_verified_status)
+                        SELECT IFNULL(MAX(courier_id), 0) + 1, ?, ?, ?, ?
+                        FROM couriers
+                        """;
 
-                try {
-                    String query =
-                    """
-                    INSERT INTO couriers (courier_id, courier_name, courier_email_address, courier_address, courier_verified_status)
-                    SELECT IFNULL(MAX(courier_id), 0) + 1, ?, ?, ?, ?
-                    FROM couriers
-                    """;
-
-                    try (PreparedStatement pstmt = conn.prepareStatement(query)) {
-                        pstmt.setString(1, courier_name);
-                        pstmt.setString(2, courier_email_address);
-                        pstmt.setString(3, courier_address);
-                        pstmt.setBoolean(4, !(courier_address.isEmpty() || courier_email_address.isEmpty()));
-                                                                // ^ verifies the courier
-                        pstmt.executeUpdate();
-                    }
-
-                    query =
-                    """
-                    SELECT MAX(courier_id)
-                    FROM couriers
-                    """;
-
-                    int courier_id = 1;
-                    try (PreparedStatement selectStmt = conn.prepareStatement(query);
-                         ResultSet rs = selectStmt.executeQuery()) {
-                        if (rs.next()) {
-                            courier_id = rs.getInt(1);
+                        try (PreparedStatement pstmt = conn.prepareStatement(query)) {
+                            pstmt.setString(1, courier_name);
+                            pstmt.setString(2, courier_email_address);
+                            pstmt.setString(3, courier_address);
+                            pstmt.setBoolean(4, !(courier_address.isEmpty() || courier_email_address.isEmpty()));
+                                                                    // ^ verifies the courier
+                            pstmt.executeUpdate();
                         }
+
+                        query =
+                        """
+                        SELECT MAX(courier_id)
+                        FROM couriers
+                        """;
+
+                        int courier_id = 1;
+                        try (PreparedStatement selectStmt = conn.prepareStatement(query);
+                             ResultSet rs = selectStmt.executeQuery()) {
+                            if (rs.next()) {
+                                courier_id = rs.getInt(1);
+                            }
+                        }
+
+                        this.account = new Courier(courier_id, courier_name, courier_email_address, courier_address, courier_verified_status);
+                        courierPage.nextPageName(AccountPage.MAINPAGE);
+
+                    } catch (SQLException e){
+                        JOptionPane.showMessageDialog(null, "Error: " + e.getMessage());
                     }
-
-                    this.account = new Courier(courier_id, courier_name, courier_email_address, courier_address, courier_verified_status);
-                    courierPage.nextPageName(AccountPage.MAINPAGE);
-
-                } catch (SQLException e){
-                    JOptionPane.showMessageDialog(null, "Error: " + e.getMessage());
                 }
+                else JOptionPane.showMessageDialog(null, "Error: Invalid email format.");
             }
         }, backSignUpEvent -> {
             courierPage.clearTextFields();
@@ -1114,9 +1108,36 @@ public class MainController {
             }, editEvent -> {
                 courierPage.nextMainPageName(CourierPage.EDITPAGE);
                 courierPage.updateProfilePage((Courier) account);
+            }, saveEvent -> {
+                try {
+                    String updName = courierPage.getProfileCourierName();
+                    String updEmail = courierPage.getProfileCourierEmail();
+                    String updAddress = courierPage.getProfileCourierAddress();
+
+                    if(!updName.isEmpty() && (updEmail.isEmpty() || emailChecker(updEmail))) {
+                        ((Courier) account).updateCourierAccount(conn, updName, updEmail, updAddress);
+                        JOptionPane.showMessageDialog(null, "Success: Account information changed.");
+                    }
+                    else
+                        throw new IllegalArgumentException("Invalid arguments.");
+                } catch (Exception e) {
+                    JOptionPane.showMessageDialog(null, "Error: " + e.getMessage());
+                }
             }, logOutEvent -> {
                 mainMenuPage.nextPageName(MainFrame.SELECTACCPAGE);
                 selectAccountPage.nextPageName(SelectAccount.SELECTACCPAGE);
         });
+    }
+
+    private boolean emailChecker(String courier_email_address) {
+        String regex = "^[\\w!#$%&'*+/=?`{|}~^-]+(?:\\.[\\w!#$%&'*+/=?`{|}~^-]+)" +
+                "*@(?:[a-zA-Z0-9-]+\\.)+[a-zA-Z]{2,6}";
+
+        Pattern pattern = Pattern.compile(regex);
+        Matcher matcher = pattern.matcher(courier_email_address);
+
+        //            courier_email_address = courierPage.getCourierEmail();
+        //            matcher = pattern.matcher(courier_email_address);
+        return matcher.matches();
     }
 }

@@ -257,10 +257,11 @@ public class CourierPage extends JPanel implements AccountPage {
         courierBackBtn.addActionListener(backLtr);
     }
 
-    public void initMainListeners(ActionListener orderLtr, ActionListener actLtr, ActionListener editLtr, ActionListener logOutLtr) {
+    public void initMainListeners(ActionListener orderLtr, ActionListener actLtr, ActionListener editLtr, ActionListener saveLtr, ActionListener logOutLtr) {
         ongoingOrderBtn.addActionListener(orderLtr);
         activityBtn.addActionListener(actLtr);
         editBtn.addActionListener(editLtr);
+        saveBtn.addActionListener(saveLtr);
         logOutBtn.addActionListener(logOutLtr);
     }
 
@@ -307,4 +308,16 @@ public class CourierPage extends JPanel implements AccountPage {
     public String getCourierName() { return courierNameField.getText().trim(); }
     public String getCourierEmail() { return courierEmailField.getText().trim(); }
     public String getCourierAddress() { return courierAddressField.getText().trim(); }
+
+    public String getProfileCourierName() {
+        return profileCourierNameField.getText().trim();
+    }
+
+    public String getProfileCourierEmail() {
+        return profileCourierEmailField.getText().trim();
+    }
+
+    public String getProfileCourierAddress() {
+        return profileCourierAddressField.getText().trim();
+    }
 }

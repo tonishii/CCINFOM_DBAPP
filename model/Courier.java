@@ -400,6 +400,29 @@ public class Courier implements Account {
         return -1;
     }
 
+    public void updateCourierAccount(Connection conn, String newName, String newEmail, String newAddress) {
+        try {
+            String update =
+                    """
+                    UPDATE couriers
+                    SET courier_name = ?,
+                        courier_email_address = ?,
+                        courier_address = ?,
+                        courier_verified_status = ?
+                    WHERE courier_id = ?;
+                    """;
+            PreparedStatement pstmt = conn.prepareStatement(update);
+            pstmt.setString(1, newName);
+            pstmt.setString(2, newEmail);
+            pstmt.setString(3, newAddress);
+            pstmt.setBoolean(4, !(newEmail.isEmpty() || newAddress.isEmpty()));
+            pstmt.setInt(5, this.courier_id);
+            pstmt.executeUpdate();
+        } catch (Exception e){
+            JOptionPane.showMessageDialog(null,"Error updating name: ");
+        }
+    }
+
     @Override
     public void updateAccount(Connection conn) {
         try {
