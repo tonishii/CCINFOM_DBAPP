@@ -510,6 +510,10 @@ public class Seller implements Account {
         return refund;
     }
 
+    public void AddProduct(PreparedStatement pstmt) throws SQLException {
+
+    }
+
     @Override
     public String toString() {
         return "seller";

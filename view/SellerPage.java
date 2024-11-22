@@ -138,6 +138,7 @@ public class SellerPage extends JPanel implements AccountPage {
 
         bottomPanel.add(getProductListPage(), PRODUCTLIST);
 
+
         panel.add(topPanel);
         panel.add(bottomPanel);
 
@@ -399,6 +400,7 @@ public class SellerPage extends JPanel implements AccountPage {
             return lists.get(sellerCRList.getSelectedValue());
         return null;
     }
+
     public String getSellerCRBox(){ return (String) this.sellerCRBox.getSelectedItem(); }
     public String getSellerName() { return sellerNameField.getText().trim(); }
     public String getSellerAddress() { return sellerAddressField.getText().trim(); }

@@ -721,7 +721,10 @@ public class MainController {
         }, editAccountEvent -> {
             int result = sellerPage.showEditAccountOptionPane();
             if (result==JOptionPane.OK_OPTION){
-
+                ((Seller) account).setName(sellerPage.getSellerName());
+                ((Seller) account).setAddress(sellerPage.getSellerAddress());
+                ((Seller) account).setPhoneNumber(sellerPage.getSellerPhone());
+                ((Seller) account).updateAccount(conn);
             }
         }, logoutEvent -> {
             mainMenuPage.nextPageName(MainFrame.SELECTACCPAGE);
@@ -813,10 +816,30 @@ public class MainController {
                     }
                 }
             }
-        }, addEvent -> {
-            sellerPage.showAddProductOptionPane();
+        }, addEvent -> { // Add product
+            int result = sellerPage.showAddProductOptionPane();
+            if (result==JOptionPane.OK_OPTION){
+                if (sellerPage.getSelectedOption()!=null) {
+                    List<Integer> Ids = Arrays.stream(sellerPage.getSelectedOption()
+                                    .split(" "))
+                                    .map(Integer::parseInt)
+                                    .toList();
+                    Product product = new Product();
+                    product.setSellerID(((Seller)account).getID());
+                    product.setName(sellerPage.getProductName());
+                    product.setPrice(Float.parseFloat(sellerPage.getProductPrice()));
+                    product.setDescription(sellerPage.getProductDesc());
+                    product.setQuantity(Integer.parseInt(sellerPage.getProductQuantity()));
+                    product.setType(sellerPage.getProductType());
+                    product.isListed();
+                    product.sendToDB(conn);
+                }
+            }
         }, editProdEvent ->{
-            sellerPage.showEditProductOptionPane();
+            int result = sellerPage.showEditProductOptionPane();
+            if (result==JOptionPane.OK_OPTION){
+
+            }
         });
     }
 
