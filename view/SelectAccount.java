@@ -92,10 +92,18 @@ public class SelectAccount extends JPanel {
         backLoginBtn = new JButton("Back");
         backLoginBtn.setFocusable(false);
 
-        loginPage.add(textLbl);
-        loginPage.add(idLoginField);
-        loginPage.add(submitLoginBtn);
-        loginPage.add(backLoginBtn);
+        gbc.gridx = 0;
+        gbc.gridy = 0;
+        loginPage.add(textLbl, gbc);
+        gbc.gridx = 1;
+        loginPage.add(idLoginField, gbc);
+        gbc.gridx = 0;
+        gbc.gridy = 1;
+        gbc.gridwidth = 2;
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+        loginPage.add(submitLoginBtn, gbc);
+        gbc.gridy = 2;
+        loginPage.add(backLoginBtn, gbc);
 
         this.add(accountSelectPage, SELECTACCPAGE);
         this.add(loginPage, LOGINPAGE);

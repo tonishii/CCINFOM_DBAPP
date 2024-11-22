@@ -104,52 +104,76 @@ public class UserPage extends JPanel implements AccountPage {
 
     @Override
     public JPanel getSignUpPage() {
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.insets = new Insets(5, 5, 5, 5);
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+        
         JPanel signUpPage = new JPanel();
         signUpPage.setBorder(BorderFactory.createTitledBorder(BorderFactory.createLineBorder(Color.BLACK, 2),
     "User sign-up", TitledBorder.LEFT, TitledBorder.TOP, new Font("Montserrat", Font.PLAIN, 12)));
+        
+        signUpPage.setLayout(new GridBagLayout());
 
         JLabel label = new JLabel("Enter user account name: ");
         userNameField = new JTextField();
         userNameField.setPreferredSize(new Dimension(200, 20));
 
-        signUpPage.add(label);
-        signUpPage.add(userNameField);
+        gbc.gridx = 0;
+        gbc.gridy = 0;
+        signUpPage.add(label, gbc);
+        gbc.gridx = 1;
+        signUpPage.add(userNameField, gbc);
 
         label = new JLabel("Enter user first name: ");
         userFirstNameField = new JTextField();
         userFirstNameField.setPreferredSize(new Dimension(200, 20));
 
-        signUpPage.add(label);
-        signUpPage.add(userFirstNameField);
+        gbc.gridx = 0;
+        gbc.gridy = 1;
+        signUpPage.add(label, gbc);
+        gbc.gridx = 1;
+        signUpPage.add(userFirstNameField, gbc);
 
         label = new JLabel("Enter user last name: ");
         userLastNameField = new JTextField();
         userLastNameField.setPreferredSize(new Dimension(200, 20));
 
-        signUpPage.add(label);
-        signUpPage.add(userLastNameField);
+        gbc.gridx = 0;
+        gbc.gridy = 2;
+        signUpPage.add(label, gbc);
+        gbc.gridx = 1;
+        signUpPage.add(userLastNameField, gbc);
 
         label = new JLabel("Enter user address: ");
         userAddressField = new JTextField();
         userAddressField.setPreferredSize(new Dimension(200, 20));
 
-        signUpPage.add(label);
-        signUpPage.add(userAddressField);
+        gbc.gridx = 0;
+        gbc.gridy = 3;
+        signUpPage.add(label, gbc);
+        gbc.gridx = 1;
+        signUpPage.add(userAddressField, gbc);
 
         label = new JLabel("Enter phone number:  ");
         userPhoneField = new JTextField();
         userPhoneField.setPreferredSize(new Dimension(200, 20));
 
-        signUpPage.add(label);
-        signUpPage.add(userPhoneField);
+        gbc.gridx = 0;
+        gbc.gridy = 4;
+        signUpPage.add(label, gbc);
+        gbc.gridx = 1;
+        signUpPage.add(userPhoneField, gbc);
 
         submitSignUpBtn = new JButton("Submit");
         submitSignUpBtn.setFocusable(false);
-        signUpPage.add(submitSignUpBtn);
+        gbc.gridx = 0;
+        gbc.gridy = 5;
+        signUpPage.add(submitSignUpBtn, gbc);
 
         userBackBtn = new JButton("Back");
         userBackBtn.setFocusable(false);
-        signUpPage.add(userBackBtn);
+        gbc.gridx = 1;
+        signUpPage.add(userBackBtn, gbc);
 
         return signUpPage;
     }
@@ -159,24 +183,31 @@ public class UserPage extends JPanel implements AccountPage {
         mainCardLayout = new CardLayout();
 
         JPanel panel = new JPanel();
+        panel.setBackground(Colors.WHITE);
 
         topPanel = new JPanel();
-        topPanel.setBackground(Color.PINK);
+        topPanel.setBackground(Colors.PINK);
         topPanel.setPreferredSize(new Dimension(800, 60));
+        topPanel.setBorder(BorderFactory.createMatteBorder(0, 0, 2, 0, Colors.BLACK));
 
         shopBtn = new JButton("Shop");
+        Colors.setButtonUI(shopBtn);
         shopBtn.setFocusable(false);
 
         cartBtn = new JButton("Cart");
+        Colors.setButtonUI(cartBtn);
         cartBtn.setFocusable(false);
 
         ordersBtn = new JButton("Orders");
+        Colors.setButtonUI(ordersBtn);
         ordersBtn.setFocusable(false);
 
         profileBtn = new JButton("Profile");
+        Colors.setButtonUI(profileBtn);
         profileBtn.setFocusable(false);
 
         logOutBtn = new JButton("Log out");
+        Colors.setButtonUI(logOutBtn);
         logOutBtn.setFocusable(false);
 
         topPanel.add(shopBtn);
@@ -186,8 +217,9 @@ public class UserPage extends JPanel implements AccountPage {
         topPanel.add(logOutBtn);
 
         bottomPanel = new JPanel(mainCardLayout);
+        bottomPanel.setOpaque(false);
         bottomPanel.setPreferredSize(new Dimension(800, 640));
-        bottomPanel.setBorder(BorderFactory.createTitledBorder(BorderFactory.createLineBorder(Color.BLACK, 2),
+        bottomPanel.setBorder(BorderFactory.createTitledBorder(BorderFactory.createLineBorder(Colors.BLACK, 2),
     "User", TitledBorder.LEFT, TitledBorder.TOP, new Font("Montserrat", Font.PLAIN, 12)));
 
         bottomPanel.add(getShopPage(), SHOPPAGE);
@@ -204,9 +236,15 @@ public class UserPage extends JPanel implements AccountPage {
     }
 
     public JPanel getShopPage() {
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.insets = new Insets(5, 5, 5, 5);
+        
         JPanel panel = new JPanel();
-
+        panel.setBackground(Colors.WHITE);
+        panel.setLayout(new GridBagLayout());
+        
         JPanel infoPanel = new JPanel();
+        infoPanel.setOpaque(false);
         infoPanel.setSize(new Dimension(400, 300));
         infoPanel.setBorder(BorderFactory.createTitledBorder(BorderFactory.createLineBorder(Color.BLACK, 2),
     "Product information", TitledBorder.LEFT, TitledBorder.TOP, new Font("Montserrat", Font.PLAIN, 12)));
@@ -214,14 +252,16 @@ public class UserPage extends JPanel implements AccountPage {
         productInfoLabel = new JLabel();
         productInfoLabel.setSize(new Dimension(450, 250));
         infoPanel.add(productInfoLabel);
-        panel.add(infoPanel);
 
         JLabel label = new JLabel("Browse by: ");
-        panel.add(label);
+        gbc.gridx = 0;
+        gbc.gridy = 0;
+        panel.add(label, gbc);
 
         String[] browseOptions = { "By shop", "By product type" };
         browseByBox = new JComboBox<>(browseOptions);
-        panel.add(browseByBox);
+        gbc.gridx = 1;
+        panel.add(browseByBox, gbc);
 
         browseByList = new JList<>(new DefaultListModel<>());
         browseByList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
@@ -231,7 +271,11 @@ public class UserPage extends JPanel implements AccountPage {
         browseByListPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
         browseByListPane.setPreferredSize(new Dimension(300, 200));
 
-        panel.add(browseByListPane);
+        gbc.gridx = 0;
+        gbc.gridy = 1;
+        gbc.gridwidth = 2;
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+        panel.add(browseByListPane, gbc);
 
         productList = new JList<>(new DefaultListModel<>());
 
@@ -242,18 +286,31 @@ public class UserPage extends JPanel implements AccountPage {
         productListPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
         productListPane.setPreferredSize(new Dimension(300, 200));
 
-        panel.add(productListPane);
+        gbc.gridy = 2;
+        gbc.gridwidth = 1;
+        panel.add(productListPane, gbc);
 
-        addToCartBtn = new JButton("Add");
+        gbc.gridx = 1;
+        panel.add(infoPanel, gbc);
+        
+        addToCartBtn = new JButton("Add to Cart");
+        Colors.setButtonUI(addToCartBtn);
         addToCartBtn.setFocusable(false);
 
-        panel.add(addToCartBtn);
+        gbc.gridx = 0;
+        gbc.gridy = 3;
+        panel.add(addToCartBtn, gbc);
 
         return panel;
     }
 
     public JPanel getCartPage() {
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.insets = new Insets(5, 5, 5, 5);
+
         JPanel panel = new JPanel();
+        panel.setLayout(new GridBagLayout());
+        panel.setBackground(Colors.WHITE);
 
         OrderTableModel mdl = new OrderTableModel(new HashSet<>());
 
@@ -268,26 +325,44 @@ public class UserPage extends JPanel implements AccountPage {
 
         JScrollPane cartTablePane = new JScrollPane(cartTable, JScrollPane.VERTICAL_SCROLLBAR_ALWAYS, JScrollPane.HORIZONTAL_SCROLLBAR_ALWAYS);
         cartTablePane.setPreferredSize(new Dimension(550, 400));
-        panel.add(cartTablePane);
+        gbc.gridx = 0;
+        gbc.gridy = 0;
+        gbc.gridwidth = 2;
+        panel.add(cartTablePane, gbc);
 
         checkOutBtn = new JButton("Check out");
+        Colors.setButtonUI(checkOutBtn);
+        gbc.gridy = 2;
+        gbc.gridwidth = 1;
         checkOutBtn.setFocusable(false);
-        panel.add(checkOutBtn);
+        panel.add(checkOutBtn, gbc);
 
         removeBtn = new JButton("Remove");
+        Colors.setButtonUI(removeBtn);
+        gbc.gridx = 1;
+        gbc.gridwidth = 1;
         removeBtn.setFocusable(false);
-        panel.add(removeBtn);
+        panel.add(removeBtn, gbc);
 
         JLabel lbl = new JLabel("Total: ");
-        panel.add(lbl);
+        gbc.gridx = 0;
+        gbc.gridy = 1;
+        panel.add(lbl, gbc);
 
         totalLbl = new JLabel();
-        panel.add(totalLbl);
+        gbc.gridx = 1;
+        panel.add(totalLbl, gbc);
+        
         return panel;
     }
 
     public JPanel getOrdersPage() {
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.insets = new Insets(5, 5, 5, 5);
+
         JPanel panel = new JPanel();
+        panel.setLayout(new GridBagLayout());
+        panel.setBackground(Colors.WHITE);
 
         ordersList = new JList<>(new DefaultListModel<>());
 
@@ -298,77 +373,121 @@ public class UserPage extends JPanel implements AccountPage {
         ordersListPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
         ordersListPane.setPreferredSize(new Dimension(400, 300));
 
-        panel.add(ordersListPane);
+        gbc.gridx = 0;
+        gbc.gridy = 1;
+        panel.add(ordersListPane, gbc);
 
         orderInfoLbl = new JLabel();
 
         JPanel infoPanel = new JPanel();
+        infoPanel.setOpaque(false);
         
         infoPanel.setBorder(BorderFactory.createTitledBorder(BorderFactory.createLineBorder(Color.BLACK, 2),
         "Details", TitledBorder.LEFT, TitledBorder.TOP, new Font("Montserrat", Font.PLAIN, 12)));
 
         infoPanel.add(orderInfoLbl);       // USE THIS FOR SETTING THE ORDER INFO PACK IT INTO ONE STRING
         
-        panel.add(infoPanel);
+        gbc.gridx = 1;
+        gbc.gridy = 1;
+        gbc.gridwidth = 2;
+        panel.add(infoPanel, gbc);
 
         String[] orderTypes = { "Orders", "Returns" };
         ordersBox = new JComboBox<>(orderTypes);
-        panel.add(ordersBox);
+        gbc.gridx = 0;
+        gbc.gridy = 0;
+        gbc.gridwidth = 1;
+        panel.add(ordersBox, gbc);
 
         returnBtn = new JButton("Request Return");
+        Colors.setButtonUI(returnBtn);
         returnBtn.setFocusable(false);
-        panel.add(returnBtn);
+        gbc.gridx = 0;
+        gbc.gridy = 2;
+        panel.add(returnBtn, gbc);
 
         rateBtn = new JButton("Rate a Product");
+        Colors.setButtonUI(rateBtn);
         rateBtn.setFocusable(false);
-        panel.add(rateBtn);
+        gbc.gridx = 1;
+        panel.add(rateBtn, gbc);
 
         receiveBtn = new JButton("Receive Order");
+        Colors.setButtonUI(receiveBtn);
         receiveBtn.setFocusable(false);
-        panel.add(receiveBtn);
+        gbc.gridx = 2;
+        panel.add(receiveBtn, gbc);
 
         return panel;
     }
 
     public JPanel getProfilePage() {
-        JPanel panel = new JPanel();
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.insets = new Insets(5, 5, 5, 5);
 
-        JLabel lbl = new JLabel("User details: ");
-        panel.add(lbl);
+        JPanel panel = new JPanel();
+        panel.setLayout(new GridBagLayout());
+        panel.setBackground(Colors.WHITE);
+
+        JLabel lbl = new JLabel("[USER DETAILS]");
+        gbc.gridx =  0;
+        gbc.gridy = 0;
+        gbc.gridwidth = 2;
+        panel.add(lbl, gbc);
 
         lbl = new JLabel("Account name: ");
         profileNameField = new JTextField();
         profileNameField.setPreferredSize(new Dimension(200, 20));
-        panel.add(lbl);
-        panel.add(profileNameField);
+        gbc.gridx = 0;
+        gbc.gridy = 1;
+        gbc.gridwidth = 1;
+        panel.add(lbl, gbc);
+        gbc.gridx = 1;
+        panel.add(profileNameField, gbc);
 
         lbl = new JLabel("Phone number: ");
         profilePhoneField = new JTextField();
         profilePhoneField.setPreferredSize(new Dimension(200, 20));
-        panel.add(lbl);
-        panel.add(profilePhoneField);
+        gbc.gridx = 0;
+        gbc.gridy = 2;
+        panel.add(lbl, gbc);
+        gbc.gridx = 1;
+        panel.add(profilePhoneField, gbc);
 
         lbl = new JLabel("Address: ");
         profileAddressField = new JTextField();
         profileAddressField.setPreferredSize(new Dimension(200, 20));
-        panel.add(lbl);
-        panel.add(profileAddressField);
+        gbc.gridx = 0;
+        gbc.gridy = 3;
+        panel.add(lbl, gbc);
+        gbc.gridx = 1;
+        panel.add(profileAddressField, gbc);
 
         lbl = new JLabel("First name: ");
         profileFirstNameField = new JTextField();
         profileFirstNameField.setPreferredSize(new Dimension(200, 20));
-        panel.add(lbl);
-        panel.add(profileFirstNameField);
+        gbc.gridx = 0;
+        gbc.gridy = 4;
+        panel.add(lbl, gbc);
+        gbc.gridx = 1;
+        panel.add(profileFirstNameField, gbc);
 
         lbl = new JLabel("Last name: ");
         profileLastNameField = new JTextField();
         profileLastNameField.setPreferredSize(new Dimension(200, 20));
-        panel.add(lbl);
-        panel.add(profileLastNameField);
+        gbc.gridx = 0;
+        gbc.gridy = 5;
+        panel.add(lbl, gbc);
+        gbc.gridx = 1;
+        panel.add(profileLastNameField, gbc);
 
         saveChangesBtn = new JButton("Save Changes");
+        Colors.setButtonUI(saveChangesBtn);
         saveChangesBtn.setFocusable(false);
-        panel.add(saveChangesBtn);
+        gbc.gridx = 0;
+        gbc.gridy = 6;
+        gbc.gridwidth = 2;
+        panel.add(saveChangesBtn, gbc);
 
         return panel;
     }
