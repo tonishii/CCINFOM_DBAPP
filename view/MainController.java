@@ -158,10 +158,9 @@ public class MainController {
                     Pattern pattern = Pattern.compile("^\\d{11}$");
                     Matcher matcher = pattern.matcher(user_phone_number);
 
-                    while (!matcher.matches()) {
+                    if (!matcher.matches()) {
                         JOptionPane.showMessageDialog(null, "Error: Invalid phone number format.");
-                        user_phone_number = userPage.getUserPhone();
-                        matcher = pattern.matcher(user_phone_number);
+                        return;
                     }
                 }
 
@@ -663,10 +662,9 @@ public class MainController {
                     Pattern pattern = Pattern.compile("^\\d{11}$");
                     Matcher matcher = pattern.matcher(seller_phone_number);
 
-                    while (!matcher.matches()) {
+                    if (!matcher.matches()) {
                         JOptionPane.showMessageDialog(null, "Error: Invalid phone number format.");
-                        seller_phone_number = sellerPage.getSellerPhone();
-                        matcher = pattern.matcher(seller_phone_number);
+                        return;
                     }
                 }
 
@@ -1051,10 +1049,9 @@ public class MainController {
                     Pattern pattern = Pattern.compile(regex);
                     Matcher matcher = pattern.matcher(courier_email_address);
 
-                    while (!matcher.matches()) {
+                    if (!matcher.matches()) {
                         JOptionPane.showMessageDialog(null, "Error: Invalid email format.");
-                        courier_email_address = courierPage.getCourierEmail();
-                        matcher = pattern.matcher(courier_email_address);
+                        return;
                     }
                 }
 
