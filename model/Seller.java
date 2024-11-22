@@ -33,7 +33,7 @@ public class Seller implements Account {
     public Seller() {}
 
     @Override
-    public void login(int id, Connection conn) throws SQLException {
+    public boolean login(int id, Connection conn) throws SQLException {
         String query =
         """
         SELECT seller_id, seller_name, seller_address, seller_verified_status, seller_phone_number, seller_creation_date
@@ -52,7 +52,9 @@ public class Seller implements Account {
             this.seller_verified_status = result.getBoolean("seller_verified_status");
             this.seller_phone_number = result.getString("seller_phone_number");
             this.seller_creation_date = result.getDate("seller_creation_date");
+            return true;
         }
+        return false;
     }
 
     @Override

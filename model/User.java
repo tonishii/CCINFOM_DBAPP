@@ -36,7 +36,7 @@ public class User implements Account {
     public User() {}
 
     @Override
-    public void login(int id, Connection conn) throws SQLException {
+    public boolean login(int id, Connection conn) throws SQLException {
         String query =
         """
         SELECT user_id, user_name, user_phone_number, user_address, user_verified_status, user_creation_date, user_firstname, user_lastname
@@ -57,7 +57,9 @@ public class User implements Account {
             this.user_creation_date = result.getDate("user_creation_date");
             this.user_firstname = result.getString("user_firstname");
             this.user_lastname = result.getString("user_lastname");
+            return true;
         }
+        return false;
     }
 
     @Override

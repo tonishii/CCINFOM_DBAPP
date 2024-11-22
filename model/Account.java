@@ -5,7 +5,7 @@ import java.sql.SQLException;
 import java.util.Scanner;
 
 public interface Account {
-    void login(int id, Connection conn) throws SQLException;
+    boolean login(int id, Connection conn) throws SQLException;
     void displayView(Scanner scn, Connection conn);
     void updateAccount(Connection conn);
 

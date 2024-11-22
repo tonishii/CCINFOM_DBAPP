@@ -108,16 +108,17 @@ public class MainController {
 
         }, submitLoginEvent -> {
             try {
-                account.login(Integer.parseInt(selectAccountPage.getID()), conn);
-                (account instanceof User ? userPage :
-                account instanceof Seller ? sellerPage :
-                courierPage).nextPageName(AccountPage.MAINPAGE);
-                mainMenuPage.nextPageName(account.toString());
+                if (account.login(Integer.parseInt(selectAccountPage.getID()), conn)) {
+                    (account instanceof User ? userPage :
+                    account instanceof Seller ? sellerPage :
+                    courierPage).nextPageName(AccountPage.MAINPAGE);
+                    mainMenuPage.nextPageName(account.toString());
 
-                if (account instanceof User) {
-                    userPage.updateBrowseList(((User) account).browseByShops(conn));
+                    if (account instanceof User) {
+                        userPage.updateBrowseList(((User) account).browseByShops(conn));
+                    }
                 }
-
+                else JOptionPane.showMessageDialog(null, "Account does not exist.");
             } catch (NumberFormatException e) {
                 JOptionPane.showMessageDialog(null, "Error: Enter valid ID.");
             } catch (SQLException e) {

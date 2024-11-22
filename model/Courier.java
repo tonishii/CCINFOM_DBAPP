@@ -30,7 +30,7 @@ public class Courier implements Account {
     public Courier() {}
 
     @Override
-    public void login(int id, Connection conn) throws SQLException {
+    public boolean login(int id, Connection conn) throws SQLException {
         String query =
         """
         SELECT courier_id, courier_name, courier_email_address, courier_address, courier_verified_status
@@ -48,7 +48,9 @@ public class Courier implements Account {
             this.courier_email_address = result.getString("courier_email_address");
             this.courier_address = result.getString("courier_address");
             this.courier_verified_status = result.getBoolean("courier_verified_status");
+            return true;
         }
+        return false;
     }
 
     @Override
