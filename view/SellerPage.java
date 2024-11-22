@@ -129,23 +129,28 @@ public class SellerPage extends JPanel implements AccountPage {
 
         JPanel panel = new JPanel();
         GridBagConstraints gbc = new GridBagConstraints();
+        panel.setBackground(Colors.WHITE);
         topPanel = new JPanel();
-        topPanel.setBackground(Color.PINK);
+        topPanel.setBackground(Colors.PINK);
         topPanel.setPreferredSize(new Dimension(800, 60));
 
         genBtn = new JButton("Generate");
+        Colors.setButtonUI(genBtn);
         genBtn.setFocusable(false);
 
         editAccBtn = new JButton("Edit Account");
+        Colors.setButtonUI(editAccBtn);
         editAccBtn.setFocusable(false);
 
         logoutBtn = new JButton("Log Out");
+        Colors.setButtonUI(logoutBtn);
         logoutBtn.setFocusable(false);
         topPanel.add(genBtn);
         topPanel.add(editAccBtn);
         topPanel.add(logoutBtn);
 
         bottomPanel = new JPanel(mainCardLayout);
+        bottomPanel.setOpaque(false);
         bottomPanel.setPreferredSize(new Dimension(800, 640));
         bottomPanel.setBorder(BorderFactory.createTitledBorder(BorderFactory.createLineBorder(Color.BLACK, 2),
     "Seller", TitledBorder.LEFT, TitledBorder.TOP, new Font("Montserrat", Font.PLAIN, 12)));
@@ -179,7 +184,7 @@ public class SellerPage extends JPanel implements AccountPage {
         saveProductBtn.setFocusable(false);
 
         generateReportBtn = new JButton("Generate Report");
-        saveProductBtn.setFocusable(false);
+        generateReportBtn.setFocusable(false);
 
         String[] reports = {"Sales Report", "Credibility Report", "Product Popularity Report"};
         sellerReportBox = new JComboBox<>(reports);
@@ -188,6 +193,7 @@ public class SellerPage extends JPanel implements AccountPage {
 
         // top panel
         JPanel panelCenter = new JPanel(new GridBagLayout());
+        panelCenter.setBackground(Colors.WHITE);
         gbc.insets = new Insets(0, 4 ,5 ,4);
         String[] stuff = {"Products", "Refunds"};
         sellerCRBox = new JComboBox<>(stuff);
@@ -208,19 +214,24 @@ public class SellerPage extends JPanel implements AccountPage {
         productRefundInfo.setFocusable(false);
 
         addBtn = new JButton("Add");
+        Colors.setButtonUI(addBtn);
         addBtn.setFocusable(false);
 
         removeBtn = new JButton("Remove");
+        Colors.setButtonUI(removeBtn);
         removeBtn.setFocusable(false);
 
         editBtn = new JButton("Edit");
+        Colors.setButtonUI(editBtn);
         editBtn.setFocusable(false);
 
         approveBtn = new JButton("Approve");
+        Colors.setButtonUI(approveBtn);
         approveBtn.setFocusable(false);
         approveBtn.setVisible(false);
 
         rejectBtn = new JButton("Reject");
+        Colors.setButtonUI(rejectBtn);
         rejectBtn.setFocusable(false);
         rejectBtn.setVisible(false);
 

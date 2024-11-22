@@ -105,21 +105,26 @@ public class CourierPage extends JPanel implements AccountPage {
     @Override
     public JPanel getMainPage() {
         JPanel courierPage = new JPanel();
+        courierPage.setBackground(Colors.WHITE);
 
         topPanel = new JPanel();
-        topPanel.setBackground(Color.PINK);
+        topPanel.setBackground(Colors.PINK);
         topPanel.setPreferredSize(new Dimension(800, 60));
 
         ongoingOrderBtn = new JButton("Ongoing Orders");
+        Colors.setButtonUI(ongoingOrderBtn);
         ongoingOrderBtn.setFocusable(false);
 
         activityBtn = new JButton("Activity Report");
+        Colors.setButtonUI(activityBtn);
         activityBtn.setFocusable(false);
 
         editBtn = new JButton("Edit Account");
+        Colors.setButtonUI(editBtn);
         editBtn.setFocusable(false);
 
         logOutBtn = new JButton("Log out");
+        Colors.setButtonUI(logOutBtn);
         logOutBtn.setFocusable(false);
 
         topPanel.add(ongoingOrderBtn);
@@ -130,6 +135,7 @@ public class CourierPage extends JPanel implements AccountPage {
         mainCardLayout = new CardLayout();
 
         bottomPanel = new JPanel(mainCardLayout);
+        bottomPanel.setOpaque(false);
         bottomPanel.setPreferredSize(new Dimension(800, 640));
         bottomPanel.setBorder(BorderFactory.createTitledBorder(BorderFactory.createLineBorder(Color.BLACK, 2),
                 "Courier", TitledBorder.LEFT, TitledBorder.TOP, new Font("Montserrat", Font.PLAIN, 12)));
@@ -146,6 +152,7 @@ public class CourierPage extends JPanel implements AccountPage {
 
     public JPanel getOngoingOrdersPage() {
         JPanel oOPage = new JPanel(new GridBagLayout());
+        oOPage.setBackground(Colors.WHITE);
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.insets = new Insets(5, 5, 5, 5);
 
@@ -180,6 +187,7 @@ public class CourierPage extends JPanel implements AccountPage {
 
     public JPanel getActivityPage() {
         JPanel activityPanel = new JPanel(new GridBagLayout());
+        activityPanel.setBackground(Colors.WHITE);
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.insets = new Insets(5, 5, 5, 5);
 
@@ -216,32 +224,52 @@ public class CourierPage extends JPanel implements AccountPage {
     }
 
     public JPanel getEditPage() {
-        JPanel panel = new JPanel();
-
-        JLabel lbl = new JLabel("User details: ");
-        panel.add(lbl);
+        JPanel panel = new JPanel(new GridBagLayout());
+        panel.setBackground(Colors.WHITE);
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.insets = new Insets(5, 5, 5, 5);
+        
+        gbc.gridx = 0;
+        gbc.gridy = 0;
+        gbc.gridwidth = 2;
+        JLabel lbl = new JLabel("[USER DETAILS]");
+        panel.add(lbl, gbc);
 
         lbl = new JLabel("Account name: ");
         profileCourierNameField = new JTextField();
         profileCourierNameField.setPreferredSize(new Dimension(200, 20));
-        panel.add(lbl);
-        panel.add(profileCourierNameField);
+        gbc.gridx = 0;
+        gbc.gridy = 1;
+        gbc.gridwidth = 1;
+        panel.add(lbl, gbc);
+        gbc.gridx = 1;
+        panel.add(profileCourierNameField, gbc);
 
         lbl = new JLabel("Email Address: ");
         profileCourierEmailField = new JTextField();
         profileCourierEmailField.setPreferredSize(new Dimension(200, 20));
-        panel.add(lbl);
-        panel.add(profileCourierEmailField);
+        gbc.gridx = 0;
+        gbc.gridy = 2;
+        panel.add(lbl, gbc);
+        gbc.gridx = 1;
+        panel.add(profileCourierEmailField, gbc);
 
         lbl = new JLabel("Address: ");
         profileCourierAddressField = new JTextField();
         profileCourierAddressField.setPreferredSize(new Dimension(200, 20));
-        panel.add(lbl);
-        panel.add(profileCourierAddressField);
+        gbc.gridx = 0;
+        gbc.gridy = 3;
+        panel.add(lbl, gbc);
+        gbc.gridx = 1;
+        panel.add(profileCourierAddressField, gbc);
 
         saveBtn = new JButton("Save Changes");
+        Colors.setButtonUI(saveBtn);
         saveBtn.setFocusable(false);
-        panel.add(saveBtn);
+        gbc.gridx = 0;
+        gbc.gridy = 4;
+        gbc.gridwidth = 2;
+        panel.add(saveBtn, gbc);
 
         return panel;
     }

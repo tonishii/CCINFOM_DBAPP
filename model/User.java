@@ -442,6 +442,8 @@ public class User implements Account {
         preparedStatement.setInt(6, this.user_id);
 
         preparedStatement.executeUpdate();
+        
+        this.updateStatus();
     }
 
     public void setUsername(String user_name) { this.user_name = user_name; }

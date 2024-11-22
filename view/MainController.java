@@ -491,6 +491,12 @@ public class MainController {
             if (option == JOptionPane.OK_OPTION) {
                 try {
                     // Retrieve the edited fields and update in the database
+                    if (!userPage.getEditedPhone().isEmpty()) {
+                        if (!(phoneChecker(userPage.getEditedPhone()))) {
+                            JOptionPane.showMessageDialog(null, "Invalid phone number format.");
+                            return;
+                        }
+                    }
                     user.updateUser(
                         userPage.getEditedName(),
                         userPage.getEditedFirstName(),
