@@ -1,7 +1,7 @@
 package view;
 
 import model.Product;
-import model.Return;
+import model.Seller;
 
 import javax.swing.*;
 import javax.swing.border.LineBorder;
@@ -9,16 +9,21 @@ import javax.swing.border.TitledBorder;
 import javax.swing.event.ListSelectionListener;
 import java.awt.*;
 import java.awt.event.ActionListener;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
+import java.awt.event.WindowListener;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
 public class SellerPage extends JPanel implements AccountPage {
     private CardLayout sellerCardLayout;
+    private GridBagLayout newWindowLayout;
 
     public static final String SIGNUP = "signup";
     public static final String PRODUCTLIST = "plist";
 
+    private JDialog     newWindow;
     private JTextField sellerNameField,
                        sellerPhoneField,
                        sellerAddressField,
@@ -27,6 +32,7 @@ public class SellerPage extends JPanel implements AccountPage {
                        productType,
                        productQuantity,
                        productDesc;
+
     private JButton    submitSignUpBtn,
                        sellerBackBtn;
 
@@ -50,7 +56,11 @@ public class SellerPage extends JPanel implements AccountPage {
                        removeBtn,
                        editBtn,
                        approveBtn,
-                       rejectBtn;
+                       rejectBtn,
+                       cancelBtn,
+                       saveProfileBtn,
+                       addProductBtn,
+                       saveProductBtn;
 
     private  JComboBox<String>   sellerCRBox;
     private  JList<String>       sellerCRList;
@@ -152,6 +162,9 @@ public class SellerPage extends JPanel implements AccountPage {
         JPanel panel = new JPanel();
         GridBagConstraints gbc = new GridBagConstraints();
 
+        cancelBtn = new JButton("Cancel");
+        cancelBtn.setFocusable(false);
+
         // top panel
         JPanel panelCenter = new JPanel(new GridBagLayout());
         gbc.insets = new Insets(0, 4 ,5 ,4);
@@ -233,7 +246,18 @@ public class SellerPage extends JPanel implements AccountPage {
         return panel;
     }
 
-    public int showEditAccountOptionPane(){
+    public void showEditAccount(){
+        newWindow = new JDialog();
+        newWindow.setTitle("Edit Account");
+        newWindow.setSize(400, 200);
+        newWindow.addWindowListener(new WindowAdapter() {
+            @Override
+            public void windowClosing(WindowEvent e) {
+                // Dispose of the dialog and enable buttons
+                disposeNewWindow();
+            }
+        });
+
         JPanel panel = new JPanel( new GridBagLayout());
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.insets = new Insets(0, 4 ,5 ,4);
@@ -252,11 +276,29 @@ public class SellerPage extends JPanel implements AccountPage {
         gbc.gridy=2;
         panel.add(new JLabel("Phone: "),gbc);
         panel.add(sellerPhoneField, gbc);
+        gbc.gridy=3;
+        panel.add(cancelBtn, gbc);
 
-        return JOptionPane.showConfirmDialog(null, panel, "Edit Account", JOptionPane.OK_CANCEL_OPTION);
+        newWindow.add(panel);
+        newWindow.setResizable(false);
+        newWindow.setLocationRelativeTo(null);
+        newWindow.setVisible(true);
+
+        //return JOptionPane.showConfirmDialog(null, panel, "Edit Account", JOptionPane.OK_CANCEL_OPTION);
     }
 
-    public int showAddProductOptionPane(){
+    public void showAddProduct(){
+        newWindow = new JDialog();
+        newWindow.setTitle("Add Product");
+        newWindow.setSize(400, 200);
+        newWindow.addWindowListener(new WindowAdapter() {
+            @Override
+            public void windowClosing(WindowEvent e) {
+                // Dispose of the dialog and enable buttons
+                disposeNewWindow();
+            }
+        });
+
         JPanel panel = new JPanel( new GridBagLayout());
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.insets = new Insets(0, 4 ,5 ,4);
@@ -285,11 +327,29 @@ public class SellerPage extends JPanel implements AccountPage {
         gbc.gridy=4;
         panel.add(new JLabel("Product Description: "),gbc);
         panel.add(productDesc, gbc);
+        gbc.gridy=5;
+        panel.add(cancelBtn, gbc);
 
-        return JOptionPane.showConfirmDialog(null, panel, "Add Product", JOptionPane.OK_CANCEL_OPTION);
+        newWindow.add(panel);
+        newWindow.setResizable(false);
+        newWindow.setLocationRelativeTo(null);
+        newWindow.setVisible(true);
+
+        //return JOptionPane.showConfirmDialog(null, panel, "Add Product", JOptionPane.OK_CANCEL_OPTION);
     }
 
-    public int showEditProductOptionPane(){
+    public void showEditProduct(){
+        newWindow = new JDialog();
+        newWindow.setTitle("Edit Product");
+        newWindow.setSize(400, 200);
+        newWindow.addWindowListener(new WindowAdapter() {
+            @Override
+            public void windowClosing(WindowEvent e) {
+                // Dispose of the dialog and enable buttons
+                disposeNewWindow();
+            }
+        });
+
         JPanel panel = new JPanel( new GridBagLayout());
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.insets = new Insets(0, 4 ,5 ,4);
@@ -318,8 +378,14 @@ public class SellerPage extends JPanel implements AccountPage {
         gbc.gridy=4;
         panel.add(new JLabel("Product Description: "),gbc);
         panel.add(productDesc, gbc);
+        gbc.gridy=5;
+        panel.add(cancelBtn, gbc);
 
-        return JOptionPane.showConfirmDialog(null, panel, "Edit Product", JOptionPane.OK_CANCEL_OPTION);
+        newWindow.add(panel);
+        newWindow.setResizable(false);
+        newWindow.setLocationRelativeTo(null);
+        newWindow.setVisible(true);
+        //return JOptionPane.showConfirmDialog(null, panel, "Edit Product", JOptionPane.OK_CANCEL_OPTION);
     }
 
     @Override
@@ -330,7 +396,7 @@ public class SellerPage extends JPanel implements AccountPage {
 
     public void initMainListeners(ActionListener genLtr, ActionListener editAccLtr, ActionListener logoutLtr,
                                   ActionListener selCRLtr, ListSelectionListener textLtr, ActionListener addLtr,
-                                  ActionListener editProdLtr){
+                                  ActionListener editProdLtr, ActionListener cancelLtr){
         genBtn.addActionListener(genLtr);
         editAccBtn.addActionListener(editAccLtr);
         logoutBtn.addActionListener(logoutLtr);
@@ -338,6 +404,7 @@ public class SellerPage extends JPanel implements AccountPage {
         sellerCRList.addListSelectionListener(textLtr);
         addBtn.addActionListener(addLtr);
         editBtn.addActionListener(editProdLtr);
+        cancelBtn.addActionListener(cancelLtr);
     }
 
     @Override
@@ -379,6 +446,34 @@ public class SellerPage extends JPanel implements AccountPage {
         productRefundInfo.setText(text);
     }
 
+    public void updateEditAccount(Seller seller) {
+        sellerNameField.setText(seller.getName());
+        sellerPhoneField.setText(seller.getPhoneNumber());
+        sellerAddressField.setText(seller.getAddress());
+    }
+
+    public void setDisableButtons(){
+        genBtn.setEnabled(false);
+        editAccBtn.setEnabled(false);
+        logoutBtn.setEnabled(false);
+        approveBtn.setEnabled(false);
+        rejectBtn.setEnabled(false);
+        addBtn.setEnabled(false);
+        removeBtn.setEnabled(false);
+        editBtn.setEnabled(false);
+    }
+
+    public void setEnableButtons(){
+        genBtn.setEnabled(true);
+        editAccBtn.setEnabled(true);
+        logoutBtn.setEnabled(true);
+        approveBtn.setEnabled(true);
+        rejectBtn.setEnabled(true);
+        addBtn.setEnabled(true);
+        removeBtn.setEnabled(true);
+        editBtn.setEnabled(true);
+    }
+
     public void setInvisibleBtns(String n){
         if (n.equals("Refunds")) {
             approveBtn.setVisible(true);
@@ -401,6 +496,11 @@ public class SellerPage extends JPanel implements AccountPage {
         return null;
     }
 
+    public JDialog getNewWindow() { return newWindow; }
+    public void disposeNewWindow() {
+        newWindow.dispose();
+        setEnableButtons();
+    }
     public String getSellerCRBox(){ return (String) this.sellerCRBox.getSelectedItem(); }
     public String getSellerName() { return sellerNameField.getText().trim(); }
     public String getSellerAddress() { return sellerAddressField.getText().trim(); }

@@ -720,13 +720,19 @@ public class MainController {
             selectAccountPage.nextPageName(SelectAccount.SELECTACCPAGE);
             sellerPage.nextPageName(SellerPage.SIGNUP);
         }, editAccountEvent -> {
+            sellerPage.showEditAccount();
+            sellerPage.updateEditAccount((Seller) account);
+            sellerPage.setDisableButtons();
+            /*
             int result = sellerPage.showEditAccountOptionPane();
+            sellerPage.updateEditAccount((Seller) account);
             if (result==JOptionPane.OK_OPTION){
                 ((Seller) account).setName(sellerPage.getSellerName());
                 ((Seller) account).setAddress(sellerPage.getSellerAddress());
                 ((Seller) account).setPhoneNumber(sellerPage.getSellerPhone());
                 ((Seller) account).updateAccount(conn);
             }
+             */
         }, logoutEvent -> {
             mainMenuPage.nextPageName(MainFrame.SELECTACCPAGE);
             selectAccountPage.nextPageName(SelectAccount.SELECTACCPAGE);
@@ -736,15 +742,15 @@ public class MainController {
             try {
                 if (sellerPage.getSellerCRBox().equals("Products")) {
                     sellerPage.updateSellerProductList(((Seller) account).productList(this.conn));
-                }else if (sellerPage.getSellerCRBox().equals("Refunds")){
+                } else if (sellerPage.getSellerCRBox().equals("Refunds")) {
                     sellerPage.updateSellerRefundList(((Seller) account).refundList(this.conn));
                 }
             } catch (SQLException e) {
                 JOptionPane.showMessageDialog(null, "Error: " + e.getMessage());
             }
-        }, listSelectEvent ->{
+        }, listSelectEvent -> {
             if (sellerPage.getSellerCRBox().equals("Products")) {
-                if (sellerPage.getSelectedOption()!=null) {
+                if (sellerPage.getSelectedOption() != null) {
                     List<Integer> Ids = Arrays.stream(sellerPage.getSelectedOption()
                                     .split(" "))
                             .map(Integer::parseInt)
@@ -754,34 +760,34 @@ public class MainController {
 
                     try {
                         String query = """
-                                       SELECT *
-                                       FROM products
-                                       WHERE product_id = ? AND seller_id = ?
-                                       LIMIT 1;
-                                       """;
+                                SELECT *
+                                FROM products
+                                WHERE product_id = ? AND seller_id = ?
+                                LIMIT 1;
+                                """;
                         PreparedStatement pstmt = conn.prepareStatement(query);
                         pstmt.setInt(1, Ids.get(0));
                         pstmt.setInt(2, Ids.get(1));
-                        product = ((Seller)account).getSellerProduct(pstmt);
+                        product = ((Seller) account).getSellerProduct(pstmt);
 
                         sellerPage.setProductRefundInfo(
                                 " Product Info \n" +
-                                "Product ID: " + product.getProductID() + "\n" +
-                                "Product Name: " + product.getName() + "\n" +
-                                "Product Price: " + product.getPrice() + "\n" +
-                                "Product Quantity: " + product.getQuantity() + "\n" +
-                                "Product Rating: " + product.getRating() + "\n" +
-                                "Product Listed: " + product.isListed() + "\n" +
-                                "Product Type: " + product.getDescription() + "\n" +
-                                "Product Description: " + product.getType()
+                                        "Product ID: " + product.getProductID() + "\n" +
+                                        "Product Name: " + product.getName() + "\n" +
+                                        "Product Price: " + product.getPrice() + "\n" +
+                                        "Product Quantity: " + product.getQuantity() + "\n" +
+                                        "Product Rating: " + product.getRating() + "\n" +
+                                        "Product Listed: " + product.isListed() + "\n" +
+                                        "Product Type: " + product.getDescription() + "\n" +
+                                        "Product Description: " + product.getType()
                         );
 
                     } catch (SQLException e) {
                         JOptionPane.showMessageDialog(null, "Error: " + e.getMessage());
                     }
                 }
-            }else if (sellerPage.getSellerCRBox().equals("Refunds")){
-                if (sellerPage.getSelectedOption()!=null) {
+            } else if (sellerPage.getSellerCRBox().equals("Refunds")) {
+                if (sellerPage.getSelectedOption() != null) {
                     List<Integer> Ids = Arrays.stream(sellerPage.getSelectedOption()
                                     .split(" "))
                             .map(Integer::parseInt)
@@ -791,25 +797,25 @@ public class MainController {
 
                     try {
                         String query = """
-                                       SELECT *
-                                       FROM returns
-                                       WHERE order_id = ? AND product_id = ?
-                                       LIMIT 1;
-                                       """;
+                                SELECT *
+                                FROM returns
+                                WHERE order_id = ? AND product_id = ?
+                                LIMIT 1;
+                                """;
                         PreparedStatement pstmt = conn.prepareStatement(query);
                         pstmt.setInt(1, Ids.get(0));
                         pstmt.setInt(2, Ids.get(1));
-                        refund = ((Seller)account).getSellerRefund(pstmt);
+                        refund = ((Seller) account).getSellerRefund(pstmt);
 
                         sellerPage.setProductRefundInfo(
                                 "Refund Info \n" +
-                                "Order ID: " + refund.getOrderID() + "\n" +
-                                "Product ID: " + refund.getProductID() + "\n" +
-                                "Courier ID: " + refund.getCourierID() + "\n" +
-                                "Return Reason: " + refund.getReason() + "\n" +
-                                "Product Rating: " + refund.getDescription() + "\n" +
-                                "Product Listed: " + refund.getDate() + "\n" +
-                                "Product Type: " + refund.getStatus() + "\n"
+                                        "Order ID: " + refund.getOrderID() + "\n" +
+                                        "Product ID: " + refund.getProductID() + "\n" +
+                                        "Courier ID: " + refund.getCourierID() + "\n" +
+                                        "Return Reason: " + refund.getReason() + "\n" +
+                                        "Product Rating: " + refund.getDescription() + "\n" +
+                                        "Product Listed: " + refund.getDate() + "\n" +
+                                        "Product Type: " + refund.getStatus() + "\n"
                         );
 
                     } catch (SQLException e) {
@@ -818,13 +824,11 @@ public class MainController {
                 }
             }
         }, addEvent -> { // Add product
-            int result = sellerPage.showAddProductOptionPane();
+            sellerPage.showAddProduct();
+            sellerPage.setDisableButtons();
+            /*
             if (result==JOptionPane.OK_OPTION){
                 if (sellerPage.getSelectedOption()!=null) {
-                    List<Integer> Ids = Arrays.stream(sellerPage.getSelectedOption()
-                                    .split(" "))
-                                    .map(Integer::parseInt)
-                                    .toList();
                     Product product = new Product();
                     product.setSellerID(((Seller)account).getID());
                     product.setName(sellerPage.getProductName());
@@ -836,11 +840,12 @@ public class MainController {
                     product.sendToDB(conn);
                 }
             }
-        }, editProdEvent ->{
-            int result = sellerPage.showEditProductOptionPane();
-            if (result==JOptionPane.OK_OPTION){
-
-            }
+            */
+        }, editProdEvent -> {
+            sellerPage.showEditProduct();
+            sellerPage.setDisableButtons();
+        }, cancelEvent -> {
+            sellerPage.disposeNewWindow();
         });
     }
 
