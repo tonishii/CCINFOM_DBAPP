@@ -154,14 +154,9 @@ public class MainController {
             if (user_name.isEmpty() || user_firstname.isEmpty() || user_lastname.isEmpty())
                 JOptionPane.showMessageDialog(null, "Please fill out the required fields:\nUsername\nFirst Name\nLast Name");
             else {
-                if (!user_phone_number.isEmpty()) {
-                    Pattern pattern = Pattern.compile("^\\d{11}$");
-                    Matcher matcher = pattern.matcher(user_phone_number);
-
-                    if (!matcher.matches()) {
-                        JOptionPane.showMessageDialog(null, "Error: Invalid phone number format.");
-                        return;
-                    }
+                if (!phoneChecker(user_phone_number)) {
+                    JOptionPane.showMessageDialog(null, "Error: Invalid phone number format.");
+                    return;
                 }
 
                 Date user_creation_date = new Date(System.currentTimeMillis());
@@ -658,14 +653,9 @@ public class MainController {
             if (seller_name.isEmpty())
                 JOptionPane.showMessageDialog(null, "Please fill out the required fields:\nName");
             else {
-                if (!seller_phone_number.isEmpty()) {
-                    Pattern pattern = Pattern.compile("^\\d{11}$");
-                    Matcher matcher = pattern.matcher(seller_phone_number);
-
-                    if (!matcher.matches()) {
-                        JOptionPane.showMessageDialog(null, "Error: Invalid phone number format.");
-                        return;
-                    }
+                if (!phoneChecker(seller_phone_number)) {
+                    JOptionPane.showMessageDialog(null, "Error: Invalid phone number format.");
+                    return;
                 }
 
                 Date seller_creation_date = new Date(System.currentTimeMillis());
@@ -1139,5 +1129,12 @@ public class MainController {
         //            courier_email_address = courierPage.getCourierEmail();
         //            matcher = pattern.matcher(courier_email_address);
         return matcher.matches();
+    }
+
+    private boolean phoneChecker(String user_phone_number) {
+        Pattern pattern = Pattern.compile("^\\d{11}$");
+        Matcher matcher = pattern.matcher(user_phone_number);
+
+        return user_phone_number.isEmpty() || matcher.matches();
     }
 }
