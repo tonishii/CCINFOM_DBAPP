@@ -708,9 +708,8 @@ public class MainController {
             sellerPage.nextPageName(AccountPage.SIGNUPPAGE);
         });
         sellerPage.initMainListeners(generateEvent -> {
-            mainMenuPage.nextPageName(MainFrame.SELECTACCPAGE);
-            selectAccountPage.nextPageName(SelectAccount.SELECTACCPAGE);
-            sellerPage.nextPageName(SellerPage.SIGNUP);
+            sellerPage.showGenerate();
+            sellerPage.setDisableButtons();
         }, editAccountEvent -> {
             sellerPage.showEditAccount();
             sellerPage.updateEditAccount((Seller) account);
@@ -1019,6 +1018,106 @@ public class MainController {
                 }
             }else{
                 JOptionPane.showMessageDialog(null, "No Refund Selected!", "Failure", JOptionPane.ERROR_MESSAGE);
+            }
+        }, generateSelected -> {
+            try {
+                if (sellerPage.getSellerReportBox().equals("Sales Report")) {
+                    int month = Integer.parseInt(sellerPage.getDateMonth());
+                    int year = Integer.parseInt(sellerPage.getDateYear());
+                    String query = """
+                                               SELECT COUNT(DISTINCT o.order_id) AS count, SUM(oc.subtotal) AS total
+                                               FROM order_contents oc
+                                               JOIN products p ON oc.product_id = p.product_id
+                                               JOIN orders o ON o.order_id = oc.order_id
+                                               LEFT JOIN `returns` r ON r.order_id = oc.order_id AND r.product_id = oc.product_id
+                                               WHERE p.seller_id = ?
+                                               AND YEAR(o.purchase_date) = ?
+                                               AND MONTH(o.purchase_date) = ?
+                                               AND o.order_status = 'DELIVERED'
+                                               AND (r.return_status IS NULL OR r.return_status != 'REFUNDED')
+                                               GROUP BY o.order_id;
+                                            """;
+
+                    PreparedStatement ps = conn.prepareStatement(query);
+                    ps.setInt(1, ((Seller)account).getID());
+                    ps.setInt(2, year);
+                    ps.setInt(3, month);
+                    ResultSet rs = ps.executeQuery();
+
+                    int transactions = 0;
+                    float sumOfEarnings = 0f;
+                    if (rs.next()) {
+                        do {
+                            transactions += rs.getInt("count");
+                            sumOfEarnings += rs.getInt("total");
+                        } while(rs.next());
+                    }
+                    sellerPage.setProductRefundInfo("" +
+                            "Sales Report for " + year + ":\n" +
+                            "Total orders handled: " + transactions +"\n" +
+                            "Total earnings: Php " + sumOfEarnings + "\n");
+                    sellerPage.disposeNewWindow();
+
+                } else if (sellerPage.getSellerReportBox().equals("Credibility Report")) {
+                    int year;
+                    int refunds = 0;
+                    float average = 0;
+
+                    System.out.print("Enter year: ");
+                    year = Integer.parseInt(sellerPage.getDateYear());
+
+                    String query =
+                            """
+                            SELECT AVG(p.average_rating) AS AverageRating
+                            FROM products p
+                            WHERE seller_id = ?;
+                            """;
+
+                    PreparedStatement pstmt = conn.prepareStatement(query);
+                    pstmt.setInt(1, ((Seller)account).getID());
+                    ResultSet rstmt = pstmt.executeQuery();
+
+                    while (rstmt.next()) {
+                        average = rstmt.getFloat("AverageRating");
+                    }
+
+                    query =
+                            """
+                            SELECT COUNT(product_id) AS numOfRefunds
+                            FROM returns r
+                            WHERE 	r.return_status = 'REFUNDED' AND
+                                    YEAR(r.return_date) = ? AND
+                                    product_id IN (SELECT product_id
+                                    FROM products p
+                                    WHERE seller_id = ?);
+                            """;
+
+                    pstmt = conn.prepareStatement(query);
+                    pstmt.setInt(1, year);
+                    pstmt.setInt(2, ((Seller)account).getID());
+                    rstmt = pstmt.executeQuery();
+
+                    while (rstmt.next()) {
+                        refunds = rstmt.getInt("numOfRefunds");
+                    }
+                    sellerPage.setProductRefundInfo("Credibility Report for " + ((Seller)account).getName() + " on Year: " + year + "\n" +
+                            "Overall Average Rating of Products: " + average + "\n" +
+                            "Total number of Refunds: " + refunds);
+                    sellerPage.disposeNewWindow();
+
+                } else if (sellerPage.getSellerReportBox().equals("Product Popularity Report")) {
+                    JOptionPane.showMessageDialog(null, "hi");
+                }
+            } catch (SQLException e) {
+                JOptionPane.showMessageDialog(null, "Error: " + e.getMessage());
+            }
+        }, listReportEvent -> {
+            if (sellerPage.getSellerReportBox().equals("Sales Report")) {
+                sellerPage.enableMonthTextField();
+            } else if (sellerPage.getSellerReportBox().equals("Credibility Report")) {
+                sellerPage.disableMonthTextField();
+            } else if (sellerPage.getSellerReportBox().equals("Product Popularity Report")) {
+                sellerPage.enableMonthTextField();
             }
         });
     }

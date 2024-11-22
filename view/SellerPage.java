@@ -31,7 +31,9 @@ public class SellerPage extends JPanel implements AccountPage {
                        productPrice,
                        productType,
                        productQuantity,
-                       productDesc;
+                       productDesc,
+                       dateYear,
+                       dateMonth;
 
     private JButton    submitSignUpBtn,
                        sellerBackBtn;
@@ -60,9 +62,11 @@ public class SellerPage extends JPanel implements AccountPage {
                        cancelBtn,
                        saveProfileBtn,
                        addProductBtn,
-                       saveProductBtn;
+                       saveProductBtn,
+                       generateReportBtn;
 
     private  JComboBox<String>   sellerCRBox;
+    private  JComboBox<String>   sellerReportBox;
     private  JList<String>       sellerCRList;
 
     public SellerPage() {
@@ -173,6 +177,14 @@ public class SellerPage extends JPanel implements AccountPage {
 
         saveProductBtn = new JButton("Save Product");
         saveProductBtn.setFocusable(false);
+
+        generateReportBtn = new JButton("Generate Report");
+        saveProductBtn.setFocusable(false);
+
+        String[] reports = {"Sales Report", "Credibility Report", "Product Popularity Report"};
+        sellerReportBox = new JComboBox<>(reports);
+        sellerReportBox.setPreferredSize(new Dimension(300, 50));
+        sellerReportBox.setFocusable(false);
 
         // top panel
         JPanel panelCenter = new JPanel(new GridBagLayout());
@@ -400,6 +412,60 @@ public class SellerPage extends JPanel implements AccountPage {
         //return JOptionPane.showConfirmDialog(null, panel, "Edit Product", JOptionPane.OK_CANCEL_OPTION);
     }
 
+    public void showGenerate(){
+        newWindow = new JDialog();
+        newWindow.setTitle("Report Generation");
+        newWindow.setSize(400, 250);
+        newWindow.addWindowListener(new WindowAdapter() {
+            @Override
+            public void windowClosing(WindowEvent e) {
+                // Dispose of the dialog and enable buttons
+                disposeNewWindow();
+            }
+        });
+
+        JPanel panel = new JPanel(new GridBagLayout());
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.anchor = gbc.CENTER;
+        gbc.insets = new Insets(0, 4 ,5 ,4);
+        dateYear = new JTextField();
+        dateYear.setPreferredSize(new Dimension(100, 20));
+        dateMonth = new JTextField();
+        dateMonth.setPreferredSize(new Dimension(100, 20));
+        sellerReportBox.setPreferredSize(new Dimension(200, 30));
+        sellerReportBox.setSelectedIndex(0);
+
+        gbc.gridy = 0;
+        gbc.weighty = 0.0;
+        panel.add(new JLabel("Reports: "),gbc);
+
+        gbc.gridy = 1;
+        panel.add(sellerReportBox, gbc);
+
+        gbc.gridy = 2;
+        gbc.anchor = gbc.WEST;
+        panel.add(new JLabel("Month (Number): "), gbc);
+        gbc.anchor = gbc.CENTER;
+        panel.add(dateMonth, gbc);
+
+        gbc.gridy = 3;
+        gbc.anchor = gbc.WEST;
+        panel.add(new JLabel("Year (Number): "), gbc);
+        gbc.anchor = gbc.CENTER;
+        panel.add(dateYear, gbc);
+
+        gbc.gridy = 4;
+        gbc.anchor = gbc.WEST;
+        panel.add(generateReportBtn, gbc);
+        gbc.anchor = gbc.CENTER;
+        panel.add(cancelBtn, gbc);
+
+        newWindow.add(panel);
+        newWindow.setResizable(false);
+        newWindow.setLocationRelativeTo(null);
+        newWindow.setVisible(true);
+    }
+
     @Override
     public void initSignUpListeners(ActionListener signUpLtr, ActionListener backLtr) {
         submitSignUpBtn.addActionListener(signUpLtr);
@@ -410,7 +476,8 @@ public class SellerPage extends JPanel implements AccountPage {
                                   ActionListener selCRLtr, ListSelectionListener textLtr, ActionListener addLtr,
                                   ActionListener editProdLtr, ActionListener cancelLtr, ActionListener saveProfileLtr,
                                   ActionListener addProductLtr, ActionListener saveProductLtr, ActionListener removeProductLtr,
-                                  ActionListener approveLtr, ActionListener rejectLtr){
+                                  ActionListener approveLtr, ActionListener rejectLtr, ActionListener generateReportLtr,
+                                  ActionListener listReportLtr){
         genBtn.addActionListener(genLtr);
         editAccBtn.addActionListener(editAccLtr);
         logoutBtn.addActionListener(logoutLtr);
@@ -425,6 +492,8 @@ public class SellerPage extends JPanel implements AccountPage {
         removeBtn.addActionListener(removeProductLtr);
         approveBtn.addActionListener(approveLtr);
         rejectBtn.addActionListener(rejectLtr);
+        generateReportBtn.addActionListener(generateReportLtr);
+        sellerReportBox.addActionListener(listReportLtr);
     }
 
     @Override
@@ -530,6 +599,17 @@ public class SellerPage extends JPanel implements AccountPage {
         setEnableButtons();
     }
 
+
+    public void enableMonthTextField(){
+        dateMonth.setEditable(true);
+    }
+    public void disableMonthTextField(){
+        dateMonth.setEditable(false);
+        dateMonth.setText("");
+    }
+    public String getDateMonth(){ return dateMonth.getText().trim(); }
+    public String getDateYear(){ return dateYear.getText().trim(); }
+    public String getSellerReportBox(){ return (String) this.sellerReportBox.getSelectedItem(); }
     public void setBackSellerBox(){ this.sellerCRBox.setSelectedIndex(0); }
     public String getSellerCRBox(){ return (String) this.sellerCRBox.getSelectedItem(); }
     public String getSellerName() { return sellerNameField.getText().trim(); }
