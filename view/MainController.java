@@ -653,14 +653,9 @@ public class MainController {
             if (seller_name.isEmpty())
                 JOptionPane.showMessageDialog(null, "Please fill out the required fields:\nName");
             else {
-                if (!seller_phone_number.isEmpty()) {
-                    Pattern pattern = Pattern.compile("^\\d{11}$");
-                    Matcher matcher = pattern.matcher(seller_phone_number);
-
-                    if (!matcher.matches()) {
-                        JOptionPane.showMessageDialog(null, "Error: Invalid phone number format.");
-                        return;
-                    }
+                if (!phoneChecker(seller_phone_number)) {
+                    JOptionPane.showMessageDialog(null, "Error: Invalid phone number format.");
+                    return;
                 }
 
                 Date seller_creation_date = new Date(System.currentTimeMillis());
