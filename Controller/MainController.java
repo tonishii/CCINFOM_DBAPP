@@ -969,9 +969,10 @@ public class MainController {
                             WHERE product_id = ? AND seller_id = ?
                             """;
                     PreparedStatement pstmt = conn.prepareStatement(query);
-                    pstmt.setBoolean(2, false);
+                    pstmt.setInt(1, 0);
                     pstmt.setInt(2, Ids.get(0));
                     pstmt.setInt(3, Ids.get(1));
+                    pstmt.executeUpdate();
                     sellerPage.updateSellerProductList(((Seller) account).productList(this.conn));
                 } catch (SQLException e) {
                     JOptionPane.showMessageDialog(null, "Error: " + e.getMessage());
