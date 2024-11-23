@@ -827,15 +827,13 @@ public class MainController {
                             "<b> Product Quantity: </b>" + product.getQuantity() + "<br>" +
                             "<b> Product Rating: </b>" + product.getRating() + "<br>" +
                             "<b> Product Listed: </b>" + product.isListed() + "<br>" +
-                            "<b> Product Type: </b>" + product.getDescription() + "<br>" +
-                            "<b> Product Description: </b>" + product.getType() + "</html>"
+                            "<b> Product Type: </b>" + product.getType() + "<br>" +
+                            "<b> Product Description: </b>" + product.getDescription() + "</html>"
                         );
 
                     } catch (SQLException e) {
                         JOptionPane.showMessageDialog(null, "Error: " + e.getMessage());
                     }
-                } else {
-                    JOptionPane.showMessageDialog(null, "Error: Select a product first.");
                 }
 
             } else if (sellerPage.getSellerCRBox().equals("Refunds")) {
@@ -860,13 +858,13 @@ public class MainController {
 
                         sellerPage.setProductRefundInfo(
                                 "<html><b> Refund Info </b><br>\n" +
-                                        "<b> Order ID: </b>" + refund.getOrderID() + "<br>" +
-                                        "<b> Product ID: </b>" + refund.getProductID() + "<br>" +
-                                        "<b> Courier ID: </b>" + refund.getCourierID() + "<br>" +
-                                        "<b> Return Reason: </b>" + refund.getReason() + "<br>" +
-                                        "<b> Product Rating: </b>" + refund.getDescription() + "<br>" +
-                                        "<b> Product Listed: </b>" + refund.getDate() + "<br>" +
-                                        "<b> Product Type: </b>" + refund.getStatus() + "</html>"
+                                "<b> Order ID: </b>" + refund.getOrderID() + "<br>" +
+                                "<b> Product ID: </b>" + refund.getProductID() + "<br>" +
+                                "<b> Courier ID: </b>" + refund.getCourierID() + "<br>" +
+                                "<b> Return Reason: </b>" + refund.getReason() + "<br>" +
+                                "<b> Product Rating: </b>" + refund.getDescription() + "<br>" +
+                                "<b> Product Listed: </b>" + refund.getDate() + "<br>" +
+                                "<b> Product Type: </b>" + refund.getStatus() + "</html>"
                         );
 
                     } catch (SQLException e) {
@@ -921,6 +919,7 @@ public class MainController {
                     pstmt.setInt(2, Ids.get(1));
                     product = ((Seller) account).getSellerProduct(pstmt);
                     sellerPage.updateEditProduct(product);
+
                 } catch (SQLException e) {
                     JOptionPane.showMessageDialog(null, "Error: " + e.getMessage());
                 }
@@ -953,6 +952,7 @@ public class MainController {
 
                     try {
                         account.updateAccount(conn);
+                        JOptionPane.showMessageDialog(null, "Profile edited...");
                     } catch (SQLException e) {
                         JOptionPane.showMessageDialog(null, "Error: " + e.getMessage());
                     }
@@ -965,19 +965,18 @@ public class MainController {
 
             if (choice == JOptionPane.OK_OPTION) {
                 try {
-                    if (sellerPage.getSelectedOption() != null) {
-                        Product product = new Product();
+                    Product product = new Product();
 
-                        product.setSellerID(((Seller) account).getID());
-                        product.setName(sellerPage.getProductName());
-                        product.setPrice(sellerPage.getProductPrice());
-                        product.setDescription(sellerPage.getProductDesc());
-                        product.setQuantity(sellerPage.getProductQuantity());
-                        product.setType(sellerPage.getProductType());
-                        product.updateListedStatus();
+                    product.setSellerID(((Seller) account).getID());
+                    product.setName(sellerPage.getProductName());
+                    product.setPrice(sellerPage.getProductPrice());
+                    product.setDescription(sellerPage.getProductDesc());
+                    product.setQuantity(sellerPage.getProductQuantity());
+                    product.setType(sellerPage.getProductType());
+                    product.updateListedStatus();
 
-                        product.sendToDB(conn);
-                    }
+                    product.sendToDB(conn);
+                    JOptionPane.showMessageDialog(null, "Added product!");
 
                     sellerPage.updateSellerProductList(((Seller) account).productList(this.conn));
 
@@ -987,8 +986,10 @@ public class MainController {
 
                 sellerPage.disposeNewWindow();
             }
+
         }, saveProductEvent -> {
             int choice = JOptionPane.showConfirmDialog(null, "Are you sure?", "Prompt", JOptionPane.OK_CANCEL_OPTION);
+
             if (choice == JOptionPane.OK_OPTION){
                 List<Integer> Ids =
                     Arrays.stream(sellerPage.getSelectedOption()
@@ -998,35 +999,36 @@ public class MainController {
 
                 try {
                     String query =
-                    """
-                    UPDATE products
-                    SET product_name = ?
-                        product_price = ?
-                        product_type = ?
-                        quantity_stocked = ?
-                        description = ?
-                        listed_status = ?
-                    WHERE product_id = ? AND seller_id = ?
-                    LIMIT 1;
-                    """;
+                        """
+                        UPDATE products
+                        SET product_name = ?,
+                            product_price = ?,
+                            product_type = ?,
+                            quantity_stocked = ?,
+                            description = ?,
+                            listed_status = ?
+                        WHERE product_id = ?
+                        """;
+
                     PreparedStatement pstmt = conn.prepareStatement(query);
-                    ((Product) account).setQuantity(sellerPage.getProductQuantity());
 
                     pstmt.setString(1, sellerPage.getProductName());
                     pstmt.setFloat(2, sellerPage.getProductPrice());
                     pstmt.setString(3, sellerPage.getProductType());
                     pstmt.setInt(4, sellerPage.getProductQuantity());
                     pstmt.setString(5, sellerPage.getProductDesc());
-                    pstmt.setBoolean(6, ((Product) account).isListed());
-                    pstmt.setInt(7, Ids.get(0));
-                    pstmt.setInt(8, Ids.get(1));
+                    pstmt.setBoolean(6, sellerPage.getProductQuantity() != 0);
+                    pstmt.setInt(7, Ids.getFirst());
 
                     pstmt.executeUpdate();
-                    sellerPage.updateSellerProductList(((Seller) account).productList(this.conn));
+
+                    sellerPage.updateSellerProductList(((Seller) account).productList(conn));
+                    JOptionPane.showMessageDialog(null, "Saved product!");
 
                 } catch (SQLException e) {
                     JOptionPane.showMessageDialog(null, "Error: " + e.getMessage());
                 }
+
                 sellerPage.disposeNewWindow();
             }
         }, removeProductEvent -> {
@@ -1048,6 +1050,8 @@ public class MainController {
                     pstmt.setInt(3, Ids.get(1));
                     pstmt.executeUpdate();
                     sellerPage.updateSellerProductList(((Seller) account).productList(this.conn));
+                    JOptionPane.showMessageDialog(null, "Removed product!");
+
                 } catch (SQLException e) {
                     JOptionPane.showMessageDialog(null, "Error: " + e.getMessage());
                 }
@@ -1152,6 +1156,7 @@ public class MainController {
                         "<b>Total orders handled: </b>" + transactions +"<br>" +
                         "<b>Total earnings: ₱ </b>" + sumOfEarnings + "</html>"
                     );
+                    
                     sellerPage.disposeNewWindow();
 
                 } else if (sellerPage.getSellerReportBox().equals("Credibility Report")) {

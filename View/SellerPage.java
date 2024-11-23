@@ -37,7 +37,7 @@ public class SellerPage extends JPanel implements AccountPage {
                        productQuantity,
                        productPrice;
 
-    private JTable     ProductPopTable;
+    private JTable     productPopTable;
 
     private JButton    submitSignUpBtn,
                        sellerBackBtn;
@@ -216,12 +216,14 @@ public class SellerPage extends JPanel implements AccountPage {
         sellerListPane.setPreferredSize(new Dimension(300, 350));
 
         productRefundInfo = new JLabel();
-        productRefundInfo.setBorder(new LineBorder(Color.BLACK, 6));
-        productRefundInfo.setPreferredSize(new Dimension(390, 250));
         productRefundInfo.setFocusable(false);
         productRefundInfo.setOpaque(true);
         productRefundInfo.setBackground(Color.WHITE);
         productRefundInfo.setVerticalAlignment(JLabel.TOP);
+
+        JScrollPane pane = new JScrollPane(productRefundInfo);
+        pane.setPreferredSize(new Dimension(390, 250));
+        pane.setBorder(new LineBorder(Color.BLACK, 6));
 
         addBtn = new JButton("Add");
         Colors.setButtonUI(addBtn);
@@ -263,7 +265,7 @@ public class SellerPage extends JPanel implements AccountPage {
         gbc.gridwidth = 1;
         gbc.weightx = 0.5;
         gbc.fill = GridBagConstraints.HORIZONTAL;
-        panelCenter.add(productRefundInfo, gbc);
+        panelCenter.add(pane, gbc);
 
         gbc.weightx = 0.0;
         gbc.weighty = 0.0;
@@ -507,9 +509,9 @@ public class SellerPage extends JPanel implements AccountPage {
 
         final String[] columnNames = {"Rank", "Product Name", "Units Sold", "Average Rating"};
         DefaultTableModel model = new DefaultTableModel(columnNames, 0);
-        ProductPopTable = new JTable(model);
+        productPopTable = new JTable(model);
 
-        JScrollPane ProductPopPane = new JScrollPane(ProductPopTable, JScrollPane.VERTICAL_SCROLLBAR_ALWAYS, JScrollPane.HORIZONTAL_SCROLLBAR_ALWAYS);
+        JScrollPane ProductPopPane = new JScrollPane(productPopTable, JScrollPane.VERTICAL_SCROLLBAR_ALWAYS, JScrollPane.HORIZONTAL_SCROLLBAR_ALWAYS);
         ProductPopPane.setPreferredSize(new Dimension(550, 400));
 
         gbc.gridx = 0;
@@ -677,7 +679,7 @@ public class SellerPage extends JPanel implements AccountPage {
             model.addRow(new Object[]{record[0], record[1], record[2], record[3]});
         }
 
-        ProductPopTable.setModel(model);
+        productPopTable.setModel(model);
     }
 
     public void setEnableTopButtons(){
