@@ -605,9 +605,14 @@ public class SellerPage extends JPanel implements AccountPage {
     }
 
     public void updateEditAccount(Seller seller) {
-        sellerNameField.setText(seller.getName());
-        sellerPhoneField.setText(seller.getPhoneNumber());
-        sellerAddressField.setText(seller.getAddress());
+        editSellerNameField.setText(seller.getName());
+        editSellerPhoneField.setText(seller.getPhoneNumber());
+        editSellerAddressField.setText(seller.getAddress());
+    }
+    public void clearAccountField() {
+        sellerNameField.setText("");
+        sellerPhoneField.setText("");
+        sellerAddressField.setText("");
     }
 
     public void updateEditProduct(Product product){

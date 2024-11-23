@@ -812,6 +812,8 @@ public class MainController {
                     }
 
                     account = new Seller(seller_id, seller_name, seller_address, seller_phone_number, seller_creation_date, seller_verified_status);
+                    sellerPage.clearAccountField();
+                    sellerPage.updateSellerProductList(((Seller)account).productList(conn));
                     sellerPage.nextPageName(AccountPage.MAINPAGE);
 
                 } catch (SQLException e) {
@@ -926,8 +928,6 @@ public class MainController {
                     } catch (SQLException e) {
                         JOptionPane.showMessageDialog(null, "Error: " + e.getMessage());
                     }
-                } else {
-                    JOptionPane.showMessageDialog(null, "Error: Select a refund first.");
                 }
             }
         }, addEvent -> { // Add product
@@ -991,8 +991,6 @@ public class MainController {
             if (choice == JOptionPane.OK_OPTION) {
                 Seller seller = (Seller) account;
 
-                sellerPage.updateEditAccount(seller);
-
                 if (sellerPage.getEditSellerName().isEmpty()) {
                     JOptionPane.showMessageDialog(null, "Please fill out the required fields:\nName");
                 } else {
@@ -1008,11 +1006,13 @@ public class MainController {
 
                     try {
                         account.updateAccount(conn);
+                        JOptionPane.showMessageDialog(null, sellerPage.getEditSellerPhone());
                         JOptionPane.showMessageDialog(null, "Profile edited...");
                     } catch (SQLException e) {
                         JOptionPane.showMessageDialog(null, "Error: " + e.getMessage());
                     }
 
+                    sellerPage.clearAccountField();
                     sellerPage.disposeNewWindow();
                 }
             }
