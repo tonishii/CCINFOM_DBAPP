@@ -372,7 +372,10 @@ public class MainController {
                     if (rs.next()) {
                         order_id = rs.getInt("id");
                     }
-
+                    if (Courier.assignCourier(conn) == -1) {
+                        JOptionPane.showMessageDialog(null, "No available couriers as of the moment.");
+                        return;
+                    }
                     Order order = new Order(
                         order_id,
                         ((User) account).getID(),
