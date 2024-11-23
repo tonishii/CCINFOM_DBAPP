@@ -66,7 +66,7 @@ public class Seller implements Account {
             UPDATE sellers
             SET seller_name = ?,
                 seller_address = ?,
-                seller_phone_number = ?
+                seller_phone_number = ?,
                 seller_verified_status = ?
             WHERE seller_id = ?;
             """;
@@ -74,9 +74,9 @@ public class Seller implements Account {
         pstmt.setString(1, this.seller_name);
         pstmt.setString(2, this.seller_address);
         pstmt.setString(3, this.seller_phone_number);
-        pstmt.setInt(5, this.seller_id);
         updateStatus();
         pstmt.setBoolean(4, this.seller_verified_status);
+        pstmt.setInt(5, this.seller_id);
 
         pstmt.executeUpdate();
     }

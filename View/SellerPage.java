@@ -28,6 +28,9 @@ public class SellerPage extends JPanel implements AccountPage {
     private JTextField sellerNameField,
                        sellerPhoneField,
                        sellerAddressField,
+                        editSellerNameField,
+                        editSellerPhoneField,
+                        editSellerAddressField,
                        productName,
                        productType,
                        productDesc;
@@ -305,21 +308,21 @@ public class SellerPage extends JPanel implements AccountPage {
         JPanel panel = new JPanel( new GridBagLayout());
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.insets = new Insets(0, 4 ,5 ,4);
-        sellerNameField = new JTextField();
-        sellerNameField.setPreferredSize(new Dimension(200, 20));
-        sellerAddressField = new JTextField();
-        sellerAddressField.setPreferredSize(new Dimension(200, 20));
-        sellerPhoneField = new JTextField();
-        sellerPhoneField.setPreferredSize(new Dimension(200, 20));
+        editSellerNameField = new JTextField();
+        editSellerNameField.setPreferredSize(new Dimension(200, 20));
+        editSellerAddressField = new JTextField();
+        editSellerAddressField.setPreferredSize(new Dimension(200, 20));
+        editSellerPhoneField = new JTextField();
+        editSellerPhoneField.setPreferredSize(new Dimension(200, 20));
         gbc.gridy=0;
         panel.add(new JLabel("Name: "),gbc);
-        panel.add(sellerNameField, gbc);
+        panel.add(editSellerNameField, gbc);
         gbc.gridy=1;
         panel.add(new JLabel("Address: "),gbc);
-        panel.add(sellerAddressField, gbc);
+        panel.add(editSellerAddressField, gbc);
         gbc.gridy=2;
         panel.add(new JLabel("Phone: "),gbc);
-        panel.add(sellerPhoneField, gbc);
+        panel.add(editSellerPhoneField, gbc);
         gbc.gridy=3;
         panel.add(saveProfileBtn, gbc);
         panel.add(cancelBtn, gbc);
@@ -710,6 +713,9 @@ public class SellerPage extends JPanel implements AccountPage {
     public String getSellerName() { return sellerNameField.getText().trim(); }
     public String getSellerAddress() { return sellerAddressField.getText().trim(); }
     public String getSellerPhone() { return sellerPhoneField.getText().trim(); }
+    public String getEditSellerName() { return editSellerNameField.getText().trim(); }
+    public String getEditSellerAddress() { return editSellerAddressField.getText().trim(); }
+    public String getEditSellerPhone() { return editSellerPhoneField.getText().trim(); }
     public String getProductName() { return productName.getText().trim(); }
     public float getProductPrice() { return ((Number) productPrice.getValue()).floatValue(); }
     public String getProductType() { return productType.getText().trim(); }

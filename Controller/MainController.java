@@ -987,18 +987,18 @@ public class MainController {
 
                 sellerPage.updateEditAccount(seller);
 
-                if (sellerPage.getSellerName().isEmpty()) {
+                if (sellerPage.getEditSellerName().isEmpty()) {
                     JOptionPane.showMessageDialog(null, "Please fill out the required fields:\nName");
                 } else {
 
-                    if (!phoneChecker(sellerPage.getSellerPhone())) {
+                    if (!phoneChecker(sellerPage.getEditSellerPhone())) {
                         JOptionPane.showMessageDialog(null, "Error: Invalid phone number format.");
                         return;
                     }
 
-                    seller.setName(sellerPage.getSellerName());
-                    seller.setAddress(sellerPage.getSellerAddress());
-                    seller.setPhoneNumber(sellerPage.getSellerPhone());
+                    seller.setName(sellerPage.getEditSellerName());
+                    seller.setAddress(sellerPage.getEditSellerAddress());
+                    seller.setPhoneNumber(sellerPage.getEditSellerPhone());
 
                     try {
                         account.updateAccount(conn);
@@ -1066,9 +1066,9 @@ public class MainController {
                     pstmt.setFloat(2, sellerPage.getProductPrice());
                     pstmt.setString(3, sellerPage.getProductType());
                     pstmt.setInt(4, sellerPage.getProductQuantity());
-                    pstmt.setString(5, sellerPage.getProductDesc());
+                    pstmt.setString(5, singleQuoteHandler(sellerPage.getProductDesc()));
                     pstmt.setBoolean(6, sellerPage.getProductQuantity() != 0);
-                    pstmt.setInt(7, Ids.getFirst());
+                    pstmt.setInt(7, Ids.get(0));
 
                     pstmt.executeUpdate();
 
@@ -1462,5 +1462,9 @@ public class MainController {
         Matcher matcher = pattern.matcher(user_phone_number);
 
         return user_phone_number.isEmpty() || matcher.matches();
+    }
+
+    private String singleQuoteHandler(String toCheck) {
+        return toCheck.replaceAll("'", "''");
     }
 }
