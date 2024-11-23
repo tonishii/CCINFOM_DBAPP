@@ -243,7 +243,7 @@ public class UserPage extends JPanel implements AccountPage {
         panel.setBackground(Colors.WHITE);
         panel.setLayout(new GridBagLayout());
 
-        JLabel label = new JLabel("Browse by: ");
+        JLabel label = new JLabel("<html><b>Browse by: </b></html>");
         gbc.gridx = 0;
         gbc.gridy = 0;
         panel.add(label, gbc);
@@ -334,7 +334,7 @@ public class UserPage extends JPanel implements AccountPage {
         removeBtn.setFocusable(false);
         panel.add(removeBtn, gbc);
 
-        JLabel lbl = new JLabel("Total: ");
+        JLabel lbl = new JLabel("<html><b>TOTAL: </b></html>");
         gbc.gridx = 0;
         gbc.gridy = 1;
         panel.add(lbl, gbc);
@@ -412,7 +412,7 @@ public class UserPage extends JPanel implements AccountPage {
         panel.setLayout(new GridBagLayout());
         panel.setBackground(Colors.WHITE);
 
-        JLabel lbl = new JLabel("[USER DETAILS]");
+        JLabel lbl = new JLabel("<html><b><u>USER DETAILS</u></b></html>");
         gbc.gridx =  0;
         gbc.gridy = 0;
         gbc.gridwidth = 2;

@@ -137,6 +137,7 @@ public class SellerPage extends JPanel implements AccountPage {
         topPanel = new JPanel();
         topPanel.setBackground(Colors.PINK);
         topPanel.setPreferredSize(new Dimension(800, 60));
+        topPanel.setBorder(BorderFactory.createMatteBorder(0, 0, 2, 0, Colors.BLACK));
 
         genBtn = new JButton("Generate");
         Colors.setButtonUI(genBtn);
@@ -449,6 +450,7 @@ public class SellerPage extends JPanel implements AccountPage {
         gbc.anchor = GridBagConstraints.CENTER;
         gbc.insets = new Insets(0, 4 ,5 ,4);
         dateYear = new JSpinner(new SpinnerNumberModel(2024,1,Integer.MAX_VALUE,1));
+        dateYear.setEditor(new JSpinner.NumberEditor(dateYear, "#"));
         dateYear.setPreferredSize(new Dimension(100, 20));
         dateMonth = new JSpinner(new SpinnerNumberModel(1,1,12,1));
         dateMonth.setPreferredSize(new Dimension(100, 20));

@@ -40,48 +40,39 @@ public class MainFrame extends JFrame {
         for (Component comp : cont.getComponents()) {
             if (comp instanceof JTextField) {
                 ((JTextField) comp).setText("");
-                System.out.println("text field");
             }
                 
             else if (comp instanceof JPasswordField) {
                 ((JTextField) comp).setText("");
-                System.out.println("password field");
             }
 
             else if (comp instanceof JLabel) {
                 ((JLabel) comp).setText("");
-                System.out.println("label");
             }
             
             else if (comp instanceof JTextArea) {
                 ((JTextArea) comp).setText("");
-                System.out.println("text area");
             }
                 
             else if (comp instanceof JCheckBox) {
                 ((JCheckBox) comp).setSelected(false);
-                System.out.println("checkbox");
             }
                 
             else if (comp instanceof JComboBox) {
                 ((JComboBox<?>) comp).setSelectedIndex(0);
-                System.out.println("combo box");
             }
                 
             else if (comp instanceof JTable) {
                 JTable table = (JTable) comp;
                 table.setModel(new DefaultTableModel());
-                System.out.println("table");
             }
             else if (comp instanceof JList<?> list) {
                 if (list.getModel() instanceof DefaultListModel<?> model) {
                     model.clear();
-                    System.out.println("list");
                 }
             }
             else if (comp instanceof Container) {
                  clearInputs((Container) comp);
-                 System.out.println("called");
             }
         }
     }

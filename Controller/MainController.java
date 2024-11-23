@@ -542,7 +542,8 @@ public class MainController {
                     """
                     SELECT *
                     FROM products
-                    WHERE seller_id = ?;
+                    WHERE seller_id = ?
+                    AND listed_status = 1;
                     """;
                     PreparedStatement pstmt = conn.prepareStatement(query);
                     pstmt.setInt(1, Integer.parseInt(userPage.getSelectedOption()));
@@ -554,7 +555,8 @@ public class MainController {
                     """
                     SELECT *
                     FROM products
-                    WHERE product_type = ?;
+                    WHERE product_type = ?
+                    AND listed_status = 1;
                     """;
 
                     PreparedStatement pstmt = conn.prepareStatement(query);
@@ -582,8 +584,8 @@ public class MainController {
             "Price: " + selectedProduct.getPrice() + "\n" +
             "Type: " + selectedProduct.getType() + "\n" +
             "Rating: " + selectedProduct.getRating() + "\n" +
-            "Qty: " + selectedProduct.getQuantity() + "\n" +
-            "Listed: " + ((selectedProduct.isListed()) ? "Yes" : "No") + "\n" +
+            "Quantity in Stock: " + selectedProduct.getQuantity() + "\n" +
+//            "Listed: " + ((selectedProduct.isListed()) ? "Yes" : "No") + "\n" +
             "Description: " + selectedProduct.getDescription());
 
         }, orderSelectEvent -> { // Action: Pressing an order in the orders list in the orders page
@@ -616,7 +618,7 @@ public class MainController {
                             text += "<br><br><b>[ITEMS ORDERED]</b>";
                             
                             do {
-                                text += "<br><br>" + rs.getString("p.product_name") + " from " + rs.getString("s.seller_name") + "<br>Quantity: " + rs.getInt("oc.item_quantity");
+                                text += "<br><br>" + rs.getString("p.product_name") + " from " + rs.getString("s.seller_name") + "<br><b>Quantity:</b> " + rs.getInt("oc.item_quantity");
                                 total += rs.getFloat("oc.subtotal");
                             } while (rs.next());
                             

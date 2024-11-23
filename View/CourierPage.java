@@ -117,6 +117,7 @@ public class CourierPage extends JPanel implements AccountPage {
         topPanel = new JPanel();
         topPanel.setBackground(Colors.PINK);
         topPanel.setPreferredSize(new Dimension(800, 60));
+        topPanel.setBorder(BorderFactory.createMatteBorder(0, 0, 2, 0, Colors.BLACK));
 
         ongoingOrderBtn = new JButton("Ongoing Orders");
         Colors.setButtonUI(ongoingOrderBtn);
@@ -164,7 +165,7 @@ public class CourierPage extends JPanel implements AccountPage {
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.insets = new Insets(5, 5, 5, 5);
 
-        JLabel ongoingOrdersLabel = new JLabel("Ongoing Orders:");
+        JLabel ongoingOrdersLabel = new JLabel("<html><b>Ongoing Orders:</b><html>");
 
         OrderClassTableModel oCTM = new OrderClassTableModel(new ArrayList<>());
         ongoingOrdersTable = new JTable(oCTM);
@@ -175,8 +176,9 @@ public class CourierPage extends JPanel implements AccountPage {
         ongoingOrdersPane.setPreferredSize(new Dimension(550, 200));
 
         this.deliverBtn = new JButton("Deliver Order");
+        Colors.setButtonUI(this.deliverBtn);
 
-        JLabel ongoingReturnsLabel = new JLabel("Ongoing Returns:");
+        JLabel ongoingReturnsLabel = new JLabel("<html><b>Ongoing Returns:</b></html>");
 
         ReturnTableModel rTM = new ReturnTableModel(new ArrayList<>());
         ongoingReturnsTable = new JTable(rTM);
@@ -188,12 +190,13 @@ public class CourierPage extends JPanel implements AccountPage {
         oOPage.add(ongoingOrdersLabel, gbc);
         gbc.gridy = 1;
         oOPage.add(ongoingOrdersPane, gbc);
-        gbc.gridx = 1;
-        oOPage.add(deliverBtn, gbc);
-        gbc.gridx = 0;
+//        gbc.gridx = 1;
         gbc.gridy = 2;
-        oOPage.add(ongoingReturnsLabel, gbc);
+        oOPage.add(deliverBtn, gbc);
+//        gbc.gridx = 0;
         gbc.gridy = 3;
+        oOPage.add(ongoingReturnsLabel, gbc);
+        gbc.gridy = 4;
         oOPage.add(ongoingReturnsPane, gbc);
 
         return oOPage;
@@ -214,6 +217,7 @@ public class CourierPage extends JPanel implements AccountPage {
         courierYear.setPreferredSize(new Dimension(200, 20));
 
         this.dateBtn = new JButton("Submit");
+        Colors.setButtonUI(this.dateBtn);
 
         datePanel.add(monthLabel, gbc);
         gbc.gridx = 1;
@@ -235,8 +239,8 @@ public class CourierPage extends JPanel implements AccountPage {
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.insets = new Insets(5, 5, 5, 5);
 
-        JLabel activityMainLabel = new JLabel("Activity Report");
-        JLabel activityOrdersLabel = new JLabel("Completed Orders:");
+        JLabel activityMainLabel = new JLabel("<html><b><u>ACTIVITY REPORT</u></b></html>");
+        JLabel activityOrdersLabel = new JLabel("<html><b>Completed Orders:</b><html>");
 
         OrderClassTableModel oCTM = new OrderClassTableModel(new ArrayList<>());
         activityOrdersTable = new JTable(oCTM);
@@ -245,7 +249,7 @@ public class CourierPage extends JPanel implements AccountPage {
         this.activityOrdersPane = new JScrollPane(activityOrdersTable, JScrollPane.VERTICAL_SCROLLBAR_ALWAYS, JScrollPane.HORIZONTAL_SCROLLBAR_ALWAYS);
         activityOrdersPane.setPreferredSize(new Dimension(550, 200));
 
-        JLabel activityReturnsLabel = new JLabel("Completed Returns:");
+        JLabel activityReturnsLabel = new JLabel("<html><b>Completed Returns:</b></html>");
 
         ReturnTableModel rTM = new ReturnTableModel(new ArrayList<>());
         activityReturnsTable = new JTable(rTM);
@@ -276,7 +280,7 @@ public class CourierPage extends JPanel implements AccountPage {
         gbc.gridx = 0;
         gbc.gridy = 0;
         gbc.gridwidth = 2;
-        JLabel lbl = new JLabel("[USER DETAILS]");
+        JLabel lbl = new JLabel("<html><b><u>USER DETAILS</u></b></html>");
         panel.add(lbl, gbc);
 
         lbl = new JLabel("Account name: ");

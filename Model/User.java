@@ -164,6 +164,7 @@ public class User implements Account {
         COUNT(*) AS product_count
         FROM products
         LEFT JOIN sellers ON products.seller_id = sellers.seller_id
+        WHERE products.listed_status = 1
         GROUP BY products.seller_id;
         """;
 
@@ -174,7 +175,7 @@ public class User implements Account {
             int sellerId = resultSet.getInt("seller_id");
             String sellerName = resultSet.getString("seller_name");
             int productCount = resultSet.getInt("product_count");
-            String displayText = sellerName + " Number of products: " + productCount;
+            String displayText = sellerName + " || Number of products: " + productCount;
             shopOptionList.put(displayText, Integer.toString(sellerId));
         }
         return shopOptionList;
@@ -188,6 +189,7 @@ public class User implements Account {
         SELECT product_type,
         COUNT(*) AS product_count
         FROM products
+        WHERE products.listed_status = 1
         GROUP BY product_type;
         """;
 
@@ -198,7 +200,7 @@ public class User implements Account {
             String productType = resultSet.getString("product_type");
             int productCount = resultSet.getInt("product_count");
 
-            String displayText = productType + " Number of products: " + productCount;
+            String displayText = productType + " || Number of products: " + productCount;
             productTypeOptionList.put(displayText, productType);
         }
 
