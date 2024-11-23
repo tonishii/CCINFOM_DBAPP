@@ -829,6 +829,10 @@ public class MainController {
 
         });
         sellerPage.initMainListeners(generateEvent -> {
+            if (!(((Seller) account).isVerified())) {
+                JOptionPane.showMessageDialog(null, "Account not verified. Unable to proceed with action.");
+                return;
+            }
             sellerPage.showGenerate();
             sellerPage.setDisableButtons();
         }, editAccountEvent -> {
@@ -932,6 +936,10 @@ public class MainController {
                 }
             }
         }, addEvent -> { // Add product
+            if (!(((Seller) account).isVerified())) {
+                JOptionPane.showMessageDialog(null, "Account not verified. Unable to proceed with action.");
+                return;
+            }
             sellerPage.showAddProduct();
             sellerPage.setDisableButtons();
             /*
@@ -950,7 +958,10 @@ public class MainController {
             }
             */
         }, editProdEvent -> {
-
+            if (!(((Seller) account).isVerified())) {
+                JOptionPane.showMessageDialog(null, "Account not verified. Unable to proceed with action.");
+                return;
+            }
             if (sellerPage.getSelectedOption()!=null) {
 
                 sellerPage.showEditProduct();
@@ -1090,6 +1101,10 @@ public class MainController {
                 sellerPage.disposeNewWindow();
             }
         }, removeProductEvent -> {
+            if (!(((Seller) account).isVerified())) {
+                JOptionPane.showMessageDialog(null, "Account not verified. Unable to proceed with action.");
+                return;
+            }
             if (sellerPage.getSelectedOption() != null) {
                 try {
                     List<Integer> Ids = Arrays.stream(sellerPage.getSelectedOption()
@@ -1118,6 +1133,10 @@ public class MainController {
             }
 
         }, approveReturnEvent -> {
+            if (!(((Seller) account).isVerified())) {
+                JOptionPane.showMessageDialog(null, "Account not verified. Unable to proceed with action.");
+                return;
+            }
             if (sellerPage.getSelectedOption() != null) {
                 int choice = JOptionPane.showConfirmDialog(null, "Are you sure?", "Return product", JOptionPane.OK_CANCEL_OPTION);
                 if (choice == JOptionPane.OK_OPTION) {
@@ -1145,6 +1164,10 @@ public class MainController {
                 JOptionPane.showMessageDialog(null, "No Refund Selected!", "Failure", JOptionPane.ERROR_MESSAGE);
             }
         }, rejectReturnEvent -> {
+            if (!(((Seller) account).isVerified())) {
+                JOptionPane.showMessageDialog(null, "Account not verified. Unable to proceed with action.");
+                return;
+            }
             if (sellerPage.getSelectedOption() != null) {
                 int choice = JOptionPane.showConfirmDialog(null, "Are you sure?", "Return", JOptionPane.OK_CANCEL_OPTION);
 

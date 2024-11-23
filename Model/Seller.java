@@ -201,4 +201,5 @@ public class Seller implements Account {
     public String getName() { return this.seller_name; }
     public String getAddress() { return this.seller_address; }
     public String getPhoneNumber() { return this.seller_phone_number; }
+    public boolean isVerified() { return this.seller_verified_status; }
 }
