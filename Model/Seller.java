@@ -70,6 +70,7 @@ public class Seller implements Account {
                 seller_verified_status = ?
             WHERE seller_id = ?;
             """;
+
         PreparedStatement pstmt = conn.prepareStatement(update);
         pstmt.setString(1, this.seller_name);
         pstmt.setString(2, this.seller_address);
@@ -78,6 +79,7 @@ public class Seller implements Account {
         pstmt.setBoolean(4, this.seller_verified_status);
         pstmt.setInt(5, this.seller_id);
 
+        System.out.println(pstmt);
         pstmt.executeUpdate();
     }
 

@@ -292,12 +292,12 @@ public class MainController {
 
         }, addToCartEvent -> { // Action: Pressing the add button in the shop page
             User user = (User) account;
-            
+
             if (!(user.isVerified())) {
                 JOptionPane.showMessageDialog(null, "Account not verified. Unable to proceed with action.");
                 return;
             }
-            
+
             Product selectedProduct = userPage.getSelectedProduct();
             int orderQuantity = userPage.getQuantity();
 
@@ -336,12 +336,12 @@ public class MainController {
             userPage.updateBrowseList(options);
 
         }, checkOutEvent -> { // Action: Pressing check out button in the shopping cart page
-            
+
             if (!(((User) account).isVerified())) {
                 JOptionPane.showMessageDialog(null, "Account not verified. Unable to proceed with action.");
                 return;
             }
-            
+
             Set<OrderContent> shoppingCart = ((User) account).getShoppingCart();
             ArrayList<OrderContent> selectedProducts = userPage.getSelectedRecords(new ArrayList<>(shoppingCart));
 
@@ -404,7 +404,7 @@ public class MainController {
                 JOptionPane.showMessageDialog(null, "Account not verified. Unable to proceed with action.");
                 return;
             }
-            
+
             Set<OrderContent> shoppingCart = ((User) account).getShoppingCart();
             ArrayList<OrderContent> selectedProducts = userPage.getSelectedRecords(new ArrayList<>(shoppingCart));
 
@@ -427,12 +427,12 @@ public class MainController {
             userPage.updateCartTable(shoppingCart);
             
         }, returnEvent -> { // Action: Pressing the return item button in the orders page
-            
+
             if (!(((User) account).isVerified())) {
                 JOptionPane.showMessageDialog(null, "Account not verified. Unable to proceed with action.");
                 return;
             }
-            
+
             try {
                 User user = (User) account;
                 ArrayList<OrderContent> itemsList = user.getOrderItems(conn, user.getID());
@@ -470,12 +470,12 @@ public class MainController {
             }
 
         }, rateEvent -> { // Action: Pressing the return item button in the orders page
-            
+
             if (!(((User) account).isVerified())) {
                 JOptionPane.showMessageDialog(null, "Account not verified. Unable to proceed with action.");
                 return;
             }
-            
+
             try {
                 User user = (User) account;
 
@@ -509,42 +509,45 @@ public class MainController {
                 } else {
                     JOptionPane.showMessageDialog(null, "Aborting Rate...");
                 }
-            } catch (Exception e) {
+            } catch (SQLException e) {
                 JOptionPane.showMessageDialog(null, "Error: " + e);
             }
 
         }, receiveEvent -> { // Action: Pressing the receive item button in the orders page
-            
+
             if (!(((User) account).isVerified())) {
                 JOptionPane.showMessageDialog(null, "Account not verified. Unable to proceed with action.");
                 return;
             }
-            
+
             try {
-                ArrayList<OrderContent> itemsList = ((User) account).getOrderItems(conn, ((User) account).getID());
+                User user = (User) account;
+                ArrayList<OrderContent> itemsList = user.getOrderItems(conn, user.getID());
+
                 userPage.ordersListToProducts(itemsList);
                 int option = JOptionPane.showConfirmDialog(null, userPage.getReceiveOrderPanel(), "Receive Order", JOptionPane.OK_CANCEL_OPTION);
+
                 if (option == JOptionPane.OK_OPTION) {
                     String orderInp = userPage.getOrderInp();
 
                     if (orderInp.trim().isEmpty()) { // When an input field is not filled up
                         JOptionPane.showMessageDialog(null, "Please fill out the required input fields:\nOrder ID\nProduct ID");
-                    }
-                    else {
+                    } else {
                         try {
                             int order_id = Integer.parseInt(orderInp.trim());
 
-                            if (Order.receiveOrder(conn, order_id, ((User) account).getID())) {
+                            if (Order.receiveOrder(conn, order_id, user.getID())) {
                                 JOptionPane.showMessageDialog(null, "Order successfully received.");
                             } else {
                                 JOptionPane.showMessageDialog(null, "Failed to receive order.");
                             }
+
                         } catch (NumberFormatException e) {
                             JOptionPane.showMessageDialog(null, "Invalid ID input.");
                         }
                     }
                 }
-            } catch (Exception e) {
+            } catch (SQLException e) {
                 JOptionPane.showMessageDialog(null, "Error: " + e);
             }
         }, saveChangeEvent -> { // Action: Pressing the save changes button in the profile page
@@ -564,7 +567,7 @@ public class MainController {
                         JOptionPane.showMessageDialog(null, "Please fill out the required fields:\nUsername\nFirst Name\nLast Name");
                         return;
                     }
-                    
+
                     // Retrieve the edited fields and update in the database
                     if (!user_phone_number.isEmpty()) {
                         if (!(phoneChecker(user_phone_number))) {
@@ -573,9 +576,9 @@ public class MainController {
                         }
                     }
                     else user_phone_number = null;
-                    
+
                     if (user_address.isEmpty()) user_address = null;
-                    
+
                     user.setName(user_name);
                     user.setFirstName(user_firstname);
                     user.setLastName(user_lastname);

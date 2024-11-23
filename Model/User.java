@@ -6,7 +6,6 @@ import Model.enums.ReturnStatus;
 import java.sql.Date;
 import java.util.*;
 import java.sql.*;
-import java.text.SimpleDateFormat;
 
 public class User implements Account {
     private int    user_id;
@@ -152,16 +151,15 @@ public class User implements Account {
         pstmt.setString(3, this.user_address);
         pstmt.setString(4, this.user_firstname);
         pstmt.setString(5, this.user_lastname);
-        pstmt.setInt(7, this.user_id);
         updateStatus();
         pstmt.setBoolean(6, this.user_verified_status);
+        pstmt.setInt(7, this.user_id);
+
         pstmt.executeUpdate();
     }
 
     public void updateStatus() {
-        if (this.user_phone_number != null && this.user_address != null)
-            this.user_verified_status = true;
-        else this.user_verified_status = false;
+        this.user_verified_status = this.user_phone_number != null && this.user_address != null;
     }
 
     public String toString() {
@@ -190,8 +188,8 @@ public class User implements Account {
     public String getLastName() { return this.user_lastname; }
     public String getAddress() { return this.user_address; }
     public String getPhoneNumber() { return this.user_phone_number; }
-    public boolean isVerified() { return this.user_verified_status; } 
-    
+    public boolean isVerified() { return this.user_verified_status; }
+
     public ArrayList<Order> getOrdersView(Connection conn, int user_id) throws SQLException {
         ArrayList<Order> orders = new ArrayList<>();
 

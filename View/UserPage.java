@@ -10,10 +10,8 @@ import javax.swing.*;
 import javax.swing.border.TitledBorder;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.table.DefaultTableModel;
-import javax.swing.table.TableCellEditor;
 import javax.swing.table.TableCellRenderer;
 import java.awt.*;
-import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ItemListener;
 import java.util.*;
@@ -888,7 +886,7 @@ public class UserPage extends JPanel implements AccountPage {
         ArrayList<OrderContent> selectedRecords = new ArrayList<>();
 
         for (int i = 0; i < cartTable.getRowCount(); i++) {
-            if ((Boolean) cartTable.getValueAt(i, 0)) {
+            if ((Boolean) cartTable.getValueAt(i, 0) && ((Integer) cartTable.getValueAt(i, 3)) > 0) {
                 selectedRecords.add(shoppingCart.get(i).setQuantity((Integer) cartTable.getValueAt(i, 3)));
             }
         }
@@ -922,40 +920,6 @@ public class UserPage extends JPanel implements AccountPage {
         public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
             setBackground((isSelected || hasFocus) ? table.getSelectionBackground() : UIManager.getColor("Button.background"));
             return this;
-        }
-    }
-
-    static class ActionButtonEditor extends AbstractCellEditor implements TableCellEditor {
-        private final JButton button;
-        private final JTable table;
-        private final int direction;
-        private int currentRow;
-
-        public ActionButtonEditor(String label, JTable table, int direction) {
-            this.table = table;
-            this.direction = direction;
-            this.button = new JButton(label);
-
-            button.addActionListener(this::updateQuantity);
-        }
-
-        private void updateQuantity(ActionEvent e) {
-            int currentQty = (Integer) table.getValueAt(currentRow, 3);
-            int newQty = Math.max(0, currentQty + direction);
-            table.setValueAt(newQty, currentRow, 3);
-
-            fireEditingStopped();
-        }
-
-        @Override
-        public Component getTableCellEditorComponent(JTable table, Object value, boolean isSelected, int row, int column) {
-            currentRow = row;
-            return button;
-        }
-
-        @Override
-        public Object getCellEditorValue() {
-            return null;
         }
     }
 }
