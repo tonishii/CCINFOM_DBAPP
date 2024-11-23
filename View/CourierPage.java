@@ -359,24 +359,28 @@ public class CourierPage extends JPanel implements AccountPage {
         courierAddressField.setText("");
     }
 
+    // updates the view of the ongoing orders table
     public void updateOOTable(ArrayList<Order> orders) {
         OrderClassTableModel mdl = new OrderClassTableModel(orders);
         ongoingOrdersTable.setModel(mdl);
         ongoingOrdersPane.setViewportView(ongoingOrdersTable);
     }
 
+    // updates the view of the ongoing returns table
     public void updateORTable(ArrayList<Return> returns) {
         ReturnTableModel mdl = new ReturnTableModel(returns);
         ongoingReturnsTable.setModel(mdl);
         ongoingReturnsPane.setViewportView(ongoingReturnsTable);
     }
 
+    // updates the view of the orders table in activity report
     public void updateAOTable(ArrayList<Order> orders) {
         OrderClassTableModel mdl = new OrderClassTableModel(orders);
         activityOrdersTable.setModel(mdl);
         activityOrdersPane.setViewportView(activityOrdersTable);
     }
 
+    // updates the view of the returns table in activity report
     public void updateARTable(ArrayList<Return> returns) {
         ReturnTableModel mdl = new ReturnTableModel(returns);
         activityReturnsTable.setModel(mdl);
