@@ -3,9 +3,11 @@ package View;
 import Model.Courier;
 import Model.Order;
 import Model.Return;
+import Model.enums.OrderStatus;
 
 import javax.swing.*;
 import javax.swing.border.TitledBorder;
+import javax.swing.table.TableModel;
 import java.awt.*;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
@@ -36,7 +38,8 @@ public class CourierPage extends JPanel implements AccountPage {
                         activityBtn,
                         editBtn,
                         logOutBtn,
-                        saveBtn;
+                        saveBtn,
+                        deliverBtn;
 
     private JTable      ongoingOrdersTable,
                         ongoingReturnsTable,
@@ -161,9 +164,12 @@ public class CourierPage extends JPanel implements AccountPage {
         OrderClassTableModel oCTM = new OrderClassTableModel(new ArrayList<>());
         ongoingOrdersTable = new JTable(oCTM);
         ongoingOrdersTable.setDefaultEditor(Object.class, null);
+        ongoingOrdersTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 
         this.ongoingOrdersPane = new JScrollPane(ongoingOrdersTable, JScrollPane.VERTICAL_SCROLLBAR_ALWAYS, JScrollPane.HORIZONTAL_SCROLLBAR_ALWAYS);
         ongoingOrdersPane.setPreferredSize(new Dimension(550, 200));
+
+        this.deliverBtn = new JButton("Deliver Order");
 
         JLabel ongoingReturnsLabel = new JLabel("Ongoing Returns:");
 
@@ -177,6 +183,9 @@ public class CourierPage extends JPanel implements AccountPage {
         oOPage.add(ongoingOrdersLabel, gbc);
         gbc.gridy = 1;
         oOPage.add(ongoingOrdersPane, gbc);
+        gbc.gridx = 1;
+        oOPage.add(deliverBtn, gbc);
+        gbc.gridx = 0;
         gbc.gridy = 2;
         oOPage.add(ongoingReturnsLabel, gbc);
         gbc.gridy = 3;
@@ -285,9 +294,10 @@ public class CourierPage extends JPanel implements AccountPage {
         courierBackBtn.addActionListener(backLtr);
     }
 
-    public void initMainListeners(ActionListener orderLtr, ActionListener actLtr, ActionListener editLtr, ActionListener saveLtr, ActionListener logOutLtr) {
+    public void initMainListeners(ActionListener orderLtr, ActionListener actLtr, ActionListener deliverLtr, ActionListener editLtr, ActionListener saveLtr, ActionListener logOutLtr) {
         ongoingOrderBtn.addActionListener(orderLtr);
         activityBtn.addActionListener(actLtr);
+        deliverBtn.addActionListener(deliverLtr);
         editBtn.addActionListener(editLtr);
         saveBtn.addActionListener(saveLtr);
         logOutBtn.addActionListener(logOutLtr);
@@ -347,5 +357,34 @@ public class CourierPage extends JPanel implements AccountPage {
 
     public String getProfileCourierAddress() {
         return profileCourierAddressField.getText().trim();
+    }
+
+    public JTable getOngoingOrdersTable() {
+        return ongoingOrdersTable;
+    }
+
+//    public ArrayList<Integer> getRowsToUpdate() {
+//        TableModel dtm = ongoingOrdersTable.getModel();
+//        int[] selection = ongoingOrdersTable.getSelectedRow();
+//        int colSize = dtm.getColumnCount();
+//        ArrayList<Integer> list = new ArrayList<>();
+//        for (int selected : selection) {
+//            for(int i = 0; i < colSize; i++) {
+//                list.add((Integer)dtm.getValueAt(selected, 0));
+//                System.out.println((Integer)dtm.getValueAt(selected, 0));
+//            }
+//        }
+//
+//        return list;
+//    }
+
+    public int getRowToUpdate() {
+        TableModel dtm = ongoingOrdersTable.getModel();
+        int selection = ongoingOrdersTable.getSelectedRow();
+        if(selection != -1) {
+            if(((OrderStatus)dtm.getValueAt(selection, 5)).equals(OrderStatus.BEING_PREPARED))
+                return (Integer)dtm.getValueAt(selection, 0);
+        }
+        return -1;
     }
 }

@@ -1210,6 +1210,14 @@ public class MainController {
                 courierPage.updateAOTable(((Courier)account).showCompletedOrders(conn));
                 courierPage.updateARTable(((Courier)account).showCompletedReturns(conn));
                 courierPage.nextMainPageName(CourierPage.ACTIVITYPAGE);
+            }, deliverEvent -> {
+                int update = courierPage.getRowToUpdate();
+                if(update != -1) {
+                    ((Courier) account).deliverOrder(conn, update);
+                    JOptionPane.showMessageDialog(null, "Delivery Successful");
+                    courierPage.updateOOTable(((Courier) account).showOngoingOrders(conn));
+                }
+                else JOptionPane.showMessageDialog(null, "Error: Invalid or no row selected");
             }, editEvent -> {
                 courierPage.nextMainPageName(CourierPage.EDITPAGE);
                 courierPage.updateProfilePage((Courier) account);

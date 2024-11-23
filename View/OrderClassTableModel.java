@@ -21,10 +21,6 @@ public class OrderClassTableModel extends DefaultTableModel {
         }
     }
 
-    public Order getOrder(int index) {
-        return orders.get(index);
-    }
-
     @Override
     public int getRowCount() {
         if (orders == null) {
