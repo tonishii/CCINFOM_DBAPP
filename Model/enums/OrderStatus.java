@@ -1,4 +1,4 @@
-package enums;
+package Model.enums;
 
 public enum OrderStatus {
     BEING_PREPARED("BEING_PREPARED"),

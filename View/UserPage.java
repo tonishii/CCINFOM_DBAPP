@@ -1,14 +1,15 @@
-package view;
+package View;
 
-import model.Order;
-import model.OrderContent;
-import model.Product;
-import model.User;
-import model.Return;
+import Model.Order;
+import Model.OrderContent;
+import Model.Product;
+import Model.User;
+import Model.Return;
 
 import javax.swing.*;
 import javax.swing.border.TitledBorder;
 import javax.swing.event.ListSelectionListener;
+import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableCellEditor;
 import javax.swing.table.TableCellRenderer;
 import java.awt.*;
@@ -18,7 +19,7 @@ import java.awt.event.ItemListener;
 import java.util.*;
 
 public class UserPage extends JPanel implements AccountPage {
-    private CardLayout userCardLayout;
+    private final CardLayout userCardLayout;
 
     // Constants used for switching between the different options
     public static final String SHOPPAGE = "shop";
@@ -50,7 +51,7 @@ public class UserPage extends JPanel implements AccountPage {
                        logOutBtn,
                        addToCartBtn;
 
-    private JLabel              productInfoLabel;
+    private JTextArea           productInfoArea;
     private JComboBox<String>   browseByBox;
     private JList<String>       browseByList;
     private Map<String, String> options;
@@ -61,7 +62,6 @@ public class UserPage extends JPanel implements AccountPage {
     private JTable            cartTable;
     private JButton           checkOutBtn,
                               removeBtn;
-    private JLabel            totalLbl;
 
     // Orders option
 
@@ -107,11 +107,11 @@ public class UserPage extends JPanel implements AccountPage {
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.insets = new Insets(5, 5, 5, 5);
         gbc.fill = GridBagConstraints.HORIZONTAL;
-        
+
         JPanel signUpPage = new JPanel();
         signUpPage.setBorder(BorderFactory.createTitledBorder(BorderFactory.createLineBorder(Color.BLACK, 2),
     "User sign-up", TitledBorder.LEFT, TitledBorder.TOP, new Font("Montserrat", Font.PLAIN, 12)));
-        
+
         signUpPage.setLayout(new GridBagLayout());
 
         JLabel label = new JLabel("Enter user account name: ");
@@ -238,20 +238,10 @@ public class UserPage extends JPanel implements AccountPage {
     public JPanel getShopPage() {
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.insets = new Insets(5, 5, 5, 5);
-        
+
         JPanel panel = new JPanel();
         panel.setBackground(Colors.WHITE);
         panel.setLayout(new GridBagLayout());
-        
-        JPanel infoPanel = new JPanel();
-        infoPanel.setOpaque(false);
-        infoPanel.setSize(new Dimension(400, 300));
-        infoPanel.setBorder(BorderFactory.createTitledBorder(BorderFactory.createLineBorder(Color.BLACK, 2),
-    "Product information", TitledBorder.LEFT, TitledBorder.TOP, new Font("Montserrat", Font.PLAIN, 12)));
-
-        productInfoLabel = new JLabel();
-        productInfoLabel.setSize(new Dimension(450, 250));
-        infoPanel.add(productInfoLabel);
 
         JLabel label = new JLabel("Browse by: ");
         gbc.gridx = 0;
@@ -290,9 +280,16 @@ public class UserPage extends JPanel implements AccountPage {
         gbc.gridwidth = 1;
         panel.add(productListPane, gbc);
 
+        productInfoArea = new JTextArea();
+        productInfoArea.setEditable(false);
+        productInfoArea.setFocusable(false);
+        productInfoArea.setPreferredSize(new Dimension(400, 200));
+        productInfoArea.setBorder(BorderFactory.createTitledBorder(BorderFactory.createLineBorder(Color.BLACK, 2),
+                "Product details", TitledBorder.LEFT, TitledBorder.TOP, new Font("Montserrat", Font.PLAIN, 12)));
+
         gbc.gridx = 1;
-        panel.add(infoPanel, gbc);
-        
+        panel.add(productInfoArea, gbc);
+
         addToCartBtn = new JButton("Add to Cart");
         Colors.setButtonUI(addToCartBtn);
         addToCartBtn.setFocusable(false);
@@ -312,16 +309,9 @@ public class UserPage extends JPanel implements AccountPage {
         panel.setLayout(new GridBagLayout());
         panel.setBackground(Colors.WHITE);
 
-        OrderTableModel mdl = new OrderTableModel(new HashSet<>());
-
-        cartTable = new JTable(mdl);
-        cartTable.setDefaultEditor(Object.class, null);
-
-        cartTable.getColumnModel().getColumn(2).setCellEditor(new ButtonEditor(mdl, -1));
-        cartTable.getColumnModel().getColumn(4).setCellEditor(new ButtonEditor(mdl, 1));
-
-        cartTable.getColumnModel().getColumn(2).setCellRenderer(new ButtonRenderer("-"));
-        cartTable.getColumnModel().getColumn(4).setCellRenderer(new ButtonRenderer("+"));
+        final String[] columnNames = {"Select", "Product Name", "-", "Qty", "+", "Price"};
+        DefaultTableModel model = new DefaultTableModel(columnNames, 0);
+        cartTable = new JTable(model);
 
         JScrollPane cartTablePane = new JScrollPane(cartTable, JScrollPane.VERTICAL_SCROLLBAR_ALWAYS, JScrollPane.HORIZONTAL_SCROLLBAR_ALWAYS);
         cartTablePane.setPreferredSize(new Dimension(550, 400));
@@ -349,10 +339,6 @@ public class UserPage extends JPanel implements AccountPage {
         gbc.gridy = 1;
         panel.add(lbl, gbc);
 
-        totalLbl = new JLabel();
-        gbc.gridx = 1;
-        panel.add(totalLbl, gbc);
-        
         return panel;
     }
 
@@ -365,7 +351,6 @@ public class UserPage extends JPanel implements AccountPage {
         panel.setBackground(Colors.WHITE);
 
         ordersList = new JList<>(new DefaultListModel<>());
-
         ordersList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         ordersList.setFocusable(false);
 
@@ -378,13 +363,11 @@ public class UserPage extends JPanel implements AccountPage {
         panel.add(ordersListPane, gbc);
 
         orderInfoLbl = new JLabel();
-
         JPanel infoPanel = new JPanel();
         infoPanel.setOpaque(false);
-        
+
         infoPanel.setBorder(BorderFactory.createTitledBorder(BorderFactory.createLineBorder(Color.BLACK, 2),
         "Details", TitledBorder.LEFT, TitledBorder.TOP, new Font("Montserrat", Font.PLAIN, 12)));
-
         infoPanel.add(orderInfoLbl);       // USE THIS FOR SETTING THE ORDER INFO PACK IT INTO ONE STRING
         
         gbc.gridx = 1;
@@ -499,9 +482,9 @@ public class UserPage extends JPanel implements AccountPage {
         profileFirstNameField.setText(user.getFirstName());
         profileLastNameField.setText(user.getLastName());
     }
-    
+
     public void refreshUserPage() {
-        Component comps[] = this.getComponents();
+        Component[] comps = this.getComponents();
         for (Component comp : comps) {
             if (comp.getName() != null && (comp.getName().equals("signup") || comp.getName().equals("main"))) {
                 this.remove(comp);
@@ -534,8 +517,38 @@ public class UserPage extends JPanel implements AccountPage {
     }
 
     public void updateCartTable(Set<OrderContent> shoppingCart) {
-        OrderTableModel mdl = new OrderTableModel(shoppingCart);
+        final String[] columnNames = {"Select", "Product Name", "-", "Qty", "+", "Price"};
+
+        DefaultTableModel mdl = new DefaultTableModel(columnNames, 0) {
+            @Override
+            public boolean isCellEditable(int row, int column) {
+                // Only make checkbox and button columns editable
+                return column == 0 || column == 2 || column == 4;
+            }
+
+            @Override
+            public Class<?> getColumnClass(int columnIndex) {
+                // Set Boolean class for checkbox column
+                if (columnIndex == 0) {
+                    return Boolean.class;
+                }
+                return super.getColumnClass(columnIndex);
+            }
+        };
+
+        for (OrderContent order : shoppingCart) {
+            mdl.addRow(new Object[]{false, order.getProductName(), "-", order.getQuantity(), "+", order.getPriceEach()});
+        }
+
         cartTable.setModel(mdl);
+        cartTable.getColumnModel().getColumn(0).setCellRenderer(cartTable.getDefaultRenderer(Boolean.class));
+        cartTable.getColumnModel().getColumn(0).setCellEditor(cartTable.getDefaultEditor(Boolean.class));
+
+        cartTable.getColumnModel().getColumn(2).setCellRenderer(new ActionButtonRenderer("-"));
+        cartTable.getColumnModel().getColumn(2).setCellEditor(new ActionButtonEditor("-", cartTable, -1));
+
+        cartTable.getColumnModel().getColumn(4).setCellRenderer(new ActionButtonRenderer("+"));
+        cartTable.getColumnModel().getColumn(4).setCellEditor(new ActionButtonEditor("+", cartTable, 1));
     }
 
     public int getQuantity() {
@@ -581,7 +594,6 @@ public class UserPage extends JPanel implements AccountPage {
         
         ordersBox.addActionListener(ordersBoxLtr);
 
-
         checkOutBtn.addActionListener(checkOutLtr);
         removeBtn.addActionListener(removeLtr);
 
@@ -603,7 +615,7 @@ public class UserPage extends JPanel implements AccountPage {
         this.options = new LinkedHashMap<>();
         
         for (Order order : orders) {
-            String display = "Order No. " + Integer.toString(order.getOrderID());
+            String display = "Order No. " + order.getOrderID();
             this.options.put(display, Integer.toString(order.getOrderID()));
             mdl.addElement(display);
         }
@@ -616,8 +628,8 @@ public class UserPage extends JPanel implements AccountPage {
         this.options = new LinkedHashMap<>();
         
         for (Return r : returns) {
-            String display = "Order No. " + Integer.toString(r.getOrderID()) + ",  Product No. " + Integer.toString(r.getProductID());
-            String value = Integer.toString(r.getOrderID()) + " " + Integer.toString(r.getProductID()); // value.split(" ") to get order id and product ig
+            String display = "Order No. " + r.getOrderID() + ",  Product No. " + r.getProductID();
+            String value = r.getOrderID() + " " + r.getProductID(); // value.split(" ") to get order id and product ig
             this.options.put(display, value);
             mdl.addElement(display);
         }
@@ -639,10 +651,9 @@ public class UserPage extends JPanel implements AccountPage {
     
     public void ordersListToProducts(ArrayList<OrderContent> items) {
         DefaultListModel<String> mdl = new DefaultListModel<>();
-//        this.options = new LinkedHashMap<>();
         
         for (OrderContent item : items) {
-            String display = "Order ID: " + Integer.toString(item.getOrderID()) + ", Product ID: " + Integer.toString(item.getProductID()) + ", Product Name: " + item.getProductName();
+            String display = "Order ID: " + item.getOrderID() + ", Product ID: " + item.getProductID() + ", Product Name: " + item.getProductName();
 //            String value = Integer.toString(item.getOrderID()) + " " + Integer.toString(item.getProductID());
 //            this.options.put(display, value);
             mdl.addElement(display);
@@ -688,7 +699,7 @@ public class UserPage extends JPanel implements AccountPage {
         gbc.gridy = 1;
         reqRet.add(prodInp, gbc);
         
-        String reasons[] = {"Damaged Item", "Wrong Item",  "Change of Mind", "Counterfeit Item"};
+        String[] reasons = {"Damaged Item", "Wrong Item",  "Change of Mind", "Counterfeit Item"};
         comboBox = new JComboBox<>(reasons);
         gbc.gridx = 1;
         gbc.gridy = 2;
@@ -780,30 +791,30 @@ public class UserPage extends JPanel implements AccountPage {
 //        gbc.gridy = 1;
 //        gbc.gridwidth = 2;
 //        receiveOrd.add(lbl, gbc);
-//        
+//
 //        JLabel monthLbl = new JLabel("Month: ");
 //        gbc.gridx = 0;
 //        gbc.gridy = 2;
 //        gbc.gridwidth = 1;
 //        receiveOrd.add(monthLbl, gbc);
-//        
+//
 //        JLabel dayLbl = new JLabel("Day: ");
 //        gbc.gridx = 0;
 //        gbc.gridy = 3;
 //        gbc.gridwidth = 1;
 //        receiveOrd.add(dayLbl, gbc);
-//        
+//
 //        JLabel yearLbl = new JLabel("Year: ");
 //        gbc.gridx = 0;
 //        gbc.gridy = 4;
 //        gbc.gridwidth = 1;
 //        receiveOrd.add(yearLbl, gbc);
-//        
+//
         orderInp = new JTextField(5);
         gbc.gridx = 1;
         gbc.gridy = 0;
         receiveOrd.add(orderInp, gbc);
-//        
+//
 //        String months[] = {"January", "February", "March", "April", "May", "June", "July",
 //                            "August", "September", "October", "November", "December"};
 //        comboBox = new JComboBox<>(months);
@@ -820,7 +831,7 @@ public class UserPage extends JPanel implements AccountPage {
 //        gbc.gridy = 3;
 //        gbc.gridwidth = 1;
 //        receiveOrd.add(intComboBox, gbc);
-//        
+//
 //        SpinnerModel sm = new SpinnerNumberModel(2024, 2020, 2050, 1);
 //        spinner = new JSpinner(sm);
 //        spinner.setEditor(new JSpinner.NumberEditor(spinner, "#"));
@@ -836,7 +847,8 @@ public class UserPage extends JPanel implements AccountPage {
     public int getSpinnerVal() {
         return (int) this.spinner.getValue();
     }
-    
+
+    // CAN CAUSE A NPE
     public int getIntComboBoxVal() {
         return (int) this.intComboBox.getSelectedItem();
     }
@@ -851,16 +863,15 @@ public class UserPage extends JPanel implements AccountPage {
         this.mainCardLayout.show(bottomPanel, name);
     }
 
-    public void setProductInfo(String text) { this.productInfoLabel.setText(text); }
+    public void setProductInfo(String text) { this.productInfoArea.setText(text); }
     public void setOrderInfo(String text) { this.orderInfoLbl.setText(text); }
 
-    public ArrayList<OrderContent> getSelectedRecords() {
-        OrderTableModel mdl = (OrderTableModel) cartTable.getModel();
+    public ArrayList<OrderContent> getSelectedRecords(ArrayList<OrderContent> shoppingCart) {
         ArrayList<OrderContent> selectedRecords = new ArrayList<>();
 
-        for (int i = 0; i < mdl.getRowCount(); i++) {
-            if ((Boolean) mdl.getValueAt(i, 0)) {
-                selectedRecords.add(mdl.getOrderContent(i));
+        for (int i = 0; i < cartTable.getRowCount(); i++) {
+            if ((Boolean) cartTable.getValueAt(i, 0)) {
+                selectedRecords.add(shoppingCart.get(i).setQuantity((Integer) cartTable.getValueAt(i, 3)));
             }
         }
 
@@ -881,35 +892,39 @@ public class UserPage extends JPanel implements AccountPage {
     public Product getSelectedProduct() { return productList.getSelectedValue(); }
     public String getSelectedOption() { return options.get(browseByList.getSelectedValue()); }
 
-    static class ButtonRenderer extends JButton implements TableCellRenderer {
-        public ButtonRenderer(String text) {
-            setText(text);
-            setFocusPainted(false);
+    static class ActionButtonRenderer extends JButton implements TableCellRenderer {
+        public ActionButtonRenderer(String label) {
+            setText(label);
             setContentAreaFilled(false);
+            setFocusable(false);
         }
 
         @Override
         public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
+            setBackground(isSelected ? table.getSelectionBackground() : UIManager.getColor("Button.background"));
             return this;
         }
     }
 
-    static class ButtonEditor extends AbstractCellEditor implements TableCellEditor {
+    static class ActionButtonEditor extends AbstractCellEditor implements TableCellEditor {
         private final JButton button;
-        private final OrderTableModel tableModel;
+        private final JTable table;
         private final int direction;
         private int currentRow;
 
-        public ButtonEditor(OrderTableModel tableModel, int direction) {
-            this.tableModel = tableModel;
+        public ActionButtonEditor(String label, JTable table, int direction) {
+            this.table = table;
             this.direction = direction;
+            this.button = new JButton(label);
 
-            button = new JButton(direction == -1 ? "-" : "+");
             button.addActionListener(this::updateQuantity);
         }
 
         private void updateQuantity(ActionEvent e) {
-            tableModel.updateQuantity(currentRow, direction);
+            int currentQty = (Integer) table.getValueAt(currentRow, 3);
+            int newQty = Math.max(0, currentQty + direction);
+            table.setValueAt(newQty, currentRow, 3);
+
             fireEditingStopped();
         }
 

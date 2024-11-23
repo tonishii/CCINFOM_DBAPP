@@ -1,4 +1,4 @@
-package model;
+package Model;
 
 import java.sql.Connection;
 import java.sql.*;
@@ -6,8 +6,8 @@ import java.util.Objects;
 
 public class OrderContent {
     private int order_id;
-    private int product_id;
-    private String productName;
+    private final int product_id;
+    private final String productName;
     private int quantity;
     private float priceEach;
     
@@ -38,8 +38,9 @@ public class OrderContent {
         ps.executeUpdate();
     }
     
-    public void setQuantity(int quantity) {
+    public OrderContent setQuantity(int quantity) {
         this.quantity = quantity;
+        return this;
     }
     
     public static boolean rateProduct(Connection conn, int order_id, int product_id, int user_id, int rating) {
@@ -77,7 +78,6 @@ public class OrderContent {
     public float getPriceEach() { return this.priceEach; }
     public String getProductName() { return this.productName; }
     public int getOrderID() { return this.order_id; }
-
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

@@ -1,20 +1,19 @@
-package model;
+package Model;
 import java.sql.Date;
 import java.sql.*;
-import java.util.Scanner;
 
-import enums.ReturnReason;
-import enums.ReturnStatus;
+import Model.enums.ReturnReason;
+import Model.enums.ReturnStatus;
 
 public class Return {
-    private int          order_id;
-    private int          product_id;
-    private int          courier_id;
+    private final int          order_id;
+    private final int          product_id;
+    private final int          courier_id;
 
-    private ReturnReason  return_reason;
-    private String        return_description;
-    private Date          return_date;
-    private ReturnStatus  return_status;
+    private final ReturnReason  return_reason;
+    private final String        return_description;
+    private final Date          return_date;
+    private final ReturnStatus  return_status;
     
     public Return(int order_id, int product_id, int courier_id, ReturnReason return_reason, String return_description, Date return_date, ReturnStatus return_status) {
         this.order_id = order_id;

@@ -1,7 +1,7 @@
-package view;
+package View;
 
-import model.Product;
-import model.Seller;
+import Model.Product;
+import Model.Seller;
 
 import javax.swing.*;
 import javax.swing.border.LineBorder;
@@ -11,7 +11,6 @@ import java.awt.*;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
-import java.awt.event.WindowListener;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -162,7 +161,6 @@ public class SellerPage extends JPanel implements AccountPage {
         panel.add(bottomPanel);
 
         nextMainPageName(PRODUCTLIST);
-
 
         return panel;
     }
@@ -437,7 +435,7 @@ public class SellerPage extends JPanel implements AccountPage {
 
         JPanel panel = new JPanel(new GridBagLayout());
         GridBagConstraints gbc = new GridBagConstraints();
-        gbc.anchor = gbc.CENTER;
+        gbc.anchor = GridBagConstraints.CENTER;
         gbc.insets = new Insets(0, 4 ,5 ,4);
         dateYear = new JTextField();
         dateYear.setPreferredSize(new Dimension(100, 20));
@@ -454,21 +452,21 @@ public class SellerPage extends JPanel implements AccountPage {
         panel.add(sellerReportBox, gbc);
 
         gbc.gridy = 2;
-        gbc.anchor = gbc.WEST;
+        gbc.anchor = GridBagConstraints.WEST;
         panel.add(new JLabel("Month (Number): "), gbc);
-        gbc.anchor = gbc.CENTER;
+        gbc.anchor = GridBagConstraints.CENTER;
         panel.add(dateMonth, gbc);
 
         gbc.gridy = 3;
-        gbc.anchor = gbc.WEST;
+        gbc.anchor = GridBagConstraints.WEST;
         panel.add(new JLabel("Year (Number): "), gbc);
-        gbc.anchor = gbc.CENTER;
+        gbc.anchor = GridBagConstraints.CENTER;
         panel.add(dateYear, gbc);
 
         gbc.gridy = 4;
-        gbc.anchor = gbc.WEST;
+        gbc.anchor = GridBagConstraints.WEST;
         panel.add(generateReportBtn, gbc);
-        gbc.anchor = gbc.CENTER;
+        gbc.anchor = GridBagConstraints.CENTER;
         panel.add(cancelBtn, gbc);
 
         newWindow.add(panel);
@@ -523,9 +521,9 @@ public class SellerPage extends JPanel implements AccountPage {
 
         for (Product option : lists)
         {
-            String display = "ID: " + Integer.toString(option.getProductID()) + " Name: " + option.getName();
+            String display = "ID: " + option.getProductID() + " Name: " + option.getName();
             mdl.addElement(display);
-            this.lists.put(display, Integer.toString(option.getProductID()) + " " + Integer.toString(option.getSellerID()));
+            this.lists.put(display, option.getProductID() + " " + option.getSellerID());
         }
 
         sellerCRList.setModel(mdl);

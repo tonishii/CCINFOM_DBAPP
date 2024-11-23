@@ -1,11 +1,9 @@
-package view;
+package View;
 
 import java.awt.Color;
-import java.awt.Insets;
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.border.Border;
-import javax.swing.border.EtchedBorder;
 
 public class Colors {
     public static final Color PINK = new Color(251, 175, 218);

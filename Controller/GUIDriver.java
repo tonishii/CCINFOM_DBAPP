@@ -1,4 +1,4 @@
-import view.MainController;
+package Controller;
 
 import javax.swing.*;
 import javax.swing.plaf.FontUIResource;
@@ -17,7 +17,7 @@ public class GUIDriver {
             UIManager.put("OptionPane.buttonFont", font); // JOptionPane's buttons
             UIManager.put("OptionPane.messageFont", font); // JOptionPane's messages
             UIManager.put("CheckBoxMenuItem.font", font); // JComboBox's items
-
+            UIManager.put("TextArea.font", font); // JTextArea
             new MainController();
         });
     }

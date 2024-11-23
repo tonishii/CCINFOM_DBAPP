@@ -1,4 +1,4 @@
-package model;
+package Model;
 
 import java.sql.*;
 
@@ -94,7 +94,6 @@ public class Product {
     }
 
     public boolean isListed() { return this.listed_status; }
-    public void setProductID(int product_id) { this.product_id = product_id; }
     public void setSellerID(int seller_id) { this.seller_id = seller_id; }
     public void setName(String product_name) { this.product_name = product_name; }
     public void setPrice(float product_price) { this.product_price = product_price; }

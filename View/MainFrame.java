@@ -1,4 +1,4 @@
-package view;
+package View;
 
 import javax.swing.*;
 import java.awt.*;
@@ -47,7 +47,7 @@ public class MainFrame extends JFrame {
                 ((JTextField) comp).setText("");
                 System.out.println("password field");
             }
-            
+
             else if (comp instanceof JLabel) {
                 ((JLabel) comp).setText("");
                 System.out.println("label");
@@ -73,10 +73,8 @@ public class MainFrame extends JFrame {
                 table.setModel(new DefaultTableModel());
                 System.out.println("table");
             }
-            else if (comp instanceof JList) {
-                JList<?> list = (JList<?>) comp;
-                if (list.getModel() instanceof DefaultListModel) {
-                    DefaultListModel<?> model = (DefaultListModel<?>) list.getModel();
+            else if (comp instanceof JList<?> list) {
+                if (list.getModel() instanceof DefaultListModel<?> model) {
                     model.clear();
                     System.out.println("list");
                 }

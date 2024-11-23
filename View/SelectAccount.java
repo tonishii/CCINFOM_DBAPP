@@ -1,9 +1,9 @@
-package view;
+package View;
 
-import model.Account;
-import model.Courier;
-import model.Seller;
-import model.User;
+import Model.Account;
+import Model.Courier;
+import Model.Seller;
+import Model.User;
 
 import javax.swing.*;
 import javax.swing.border.TitledBorder;
@@ -18,14 +18,14 @@ public class SelectAccount extends JPanel {
     public static final String SELECTACCPAGE = "select";
     public static final String LOGINPAGE = "login";
 
-    private JComboBox<String> accountTypeBox;
-    private JButton loginBtn;
-    private JButton signupBtn;
-    private JButton backBtn;
-    private JTextField idLoginField;
-    private JButton submitLoginBtn;
+    private final JComboBox<String> accountTypeBox;
+    private final JButton loginBtn;
+    private final JButton signupBtn;
+    private final JButton backBtn;
+    private final JTextField idLoginField;
+    private final JButton submitLoginBtn;
 
-    private JButton backLoginBtn;
+    private final JButton backLoginBtn;
 
     public SelectAccount() {
         this.selectCardLayout = new CardLayout();

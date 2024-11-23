@@ -1,9 +1,9 @@
-package view;
+package Controller;
 
-import enums.ReturnReason;
-import enums.ReturnStatus;
-import model.*;
-import enums.OrderStatus;
+import Model.enums.ReturnStatus;
+import Model.*;
+import Model.enums.OrderStatus;
+import View.*;
 
 import javax.swing.*;
 import java.awt.event.WindowAdapter;
@@ -160,10 +160,7 @@ public class MainController {
                 }
 
                 Date user_creation_date = new Date(System.currentTimeMillis());
-                boolean user_verified_status = false;
-
-                if (!user_phone_number.isEmpty() && !user_address.isEmpty())
-                    user_verified_status = true;
+                boolean user_verified_status = !user_phone_number.isEmpty() && !user_address.isEmpty();
 
                 try {
                     String query =
@@ -254,6 +251,7 @@ public class MainController {
             } catch (SQLException e) {
                 JOptionPane.showMessageDialog(null, "Error: " + e.getMessage());
             }
+
         }, ordersViewChangeEvent -> { // Action: Changing the list view in orders
             try {
                 // Check which category was selected and
@@ -284,6 +282,11 @@ public class MainController {
             User user = (User) account;
             Product selectedProduct = userPage.getSelectedProduct();
 
+            if (selectedProduct == null) {
+                JOptionPane.showMessageDialog(null, "Error: Select a product.");
+                return;
+            }
+
             if (selectedProduct.isListed()) {
                 // Show a pop-up asking for the order quantity
                 int orderQuantity = userPage.getQuantity();
@@ -298,6 +301,8 @@ public class MainController {
                 } else {
                     JOptionPane.showMessageDialog(null, "Error: Only " + selectedProduct.getQuantity() + " are in stock.");
                 }
+            } else {
+                JOptionPane.showMessageDialog(null, "Error: Product is not listed");
             }
 
         }, browseChangeEvent -> { // Action: Changing the browse option in the shop page
@@ -316,10 +321,14 @@ public class MainController {
             }
             userPage.updateBrowseList(options);
         }, checkOutEvent -> { // Action: Pressing check out button in the shopping cart page
-            ArrayList<OrderContent> selectedProducts = userPage.getSelectedRecords();
+            ArrayList<OrderContent> selectedProducts = userPage.getSelectedRecords(new ArrayList<>(((User) account).getShoppingCart()));
+
+            if (selectedProducts.isEmpty()) {
+                JOptionPane.showMessageDialog(null, "Error: Select item to checkout.");
+                return;
+            }
 
             float totalPrice = 0f;
-
             for (OrderContent product : selectedProducts) {
                 totalPrice += product.getPriceEach() * product.getQuantity();
             }
@@ -372,7 +381,12 @@ public class MainController {
             }
 
         }, removeItemEvent -> { // Action: Pressing the remove item button in the shopping cart page
-            ArrayList<OrderContent> selectedProducts = userPage.getSelectedRecords();
+            ArrayList<OrderContent> selectedProducts = userPage.getSelectedRecords(new ArrayList<>(((User) account).getShoppingCart()));
+
+            if (selectedProducts.isEmpty()) {
+                JOptionPane.showMessageDialog(null, "Error: Select item to checkout.");
+                return;
+            }
 
             int choice = JOptionPane.showConfirmDialog(null, "Are you sure?", "Remove items", JOptionPane.YES_NO_OPTION);
 
@@ -431,10 +445,10 @@ public class MainController {
                     String orderInp = userPage.getOrderInp();
                     String productInp = userPage.getProdInp();
                     int rating = userPage.getSpinnerVal();
+
                     if (orderInp.trim().isEmpty() || productInp.trim().isEmpty()) { // When an input field is not filled up
                         JOptionPane.showMessageDialog(null, "Please fill out the required input fields:\nOrder ID\nProduct ID");
-                    }
-                    else {
+                    } else {
                         try {
                             int order_id = Integer.parseInt(orderInp.trim());
                             int product_id = Integer.parseInt(productInp.trim());
@@ -471,8 +485,7 @@ public class MainController {
 
                             if (Order.receiveOrder(conn, order_id, ((User) account).getID())) {
                                 JOptionPane.showMessageDialog(null, "Order successfully received.");
-                            }
-                            else {
+                            } else {
                                 JOptionPane.showMessageDialog(null, "Failed to receive order.");
                             }
                         } catch (NumberFormatException e) {
@@ -562,13 +575,13 @@ public class MainController {
             }
 
             userPage.setProductInfo(
-            "<html>Product info<br/>" +
-            "Name: " + selectedProduct.getName() + "<br/>" +
-            "Price: " + selectedProduct.getPrice() + "<br/>" +
-            "Type: " + selectedProduct.getType() + "<br/>" +
-            "Rating: " + selectedProduct.getRating() + "<br/>" +
-            "Qty: " + selectedProduct.getQuantity() + "<br/>" +
-            "Listed: " + selectedProduct.isListed() + "<br/>" +
+            "Product info: " + selectedProduct.getProductID() + "\n" +
+            "Name: " + selectedProduct.getName() + "\n" +
+            "Price: " + selectedProduct.getPrice() + "\n" +
+            "Type: " + selectedProduct.getType() + "\n" +
+            "Rating: " + selectedProduct.getRating() + "\n" +
+            "Qty: " + selectedProduct.getQuantity() + "\n" +
+            "Listed: " + ((selectedProduct.isListed()) ? "Yes" : "No") + "\n" +
             "Description: " + selectedProduct.getDescription());
 
         }, orderSelectEvent -> { // Action: Pressing an order in the orders list in the orders page
@@ -601,7 +614,7 @@ public class MainController {
                             text += "<br><br><b>[ITEMS ORDERED]</b>";
                             
                             do {
-                                text += "<br><br>" + rs.getString("p.product_name") + " from " + rs.getString("s.seller_name") + "<br>Quantity: " + Integer.toString(rs.getInt("oc.item_quantity"));
+                                text += "<br><br>" + rs.getString("p.product_name") + " from " + rs.getString("s.seller_name") + "<br>Quantity: " + rs.getInt("oc.item_quantity");
                                 total += rs.getFloat("oc.subtotal");
                             } while (rs.next());
                             
@@ -616,7 +629,7 @@ public class MainController {
                     
                 }
                 else if (userPage.getOrdersViewOption().equals("Returns") && val != null) {
-                    String ids[] = val.split(" ");
+                    String[] ids = val.split(" ");
                     int order_id = Integer.parseInt(ids[0]);
                     int product_id = Integer.parseInt(ids[1]);
                     try {
@@ -665,10 +678,7 @@ public class MainController {
                 }
 
                 Date seller_creation_date = new Date(System.currentTimeMillis());
-                boolean seller_verified_status = false;
-
-                if (!seller_phone_number.isEmpty() && !seller_address.isEmpty())
-                    seller_verified_status = true;
+                boolean seller_verified_status = !seller_phone_number.isEmpty() && !seller_address.isEmpty();
 
                 try {
                     String query =
@@ -869,9 +879,9 @@ public class MainController {
             }else{
                 JOptionPane.showMessageDialog(null, "No Product Selected!", "Failure", JOptionPane.ERROR_MESSAGE);
             }
-        }, cancelEvent -> {
-            sellerPage.disposeNewWindow();
-        }, saveProfileEvent -> {
+        }, cancelEvent -> sellerPage.disposeNewWindow(),
+
+        saveProfileEvent -> {
             switch (JOptionPane.showConfirmDialog(null, "Are you sure?", "Prompt", JOptionPane.OK_CANCEL_OPTION)){
                 case JOptionPane.OK_OPTION -> {
                     sellerPage.updateEditAccount((Seller) account);
@@ -1058,7 +1068,7 @@ public class MainController {
                             sumOfEarnings += rs.getInt("total");
                         } while(rs.next());
                     }
-                    sellerPage.setProductRefundInfo("" +
+                    sellerPage.setProductRefundInfo(
                             "Sales Report for " + year + ":\n" +
                             "Total orders handled: " + transactions +"\n" +
                             "Total earnings: Php " + sumOfEarnings + "\n");

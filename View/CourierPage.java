@@ -1,8 +1,8 @@
-package view;
+package View;
 
-import model.Courier;
-import model.Order;
-import model.Return;
+import Model.Courier;
+import Model.Order;
+import Model.Return;
 
 import javax.swing.*;
 import javax.swing.border.TitledBorder;
@@ -11,7 +11,7 @@ import java.awt.event.ActionListener;
 import java.util.ArrayList;
 
 public class CourierPage extends JPanel implements AccountPage {
-    private CardLayout courierCardLayout;
+    private final CardLayout courierCardLayout;
 
     // Constants used for switching between the different options
     public static final String ONGOINGORDERSPAGE = "ongoing";

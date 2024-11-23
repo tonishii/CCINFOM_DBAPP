@@ -1,8 +1,8 @@
-package model;
+package Model;
 
-import enums.OrderStatus;
-import enums.ReturnReason;
-import enums.ReturnStatus;
+import Model.enums.OrderStatus;
+import Model.enums.ReturnReason;
+import Model.enums.ReturnStatus;
 
 import javax.swing.*;
 import java.util.ArrayList;
@@ -454,11 +454,7 @@ public class Courier implements Account {
     }
 
     public void setName(String courier_name) { this.courier_name = courier_name; }
-    public void setEmailAddress(String courier_email_address) { this.courier_email_address = courier_email_address; }
-    public void setAddress(String courier_address) { this.courier_address = courier_address; }
-    public int getID() { return this.courier_id; }
     public String getName() { return this.courier_name; }
     public String getEmailAddress() { return this.courier_email_address; }
     public String getAddress() { return this.courier_address; }
-    public boolean getStatus() { return this.courier_verified_status; }
 }

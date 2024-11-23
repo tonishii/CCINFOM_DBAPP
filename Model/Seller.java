@@ -1,7 +1,7 @@
-package model;
+package Model;
 
-import enums.ReturnReason;
-import enums.ReturnStatus;
+import Model.enums.ReturnReason;
+import Model.enums.ReturnStatus;
 
 import java.sql.*;
 import java.time.Year;
@@ -436,9 +436,9 @@ public class Seller implements Account {
             int prodId = resultSet.getInt("product_id");
             int sellerId = resultSet.getInt("seller_id");
             String seller = resultSet.getString("product_name");
-            Float price = resultSet.getFloat("product_price");
+            float price = resultSet.getFloat("product_price");
             String type = resultSet.getString("product_type");
-            Float rating = resultSet.getFloat("average_rating");
+            float rating = resultSet.getFloat("average_rating");
             int quantity = resultSet.getInt("quantity_stocked");
             boolean status = resultSet.getBoolean("listed_status");
             String desc = resultSet.getString("description");
@@ -469,7 +469,7 @@ public class Seller implements Account {
             int userId = resultSet.getInt("user_id");
             String uName = resultSet.getString("user_name");
             String prodName = resultSet.getString("product_name");
-            refundLists.put("Order Id: "+orderId+" Product Id: "+prodId, Integer.toString(orderId)+" "+Integer.toString(prodId));
+            refundLists.put("Order Id: " + orderId + " Product Id: " + prodId, orderId + " " + prodId);
         }
         return refundLists;
     }
@@ -512,7 +512,7 @@ public class Seller implements Account {
         return refund;
     }
 
-    public void AddProduct(PreparedStatement pstmt) throws SQLException {
+    public void addProduct(PreparedStatement pstmt) throws SQLException {
 
     }
 
@@ -528,6 +528,4 @@ public class Seller implements Account {
     public String getName() { return this.seller_name; }
     public String getAddress() { return this.seller_address; }
     public String getPhoneNumber() { return this.seller_phone_number; }
-    public Date getCreationDate() { return this.seller_creation_date; }
-    public boolean getStatus() { return this.seller_verified_status; }
 }

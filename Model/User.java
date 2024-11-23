@@ -1,7 +1,7 @@
-package model;
-import enums.OrderStatus;
-import enums.ReturnReason;
-import enums.ReturnStatus;
+package Model;
+import Model.enums.OrderStatus;
+import Model.enums.ReturnReason;
+import Model.enums.ReturnStatus;
 
 import java.sql.Date;
 import java.time.Instant;
@@ -20,7 +20,7 @@ public class User implements Account {
     private Date    user_creation_date;
     private boolean user_verified_status;
 
-    private Set<OrderContent> shoppingCart = new HashSet<>();
+    private final Set<OrderContent> shoppingCart = new HashSet<>();
 
     public User(int user_id, String user_name, String user_firstname, String user_lastname,
                 String user_address, String user_phone_number, Date user_creation_date) {
@@ -305,7 +305,7 @@ public class User implements Account {
                             .findFirst()
                             .orElse(null);
                     if (product != null) {
-                        product.updateRating(conn, product_id);
+                        Product.updateRating(conn, product_id);
                     }
                 } else {
                     System.out.println("No products found!!!!!!!!!!!!!!!!");
@@ -446,11 +446,6 @@ public class User implements Account {
         this.updateStatus();
     }
 
-    public void setUsername(String user_name) { this.user_name = user_name; }
-    public void setFirstName(String user_firstname) { this.user_firstname = user_firstname; }
-    public void setLastName(String user_lastname) { this.user_lastname = user_lastname; }
-    public void setAddress(String user_address) { this.user_address = user_address; }
-    public void setPhoneNumber(String user_phone_number) { this.user_phone_number = user_phone_number; }
     public int getID() { return this.user_id; }
     public Set<OrderContent> getShoppingCart() { return this.shoppingCart; }
     public String getUsername() { return this.user_name; }
@@ -458,9 +453,6 @@ public class User implements Account {
     public String getLastName() { return this.user_lastname; }
     public String getAddress() { return this.user_address; }
     public String getPhoneNumber() { return this.user_phone_number; }
-    public Date getCreationDate() { return this.user_creation_date; }
-    public boolean getStatus() { return this.user_verified_status; }
-    
     
     public ArrayList<Order> getOrdersView(Connection conn, int user_id) throws SQLException {
         ArrayList<Order> orders = new ArrayList<>();

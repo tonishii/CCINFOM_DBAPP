@@ -1,4 +1,4 @@
-package enums;
+package Model.enums;
 
 public enum ReturnReason {
     DAMAGED("Damaged Item"),
@@ -11,11 +11,7 @@ public enum ReturnReason {
     ReturnReason(String value) {
         this.value = value;
     }
-    
-    public String getVal() {
-        return this.value;
-    }
-    
+
     // sql enum value to java enum value
     public static ReturnReason convertVal(String val) {
         for (ReturnReason reason : values()) {

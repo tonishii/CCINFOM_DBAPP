@@ -1,19 +1,19 @@
-package model;
+package Model;
 import java.sql.Date;
 import java.sql.*;
 
-import enums.OrderStatus;
+import Model.enums.OrderStatus;
 import java.util.ArrayList;
 import java.util.Set;
 
 public class Order {
-    private int        order_id;
-    private int        user_id;
-    private int        courier_id;
+    private final int        order_id;
+    private final int        user_id;
+    private final int        courier_id;
 
-    private Date        purchase_date;
-    private float       total_price;
-    private OrderStatus order_status;
+    private final Date        purchase_date;
+    private final float       total_price;
+    private final OrderStatus order_status;
     private Date        receive_date;
     
     public Order(int order_id, int user_id, int courier_id, Date purchase_date, float total_price, OrderStatus order_status, Date receive_date) {
@@ -87,7 +87,7 @@ public class Order {
         ArrayList<OrderContent> oc = getOrderContents(conn, order_id);
         System.out.println("Product ID | Product Name | Quantity Purchased | Subtotal");
         for (OrderContent item : oc) {
-            System.out.printf("%d | %s | %d | %f\n", item.getProductID(), item.getProductName(), item.getQuantity(), (float) item.getPriceEach() * item.getQuantity());
+            System.out.printf("%d | %s | %d | %f\n", item.getProductID(), item.getProductName(), item.getQuantity(), item.getPriceEach() * item.getQuantity());
         }
     }
     
@@ -134,7 +134,7 @@ public class Order {
             
             query = 
                     """
-                    UPDATE orders 
+                    UPDATE orders
                     SET order_status = 'DELIVERED',
                     receive_date = NOW()
                     WHERE order_id = ?
@@ -150,10 +150,7 @@ public class Order {
         
         return true;
     }
-    
-    public void setReceiveDate(Date date) {
-        this.receive_date = date;
-    }
+
     public int getOrderID() {
         return this.order_id;
     }

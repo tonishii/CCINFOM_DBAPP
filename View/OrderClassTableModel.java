@@ -1,38 +1,36 @@
-package view;
+package View;
 
-import enums.OrderStatus;
-import enums.ReturnReason;
-import enums.ReturnStatus;
-import model.Return;
+import Model.enums.OrderStatus;
+import Model.*;
 
 import javax.swing.table.DefaultTableModel;
 import java.util.ArrayList;
 import java.util.Date;
 
-public class ReturnTableModel extends DefaultTableModel {
-    private final ArrayList<Return> returns;
-    private final String[] columnNames = {"Order ID", "Product ID", "Courier ID", "Return Reason", "Return Description", "Return Date", "Return Status"};
+public class OrderClassTableModel extends DefaultTableModel {
+    private final ArrayList<Order> orders;
+    private final String[] columnNames = {"Order ID", "User ID", "Courier ID", "Purchase Date", "Total Price", "Order Status", "Receive Date"};
     private final ArrayList<Boolean> selectedRows;
 
-    public ReturnTableModel(ArrayList<Return> returns) {
-        this.returns = new ArrayList<>(returns);
+    public OrderClassTableModel(ArrayList<Order> orders) {
+        this.orders = new ArrayList<>(orders);
 
         this.selectedRows = new ArrayList<>();
-        for (int i = 0; i < this.returns.size(); i++) {
+        for (int i = 0; i < this.orders.size(); i++) {
             selectedRows.add(false); // Initialize all rows as unselected
         }
     }
 
-    public Return getReturn(int index) {
-        return returns.get(index);
+    public Order getOrder(int index) {
+        return orders.get(index);
     }
 
     @Override
     public int getRowCount() {
-        if (returns == null) {
+        if (orders == null) {
             return 0;
         }
-        return returns.size();
+        return orders.size();
     }
 
     @Override
@@ -47,15 +45,15 @@ public class ReturnTableModel extends DefaultTableModel {
 
     @Override
     public Object getValueAt(int rowIndex, int columnIndex) {
-        Return returnObj = returns.get(rowIndex);
+        Order order = orders.get(rowIndex);
         return switch (columnIndex) {
-            case 0 -> returnObj.getOrderID();
-            case 1 -> returnObj.getProductID();
-            case 2 -> returnObj.getCourierID();
-            case 3 -> returnObj.getReason();
-            case 4 -> returnObj.getDescription();
-            case 5 -> returnObj.getDate();
-            case 6 -> returnObj.getStatus();
+            case 0 -> order.getOrderID();
+            case 1 -> order.getUserID();
+            case 2 -> order.getCourierID();
+            case 3 -> order.getPurchaseDate();
+            case 4 -> order.getTotalPrice();
+            case 5 -> order.getStatus();
+            case 6 -> order.getReceiveDate();
             default -> null;
         };
     }
@@ -74,17 +72,14 @@ public class ReturnTableModel extends DefaultTableModel {
             case 0, 1, 2 -> {
                 return Integer.class;
             }
-            case 3 -> {
-                return ReturnReason.class;
-            }
-            case 4 -> {
-                return String.class;
-            }
-            case 5 -> {
+            case 3, 6 -> {
                 return Date.class;
             }
-            case 6 -> {
-                return ReturnStatus.class;
+            case 4 -> {
+                return Float.class;
+            }
+            case 5 -> {
+                return OrderStatus.class;
             }
         }
         return null;
