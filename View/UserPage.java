@@ -479,6 +479,7 @@ public class UserPage extends JPanel implements AccountPage {
         profileLastNameField.setText(user.getLastName());
     }
 
+    // Removes and reinitializes the signup and main panels in the main panel
     public void refreshUserPage() {
         Component[] comps = this.getComponents();
         for (Component comp : comps) {
@@ -493,6 +494,7 @@ public class UserPage extends JPanel implements AccountPage {
         this.repaint();
     }
 
+    // Updates the browse JList
     public void updateBrowseList(Map<String, String> options) {
         DefaultListModel<String> mdl = new DefaultListModel<>();
         this.options = options;
@@ -503,6 +505,7 @@ public class UserPage extends JPanel implements AccountPage {
         browseByList.setModel(mdl);
     }
 
+    // Updates the products JList
     public void updateProductsList(ArrayList<Product> products) {
         DefaultListModel<Product> mdl = new DefaultListModel<>();
         for (Product product : products) {
@@ -512,6 +515,7 @@ public class UserPage extends JPanel implements AccountPage {
         this.productListPane.setViewportView(productList);
     }
 
+    // Updates shopping cart contents
     public void updateCartTable(Set<OrderContent> shoppingCart) {
         final String[] columnNames = {"Select", "Product Name", "-", "Qty", "+", "Price"};
 
@@ -645,13 +649,12 @@ public class UserPage extends JPanel implements AccountPage {
         orderInfoLbl.setText(text);
     }
     
+    // Converts the orders JList into an order content JList
     public void ordersListToProducts(ArrayList<OrderContent> items) {
         DefaultListModel<String> mdl = new DefaultListModel<>();
         
         for (OrderContent item : items) {
             String display = "Order ID: " + item.getOrderID() + ", Product ID: " + item.getProductID() + ", Product Name: " + item.getProductName();
-//            String value = Integer.toString(item.getOrderID()) + " " + Integer.toString(item.getProductID());
-//            this.options.put(display, value);
             mdl.addElement(display);
         }
         
@@ -780,63 +783,12 @@ public class UserPage extends JPanel implements AccountPage {
         gbc.gridx = 0;
         gbc.gridy = 0;
         receiveOrd.add(orderLbl, gbc);
-        
-//        JLabel lbl = new JLabel("ENTER DATE");
-//        lbl.setFont(new Font("Verdana", Font.BOLD, 12));
-//        gbc.gridx = 0;
-//        gbc.gridy = 1;
-//        gbc.gridwidth = 2;
-//        receiveOrd.add(lbl, gbc);
-//
-//        JLabel monthLbl = new JLabel("Month: ");
-//        gbc.gridx = 0;
-//        gbc.gridy = 2;
-//        gbc.gridwidth = 1;
-//        receiveOrd.add(monthLbl, gbc);
-//
-//        JLabel dayLbl = new JLabel("Day: ");
-//        gbc.gridx = 0;
-//        gbc.gridy = 3;
-//        gbc.gridwidth = 1;
-//        receiveOrd.add(dayLbl, gbc);
-//
-//        JLabel yearLbl = new JLabel("Year: ");
-//        gbc.gridx = 0;
-//        gbc.gridy = 4;
-//        gbc.gridwidth = 1;
-//        receiveOrd.add(yearLbl, gbc);
-//
+
         orderInp = new JTextField(5);
         gbc.gridx = 1;
         gbc.gridy = 0;
         receiveOrd.add(orderInp, gbc);
-//
-//        String months[] = {"January", "February", "March", "April", "May", "June", "July",
-//                            "August", "September", "October", "November", "December"};
-//        comboBox = new JComboBox<>(months);
-//        gbc.gridx = 1;
-//        gbc.gridy = 2;
-//        gbc.gridwidth = 1;
-//        receiveOrd.add(comboBox, gbc);
-//
-//        intComboBox = new JComboBox<>();
-//        for (int i = 1; i <= 31; i++) {
-//            intComboBox.addItem(i);
-//        }
-//        gbc.gridx = 1;
-//        gbc.gridy = 3;
-//        gbc.gridwidth = 1;
-//        receiveOrd.add(intComboBox, gbc);
-//
-//        SpinnerModel sm = new SpinnerNumberModel(2024, 2020, 2050, 1);
-//        spinner = new JSpinner(sm);
-//        spinner.setEditor(new JSpinner.NumberEditor(spinner, "#"));
-//        gbc.gridx = 1;
-//        gbc.gridy = 4;
-//        gbc.gridwidth = 1;
-//        gbc.fill = GridBagConstraints.HORIZONTAL;
-//        receiveOrd.add(spinner, gbc);
-        
+
         return receiveOrd;
     }
 

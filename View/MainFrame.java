@@ -36,6 +36,7 @@ public class MainFrame extends JFrame {
         this.centerPanel.add(panel, name);
     }
     
+    // Clears any inputs made by the user in interactable fields and containers
     public static void clearInputs(Container cont) {
         for (Component comp : cont.getComponents()) {
             if (comp instanceof JTextField) {
