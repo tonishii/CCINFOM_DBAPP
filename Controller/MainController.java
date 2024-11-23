@@ -745,6 +745,7 @@ public class MainController {
             selectAccountPage.nextPageName(SelectAccount.SELECTACCPAGE);
             sellerPage.nextPageName(SellerPage.SIGNUP);
             sellerPage.setBackSellerBox();
+            sellerPage.setProductRefundInfo("");
         }, listChangeEvent -> {
             sellerPage.setInvisibleBtns(sellerPage.getSellerCRBox());
             try {
@@ -1122,7 +1123,40 @@ public class MainController {
                     sellerPage.disposeNewWindow();
 
                 } else if (sellerPage.getSellerReportBox().equals("Product Popularity Report")) {
-                    JOptionPane.showMessageDialog(null, "hi");
+                    int month = Integer.parseInt(sellerPage.getDateMonth());
+                    int year = Integer.parseInt(sellerPage.getDateYear());
+
+                    String query = "SELECT p.product_name, SUM(oc.item_quantity) AS amt_sold, p.average_rating " +
+                            "FROM order_contents oc " +
+                            "JOIN orders o ON oc.order_id = o.order_id " +
+                            "JOIN products p ON oc.product_id = p.product_id " +
+                            "WHERE YEAR(o.purchase_date) = ? " +
+                            "AND MONTH(o.purchase_date) = ? " +
+                            "AND p.seller_id = ? " +
+                            "GROUP BY p.product_name, p.average_rating " +
+                            "ORDER BY p.average_rating DESC, p.product_name";
+
+                    PreparedStatement ps = conn.prepareStatement(query);
+                    ps.setInt(1, year);
+                    ps.setInt(2, month);
+                    ps.setInt(3, ((Seller)account).getID());
+                    ResultSet rs = ps.executeQuery();
+
+                    ArrayList<Object[]> data = new ArrayList<>();
+                    int rank = 1;
+                    while (rs.next()) {
+                        Object[] record = new Object[4];
+                        record[0] = rank;
+                        record[1] = rs.getString("p.product_name");
+                        record[2] =  rs.getInt("amt_sold");
+                        record[3] = rs.getFloat("p.average_rating");
+                        data.add(record);
+                        rank++;
+                    }
+
+                    sellerPage.nextMainPageName(SellerPage.PRODUCTPOPLIST);
+                    sellerPage.updateProductPopTable(data);
+                    sellerPage.disposeNewWindow();
                 }
             } catch (SQLException e) {
                 JOptionPane.showMessageDialog(null, "Error: " + e.getMessage());
@@ -1135,6 +1169,8 @@ public class MainController {
             } else if (sellerPage.getSellerReportBox().equals("Product Popularity Report")) {
                 sellerPage.enableMonthTextField();
             }
+        }, backButtonEvent -> {
+            sellerPage.nextMainPageName(SellerPage.PRODUCTLIST);
         });
     }
 

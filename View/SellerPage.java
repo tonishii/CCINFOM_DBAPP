@@ -7,6 +7,7 @@ import javax.swing.*;
 import javax.swing.border.LineBorder;
 import javax.swing.border.TitledBorder;
 import javax.swing.event.ListSelectionListener;
+import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
@@ -21,8 +22,9 @@ public class SellerPage extends JPanel implements AccountPage {
 
     public static final String SIGNUP = "signup";
     public static final String PRODUCTLIST = "plist";
+    public static final String PRODUCTPOPLIST = "productpop";
 
-    private JDialog     newWindow;
+    private JDialog    newWindow;
     private JTextField sellerNameField,
                        sellerPhoneField,
                        sellerAddressField,
@@ -33,6 +35,8 @@ public class SellerPage extends JPanel implements AccountPage {
                        productDesc,
                        dateYear,
                        dateMonth;
+
+    private JTable     ProductPopTable;
 
     private JButton    submitSignUpBtn,
                        sellerBackBtn;
@@ -62,7 +66,8 @@ public class SellerPage extends JPanel implements AccountPage {
                        saveProfileBtn,
                        addProductBtn,
                        saveProductBtn,
-                       generateReportBtn;
+                       generateReportBtn,
+                       backBtn;
 
     private  JComboBox<String>   sellerCRBox;
     private  JComboBox<String>   sellerReportBox;
@@ -155,6 +160,7 @@ public class SellerPage extends JPanel implements AccountPage {
     "Seller", TitledBorder.LEFT, TitledBorder.TOP, new Font("Montserrat", Font.PLAIN, 12)));
 
         bottomPanel.add(getProductListPage(), PRODUCTLIST);
+        bottomPanel.add(showProductPop(), PRODUCTPOPLIST);
 
 
         panel.add(topPanel);
@@ -184,6 +190,9 @@ public class SellerPage extends JPanel implements AccountPage {
         generateReportBtn = new JButton("Generate Report");
         generateReportBtn.setFocusable(false);
 
+        backBtn = new JButton("Back");
+        backBtn.setFocusable(false);
+
         String[] reports = {"Sales Report", "Credibility Report", "Product Popularity Report"};
         sellerReportBox = new JComboBox<>(reports);
         sellerReportBox.setPreferredSize(new Dimension(300, 50));
@@ -203,7 +212,7 @@ public class SellerPage extends JPanel implements AccountPage {
 
         JScrollPane sellerListPane = new JScrollPane(sellerCRList);
         sellerListPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
-        sellerListPane.setPreferredSize(new Dimension(300, 400));
+        sellerListPane.setPreferredSize(new Dimension(300, 350));
 
         productRefundInfo = new JTextArea();
         productRefundInfo.setEditable(false);
@@ -475,6 +484,38 @@ public class SellerPage extends JPanel implements AccountPage {
         newWindow.setVisible(true);
     }
 
+    public JPanel showProductPop(){
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.insets = new Insets(5, 5, 5, 5);
+
+        JPanel panel = new JPanel();
+        panel.setLayout(new GridBagLayout());
+        panel.setBackground(Colors.WHITE);
+
+        final String[] columnNames = {"Rank", "Product Name", "Units Sold", "Average Rating"};
+        DefaultTableModel model = new DefaultTableModel(columnNames, 0);
+        ProductPopTable = new JTable(model);
+
+        JScrollPane ProductPopPane = new JScrollPane(ProductPopTable, JScrollPane.VERTICAL_SCROLLBAR_ALWAYS, JScrollPane.HORIZONTAL_SCROLLBAR_ALWAYS);
+        ProductPopPane.setPreferredSize(new Dimension(550, 400));
+
+        gbc.gridx = 0;
+        gbc.gridy = 0;
+        panel.add(new JLabel("Product Popularity Report"), gbc);
+
+        gbc.gridx = 0;
+        gbc.gridy = 1;
+        gbc.gridwidth = 2;
+        panel.add(ProductPopPane, gbc);
+
+        gbc.gridx = 0;
+        gbc.gridy = 2;
+        gbc.gridwidth = 2;
+        panel.add(backBtn, gbc);
+
+        return panel;
+    }
+
     @Override
     public void initSignUpListeners(ActionListener signUpLtr, ActionListener backLtr) {
         submitSignUpBtn.addActionListener(signUpLtr);
@@ -486,7 +527,7 @@ public class SellerPage extends JPanel implements AccountPage {
                                   ActionListener editProdLtr, ActionListener cancelLtr, ActionListener saveProfileLtr,
                                   ActionListener addProductLtr, ActionListener saveProductLtr, ActionListener removeProductLtr,
                                   ActionListener approveLtr, ActionListener rejectLtr, ActionListener generateReportLtr,
-                                  ActionListener listReportLtr){
+                                  ActionListener listReportLtr, ActionListener backLtr){
         genBtn.addActionListener(genLtr);
         editAccBtn.addActionListener(editAccLtr);
         logoutBtn.addActionListener(logoutLtr);
@@ -503,6 +544,7 @@ public class SellerPage extends JPanel implements AccountPage {
         rejectBtn.addActionListener(rejectLtr);
         generateReportBtn.addActionListener(generateReportLtr);
         sellerReportBox.addActionListener(listReportLtr);
+        backBtn.addActionListener(backLtr);
     }
 
     @Override
@@ -608,14 +650,32 @@ public class SellerPage extends JPanel implements AccountPage {
         setEnableButtons();
     }
 
+    public void updateProductPopTable(ArrayList<Object[]> data){
+        final String[] columnNames = {"Rank", "Product Name", "Units Sold", "Average Rating"};
+
+        DefaultTableModel model = new DefaultTableModel(columnNames, 0){
+            @Override
+            public boolean isCellEditable(int row, int column){
+                return false;
+            }
+        };
+
+        for (Object[] record : data){
+            model.addRow(new Object[]{record[0], record[1], record[2], record[3]});
+        }
+
+        ProductPopTable.setModel(model);
+    }
 
     public void enableMonthTextField(){
         dateMonth.setEditable(true);
     }
+
     public void disableMonthTextField(){
         dateMonth.setEditable(false);
         dateMonth.setText("");
     }
+
     public String getDateMonth(){ return dateMonth.getText().trim(); }
     public String getDateYear(){ return dateYear.getText().trim(); }
     public String getSellerReportBox(){ return (String) this.sellerReportBox.getSelectedItem(); }
