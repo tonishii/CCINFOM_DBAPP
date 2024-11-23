@@ -119,16 +119,19 @@ public class Courier implements Account {
         }
     }
 
-    public ArrayList<Order> showCompletedOrders(Connection conn) {
+    public ArrayList<Order> showCompletedOrders(Connection conn, int year, int month) {
         ArrayList<Order> orderList = new ArrayList<>();
         try {
             String orderQuery = """
                     SELECT *
                     FROM orders
-                    WHERE courier_id = ? AND order_status IN ('Completed', 'Delivered');
+                    WHERE courier_id = ? AND order_status IN ('Completed', 'Delivered')
+                    AND YEAR(receive_date) = ? AND MONTH(receive_date) = ?;
                     """;
             PreparedStatement ordersStmt = conn.prepareStatement(orderQuery);
             ordersStmt.setInt(1, this.courier_id);
+            ordersStmt.setInt(2, year);
+            ordersStmt.setInt(3, month);
             ResultSet rs = ordersStmt.executeQuery();
 
             while (rs.next()) {
@@ -146,18 +149,21 @@ public class Courier implements Account {
         return orderList;
     }
 
-    public ArrayList<Return> showCompletedReturns(Connection conn) {
+    public ArrayList<Return> showCompletedReturns(Connection conn, int year, int month) {
         ArrayList<Return> returns = new ArrayList<>();
         try {
             String returnQuery =
                     """
                     SELECT *
                     FROM returns r
-                    WHERE r.courier_id = ? AND r.return_status = 'REFUNDED';
+                    WHERE r.courier_id = ? AND r.return_status = 'REFUNDED'
+                    AND YEAR(r.return_date) = ? AND MONTH(r.return_date) = ?;
                     """;
 
             PreparedStatement returnsStmt = conn.prepareStatement(returnQuery);
             returnsStmt.setInt(1, this.courier_id);
+            returnsStmt.setInt(2, year);
+            returnsStmt.setInt(3, month);
             ResultSet returnsResultSet = returnsStmt.executeQuery();
 
             while (returnsResultSet.next()) {

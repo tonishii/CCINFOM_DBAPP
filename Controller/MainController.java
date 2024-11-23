@@ -11,6 +11,8 @@ import java.awt.event.WindowEvent;
 import java.sql.*;
 import java.sql.Date;
 import java.text.SimpleDateFormat;
+import java.time.Instant;
+import java.time.Year;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -1249,14 +1251,25 @@ public class MainController {
             courierPage.nextPageName(AccountPage.SIGNUPPAGE);
         });
 
-        courierPage.initMainListeners(orderLtr -> {
+        courierPage.initMainListeners(dateLtr -> {
+                try {
+                    int year = Integer.parseInt(courierPage.getCourierYear());
+                    int month = Integer.parseInt(courierPage.getCourierMonth());
+                    courierPage.clearCourierDates();
+                    if(year > Integer.parseInt(Year.now().toString()) || month < 1 || month > 12)
+                        throw new IllegalArgumentException();
+                    courierPage.updateAOTable(((Courier) account).showCompletedOrders(conn, year, month));
+                    courierPage.updateARTable(((Courier) account).showCompletedReturns(conn, year, month));
+                    courierPage.nextMainPageName(CourierPage.ACTIVITYPAGE);
+                } catch (Exception e) {
+                    JOptionPane.showMessageDialog(null, "Error: Invalid Arguments");
+                }
+            }, orderLtr -> {
                 courierPage.updateOOTable(((Courier)account).showOngoingOrders(conn));
                 courierPage.updateORTable(((Courier)account).showOngoingReturns(conn));
                 courierPage.nextMainPageName(CourierPage.ONGOINGORDERSPAGE);
             }, actEvent -> {
-                courierPage.updateAOTable(((Courier)account).showCompletedOrders(conn));
-                courierPage.updateARTable(((Courier)account).showCompletedReturns(conn));
-                courierPage.nextMainPageName(CourierPage.ACTIVITYPAGE);
+                courierPage.nextMainPageName(CourierPage.DATEPAGE);
             }, deliverEvent -> {
                 int update = courierPage.getRowToUpdate();
                 if(update != -1) {

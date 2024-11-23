@@ -16,6 +16,7 @@ public class CourierPage extends JPanel implements AccountPage {
     private final CardLayout courierCardLayout;
 
     // Constants used for switching between the different options
+    public static final String DATEPAGE = "date";
     public static final String ONGOINGORDERSPAGE = "ongoing";
     public static final String ACTIVITYPAGE = "activity";
     public static final String EDITPAGE = "edit";
@@ -25,7 +26,9 @@ public class CourierPage extends JPanel implements AccountPage {
                         courierAddressField,
                         profileCourierNameField,
                         profileCourierEmailField,
-                        profileCourierAddressField;
+                        profileCourierAddressField,
+                        courierMonth,
+                        courierYear;
 
     private JButton    submitSignUpBtn,
                        courierBackBtn;
@@ -39,7 +42,8 @@ public class CourierPage extends JPanel implements AccountPage {
                         editBtn,
                         logOutBtn,
                         saveBtn,
-                        deliverBtn;
+                        deliverBtn,
+                        dateBtn;
 
     private JTable      ongoingOrdersTable,
                         ongoingReturnsTable,
@@ -143,6 +147,7 @@ public class CourierPage extends JPanel implements AccountPage {
         bottomPanel.setBorder(BorderFactory.createTitledBorder(BorderFactory.createLineBorder(Color.BLACK, 2),
                 "Courier", TitledBorder.LEFT, TitledBorder.TOP, new Font("Montserrat", Font.PLAIN, 12)));
 
+        bottomPanel.add(getDatePage(), DATEPAGE);
         bottomPanel.add(getOngoingOrdersPage(), ONGOINGORDERSPAGE);
         bottomPanel.add(getEditPage(), EDITPAGE);
         bottomPanel.add(getActivityPage(), ACTIVITYPAGE);
@@ -192,6 +197,36 @@ public class CourierPage extends JPanel implements AccountPage {
         oOPage.add(ongoingReturnsPane, gbc);
 
         return oOPage;
+    }
+
+    public JPanel getDatePage() {
+        JPanel datePanel = new JPanel(new GridBagLayout());
+        datePanel.setBackground(Colors.WHITE);
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.insets = new Insets(5, 5, 5, 5);
+
+        JLabel monthLabel = new JLabel("Enter Month: ");
+        JLabel yearLabel = new JLabel("Enter Year: ");
+
+        this.courierMonth = new JTextField();
+        courierMonth.setPreferredSize(new Dimension(200, 20));
+        this.courierYear = new JTextField();
+        courierYear.setPreferredSize(new Dimension(200, 20));
+
+        this.dateBtn = new JButton("Submit");
+
+        datePanel.add(monthLabel, gbc);
+        gbc.gridx = 1;
+        datePanel.add(courierMonth, gbc);
+        gbc.gridx = 0;
+        gbc.gridy = 1;
+        datePanel.add(yearLabel, gbc);
+        gbc.gridx = 1;
+        datePanel.add(courierYear, gbc);
+        gbc.gridy = 2;
+        datePanel.add(dateBtn, gbc);
+
+        return datePanel;
     }
 
     public JPanel getActivityPage() {
@@ -294,7 +329,8 @@ public class CourierPage extends JPanel implements AccountPage {
         courierBackBtn.addActionListener(backLtr);
     }
 
-    public void initMainListeners(ActionListener orderLtr, ActionListener actLtr, ActionListener deliverLtr, ActionListener editLtr, ActionListener saveLtr, ActionListener logOutLtr) {
+    public void initMainListeners(ActionListener dateLtr, ActionListener orderLtr, ActionListener actLtr, ActionListener deliverLtr, ActionListener editLtr, ActionListener saveLtr, ActionListener logOutLtr) {
+        dateBtn.addActionListener(dateLtr);
         ongoingOrderBtn.addActionListener(orderLtr);
         activityBtn.addActionListener(actLtr);
         deliverBtn.addActionListener(deliverLtr);
@@ -346,6 +382,19 @@ public class CourierPage extends JPanel implements AccountPage {
     public String getCourierName() { return courierNameField.getText().trim(); }
     public String getCourierEmail() { return courierEmailField.getText().trim(); }
     public String getCourierAddress() { return courierAddressField.getText().trim(); }
+
+    public String getCourierMonth() {
+        return courierMonth.getText().trim();
+    }
+
+    public String getCourierYear() {
+        return courierYear.getText().trim();
+    }
+
+    public void clearCourierDates() {
+        this.courierMonth.setText("");
+        this.courierYear.setText("");
+    }
 
     public String getProfileCourierName() {
         return profileCourierNameField.getText().trim();
