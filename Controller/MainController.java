@@ -1011,13 +1011,13 @@ public class MainController {
                     JOptionPane.showMessageDialog(null, "Please fill out the required fields:\nName");
                 } else {
 
-                    if (!name.isEmpty()) {
+                    if (!phone.isEmpty()) {
                         if (!phoneChecker(phone)) {
                             JOptionPane.showMessageDialog(null, "Error: Invalid phone number format.");
                             return;
                         }
                     } 
-                    else name = null;
+                    else phone = null;
                     
                     if (address.isEmpty()) address = null;
 
