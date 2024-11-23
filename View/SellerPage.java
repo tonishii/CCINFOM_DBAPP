@@ -85,45 +85,57 @@ public class SellerPage extends JPanel implements AccountPage {
         this.add(getMainPage(), "main");
     }
 
+    // this is for displaying the signup page when you click the signup button while selecting sellers
+    // text fields necessary for inputting information of new sellers
     @Override
     public JPanel getSignUpPage() {
 
         JPanel signUpPage = new JPanel(new GridBagLayout());
+        // for adding a border on the bottom panel
         signUpPage.setBorder(BorderFactory.createTitledBorder(BorderFactory.createLineBorder(Color.BLACK, 2),
     "Seller sign-up", TitledBorder.LEFT, TitledBorder.TOP, new Font("Montserrat", Font.PLAIN, 12)));
 
+        // for margins
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.insets = new Insets(5, 5, 5, 5);
 
+        // text field for name
         JLabel label = new JLabel("Enter seller name: ");
         sellerNameField = new JTextField();
         sellerNameField.setPreferredSize(new Dimension(200, 20));
 
+        // adding elements to panel
         gbc.gridy = 0;
         signUpPage.add(label, gbc);
         signUpPage.add(sellerNameField,gbc);
 
+        // text field for seller address
         label = new JLabel("Enter seller address: ");
         sellerAddressField = new JTextField();
         sellerAddressField.setPreferredSize(new Dimension(200, 20));
 
+        // adding elements to panel
         gbc.gridy = 2;
         signUpPage.add(label, gbc);
         signUpPage.add(sellerAddressField,gbc);
 
+        // text field for phone number
         label = new JLabel("Enter phone number: ");
         sellerPhoneField = new JTextField();
         sellerPhoneField.setPreferredSize(new Dimension(200, 20));
 
+        // adding elements to panel
         gbc.gridy = 3;
         signUpPage.add(label, gbc);
         signUpPage.add(sellerPhoneField,gbc);
 
+        // submit button
         gbc.gridy = 4;
         submitSignUpBtn = new JButton("Submit");
         submitSignUpBtn.setFocusable(false);
         signUpPage.add(submitSignUpBtn,gbc);
 
+        // back button
         sellerBackBtn = new JButton("Back");
         sellerBackBtn.setFocusable(false);
         signUpPage.add(sellerBackBtn, gbc);
@@ -131,6 +143,7 @@ public class SellerPage extends JPanel implements AccountPage {
         return signUpPage;
     }
 
+    // the main page refers to the top panel and bottom panel, top panel has a few buttons and bottom panels is for viewing and selecting
     @Override
     public JPanel getMainPage() {
         mainCardLayout = new CardLayout();
@@ -143,17 +156,22 @@ public class SellerPage extends JPanel implements AccountPage {
         topPanel.setPreferredSize(new Dimension(800, 60));
         topPanel.setBorder(BorderFactory.createMatteBorder(0, 0, 2, 0, Colors.BLACK));
 
+        // generate button
         genBtn = new JButton("Generate");
         Colors.setButtonUI(genBtn);
         genBtn.setFocusable(false);
 
+        // edit account button
         editAccBtn = new JButton("Edit Account");
         Colors.setButtonUI(editAccBtn);
         editAccBtn.setFocusable(false);
 
+        // log out button
         logoutBtn = new JButton("Log Out");
         Colors.setButtonUI(logoutBtn);
         logoutBtn.setFocusable(false);
+
+        // adding the elements into top panel
         topPanel.add(genBtn);
         topPanel.add(editAccBtn);
         topPanel.add(logoutBtn);
@@ -161,9 +179,12 @@ public class SellerPage extends JPanel implements AccountPage {
         bottomPanel = new JPanel(mainCardLayout);
         bottomPanel.setOpaque(false);
         bottomPanel.setPreferredSize(new Dimension(800, 640));
+
+        // border for bottom panel
         bottomPanel.setBorder(BorderFactory.createTitledBorder(BorderFactory.createLineBorder(Color.BLACK, 2),
     "Seller", TitledBorder.LEFT, TitledBorder.TOP, new Font("Montserrat", Font.PLAIN, 12)));
 
+        // adding necessary pages to bottom panel
         bottomPanel.add(getProductListPage(), PRODUCTLIST);
         bottomPanel.add(showProductPop(), PRODUCTPOPLIST);
 
@@ -175,6 +196,7 @@ public class SellerPage extends JPanel implements AccountPage {
         return panel;
     }
 
+    // shows the product list page which has the product list and refund list and a text area which shows information about a selection element in the list
     public JPanel getProductListPage(){
         JPanel panel = new JPanel();
         GridBagConstraints gbc = new GridBagConstraints();
@@ -293,6 +315,7 @@ public class SellerPage extends JPanel implements AccountPage {
         return panel;
     }
 
+    // shows a new window for editing account and the necessary fields of information to edit
     public void showEditAccount(){
         newWindow = new JDialog();
         newWindow.setTitle("Edit Account");
@@ -335,6 +358,7 @@ public class SellerPage extends JPanel implements AccountPage {
         //return JOptionPane.showConfirmDialog(null, panel, "Edit Account", JOptionPane.OK_CANCEL_OPTION);
     }
 
+    // shows a new window for adding a new product and the necessary fields of information to edit
     public void showAddProduct(){
         newWindow = new JDialog();
         newWindow.setTitle("Add Product");
@@ -396,6 +420,7 @@ public class SellerPage extends JPanel implements AccountPage {
         newWindow.setVisible(true);
     }
 
+    // shows a new window for editing a product and the necessary fields of information to edit
     public void showEditProduct(){
         newWindow = new JDialog();
         newWindow.setTitle("Edit Product");
@@ -447,6 +472,7 @@ public class SellerPage extends JPanel implements AccountPage {
         //return JOptionPane.showConfirmDialog(null, panel, "Edit Product", JOptionPane.OK_CANCEL_OPTION);
     }
 
+    // shows a new window indicating the options of reports that could be generated along with the necessary fields
     public void showGenerate(){
         newWindow = new JDialog();
         newWindow.setTitle("Report Generation");
@@ -502,6 +528,7 @@ public class SellerPage extends JPanel implements AccountPage {
         newWindow.setVisible(true);
     }
 
+    // shows the product popularity report in a table
     public JPanel showProductPop(){
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.insets = new Insets(5, 5, 5, 5);
@@ -534,12 +561,14 @@ public class SellerPage extends JPanel implements AccountPage {
         return panel;
     }
 
+    // listeners for the signup page
     @Override
     public void initSignUpListeners(ActionListener signUpLtr, ActionListener backLtr) {
         submitSignUpBtn.addActionListener(signUpLtr);
         sellerBackBtn.addActionListener(backLtr);
     }
 
+    // listeners for the main page
     public void initMainListeners(ActionListener genLtr, ActionListener editAccLtr, ActionListener logoutLtr,
                                   ActionListener selCRLtr, ListSelectionListener textLtr, ActionListener addLtr,
                                   ActionListener editProdLtr, ActionListener cancelLtr, ActionListener saveProfileLtr,
@@ -565,16 +594,19 @@ public class SellerPage extends JPanel implements AccountPage {
         backBtn.addActionListener(backLtr);
     }
 
+    // for navigating to another page
     @Override
     public void nextPageName(String name) {
         this.sellerCardLayout.show(this, name);
     }
 
+    // for navigating another main page (i.e. product list page)
     @Override
     public void nextMainPageName(String name) {
         this.mainCardLayout.show(bottomPanel, name);
     }
 
+    // sets up or updates the product list shown in the product list page
     public void updateSellerProductList(ArrayList<Product> lists){
         DefaultListModel<String> mdl = new DefaultListModel<>();
         this.lists = new LinkedHashMap<>();
@@ -589,6 +621,7 @@ public class SellerPage extends JPanel implements AccountPage {
         sellerCRList.setModel(mdl);
     }
 
+    // sets up or updates the refund list shown in the product list page
     public void updateSellerRefundList(Map<String,String> lists){
         DefaultListModel<String> mdl = new DefaultListModel<>();
         this.lists = lists;
@@ -600,21 +633,26 @@ public class SellerPage extends JPanel implements AccountPage {
         sellerCRList.setModel(mdl);
     }
 
+    // sets text for the text area in the main page
     public void setProductRefundInfo(String text){
         productRefundInfo.setText(text);
     }
 
+    // sets text for the editing account fields
     public void updateEditAccount(Seller seller) {
         editSellerNameField.setText(seller.getName());
         editSellerPhoneField.setText(seller.getPhoneNumber());
         editSellerAddressField.setText(seller.getAddress());
     }
+
+    // clears each account text field in the edit or signup fields
     public void clearAccountField() {
         sellerNameField.setText("");
         sellerPhoneField.setText("");
         sellerAddressField.setText("");
     }
 
+    // updates the edit product text fields for the editing product page
     public void updateEditProduct(Product product){
         productName.setText(product.getName());
         productPrice.setValue(product.getPrice());
@@ -623,6 +661,7 @@ public class SellerPage extends JPanel implements AccountPage {
         productDesc.setText(product.getDescription());
     }
 
+    // disables all buttons when a new window is opened
     public void setDisableButtons(){
         genBtn.setEnabled(false);
         editAccBtn.setEnabled(false);
@@ -634,6 +673,7 @@ public class SellerPage extends JPanel implements AccountPage {
         editBtn.setEnabled(false);
     }
 
+    // enables all buttons when a new window is closed
     public void setEnableButtons(){
         genBtn.setEnabled(true);
         editAccBtn.setEnabled(true);
@@ -645,6 +685,7 @@ public class SellerPage extends JPanel implements AccountPage {
         editBtn.setEnabled(true);
     }
 
+    // sets buttons invisible depending on the type of list
     public void setInvisibleBtns(String n){
         if (n.equals("Refunds")) {
             approveBtn.setVisible(true);
@@ -661,6 +702,7 @@ public class SellerPage extends JPanel implements AccountPage {
         }
     }
 
+    // gets selection element in the list
     public String getSelectedOption(){
         if (!(sellerCRList.getSelectedValue() == null))
             return lists.get(sellerCRList.getSelectedValue());
@@ -668,11 +710,14 @@ public class SellerPage extends JPanel implements AccountPage {
     }
 
     public JDialog getNewWindow() { return newWindow; }
+
+    // closes a new window
     public void disposeNewWindow() {
         newWindow.dispose();
         setEnableButtons();
     }
 
+    // for setting up and updating the product popularity table
     public void updateProductPopTable(ArrayList<Object[]> data){
         final String[] columnNames = {"Rank", "Product Name", "Units Sold", "Average Rating"};
 
@@ -690,12 +735,14 @@ public class SellerPage extends JPanel implements AccountPage {
         productPopTable.setModel(model);
     }
 
+    // enables all top buttons
     public void setEnableTopButtons(){
         genBtn.setEnabled(true);
         editAccBtn.setEnabled(true);
         logoutBtn.setEnabled(true);
     }
 
+    // disables all top buttons
     public void setDisableTopButtons(){
         genBtn.setEnabled(false);
         editAccBtn.setEnabled(false);
@@ -710,6 +757,7 @@ public class SellerPage extends JPanel implements AccountPage {
         dateMonth.setEnabled(false);
     }
 
+    // just getters and setters
     public int getDateMonth(){ return (int) dateMonth.getValue(); }
     public int getDateYear(){ return (int) dateYear.getValue(); }
     public String getSellerReportBox(){ return (String) this.sellerReportBox.getSelectedItem(); }
