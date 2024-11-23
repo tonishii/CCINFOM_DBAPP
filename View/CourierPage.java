@@ -383,46 +383,30 @@ public class CourierPage extends JPanel implements AccountPage {
         activityReturnsPane.setViewportView(activityReturnsTable);
     }
 
-    public String getCourierName() { return courierNameField.getText().trim(); }
-    public String getCourierEmail() { return courierEmailField.getText().trim(); }
-    public String getCourierAddress() { return courierAddressField.getText().trim(); }
-
-    public String getCourierMonth() {
-        return courierMonth.getText().trim();
-    }
-
-    public String getCourierYear() {
-        return courierYear.getText().trim();
-    }
-
     public void clearCourierDates() {
         this.courierMonth.setText("");
         this.courierYear.setText("");
     }
 
-    public String getProfileCourierName() {
-        return profileCourierNameField.getText().trim();
-    }
-
-    public String getProfileCourierEmail() {
-        return profileCourierEmailField.getText().trim();
-    }
-
-    public String getProfileCourierAddress() {
-        return profileCourierAddressField.getText().trim();
-    }
-
-    public JTable getOngoingOrdersTable() {
-        return ongoingOrdersTable;
-    }
-
     public int getRowToUpdate() {
         TableModel dtm = ongoingOrdersTable.getModel();
         int selection = ongoingOrdersTable.getSelectedRow();
-        if(selection != -1) {
-            if(((OrderStatus)dtm.getValueAt(selection, 5)).equals(OrderStatus.BEING_PREPARED))
-                return (Integer)dtm.getValueAt(selection, 0);
+
+        if (selection != -1) {
+            if ((dtm.getValueAt(selection, 5)).equals(OrderStatus.BEING_PREPARED)) {
+                return (Integer) dtm.getValueAt(selection, 0);
+            }
         }
+
         return -1;
     }
+
+    public String getCourierName() { return courierNameField.getText().trim(); }
+    public String getCourierEmail() { return courierEmailField.getText().trim(); }
+    public String getCourierAddress() { return courierAddressField.getText().trim(); }
+    public String getCourierMonth() { return courierMonth.getText().trim(); }
+    public String getCourierYear() { return courierYear.getText().trim(); }
+    public String getProfileCourierName() { return profileCourierNameField.getText().trim(); }
+    public String getProfileCourierEmail() { return profileCourierEmailField.getText().trim(); }
+    public String getProfileCourierAddress() { return profileCourierAddressField.getText().trim(); }
 }
