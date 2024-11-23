@@ -5,6 +5,7 @@ import java.sql.*;
 import Model.enums.OrderStatus;
 
 import javax.swing.*;
+import java.util.ArrayList;
 import java.util.Set;
 
 // Order represents an order made in the E-Commerce app
@@ -30,7 +31,7 @@ public class Order {
 
     // Adds a new record of an Order to the orders table with its attributes as values
     // while also adding all the contents of the cart (selected items specifically) to the order_contents table
-    public void sendToDB(Connection conn, Set<OrderContent> cart) throws SQLException {
+    public void sendToDB(Connection conn, ArrayList<OrderContent> cart) throws SQLException {
         String query =
         """
         INSERT INTO orders

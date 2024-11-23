@@ -31,26 +31,27 @@ public class MainController {
 
     public MainController(MainFrame mainFrame, SQLConnect sqlConnect, SelectAccount selectAccount,
                           UserPage userPage, SellerPage sellerPage, CourierPage courierPage) {
-
+        // initialize the main pages
         mainMenuPage = mainFrame;
         connectPage = sqlConnect;
         selectAccountPage = selectAccount;
         this.userPage = userPage;
         this.sellerPage = sellerPage;
         this.courierPage = courierPage;
-
+        // initialize action listeners of pages
         initConnectionListeners();
         initSelectListeners();
         initUserListeners();
         initSellerListeners();
         initCourierListeners();
-
+        // add to center panel of main frame
         mainMenuPage.addToCenterPanel(connectPage, MainFrame.CONNECTPAGE);
         mainMenuPage.addToCenterPanel(selectAccountPage, MainFrame.SELECTACCPAGE);
         mainMenuPage.addToCenterPanel(userPage, MainFrame.USERPAGE);
         mainMenuPage.addToCenterPanel(sellerPage, MainFrame.SELLERPAGE);
         mainMenuPage.addToCenterPanel(courierPage, MainFrame.COURIERPAGE);
 
+        // terminates connection when window is closed
         mainMenuPage.addWindowListener(new WindowAdapter() {
             @Override
             public void windowClosing(WindowEvent e) {
@@ -64,8 +65,11 @@ public class MainController {
         });
     }
 
+    // SQLConnect
     private void initConnectionListeners() {
+        // submit btn
         connectPage.initConnListeners(submitEvent -> {
+            // connects to DB
             try {
                 String url = "jdbc:mysql://localhost:3306/mydb";
                 String username = connectPage.getUsername();
@@ -74,15 +78,17 @@ public class MainController {
                 Class.forName("com.mysql.cj.jdbc.Driver");
                 conn = DriverManager.getConnection(url, username, password);
 
+                // if successful, switches to account page
                 selectAccountPage.nextPageName(SelectAccount.SELECTACCPAGE);
                 mainMenuPage.nextPageName(MainFrame.SELECTACCPAGE);
 
             } catch (SQLException | ClassNotFoundException e) {
                 JOptionPane.showMessageDialog(null, "Error: " + e.getMessage());
             }
-
+        // exit btn
         }, exitEvent -> {
             try {
+                // close connection and program
                 if (conn != null) {
                     conn.close();
                 }
@@ -93,25 +99,27 @@ public class MainController {
             }
         });
     }
-
+    // SelectAccount
     private void initSelectListeners() {
+        // Switches to log in panel
         selectAccountPage.initSelectListeners(loginEvent -> {
             selectAccountPage.clearText();
             selectAccountPage.nextPageName(SelectAccount.LOGINPAGE);
 
             this.account = selectAccountPage.getAccountType();
-        }, signUpEvent -> {
+        }, signUpEvent -> { // Gets the account type selected in JComboBox
             this.account = selectAccountPage.getAccountType();
 
             (account instanceof User ? userPage :
             account instanceof Seller ? sellerPage :
             courierPage).nextPageName(AccountPage.SIGNUPPAGE);
 
-            // Go to their SIGNUP page
+            // Go to their sign-up page
             mainMenuPage.nextPageName(account.toString());
 
         }, submitLoginEvent -> {
             try {
+                // Attempts to log in using the provided ID
                 if (account.login(Integer.parseInt(selectAccountPage.getID()), conn)) {
 
                     (account instanceof User ? userPage :
@@ -127,29 +135,31 @@ public class MainController {
                         sellerPage.updateSellerProductList(((Seller) account).getProductList(this.conn));
                     }
 
-                } else {
+                } else { // invalid ID
                     JOptionPane.showMessageDialog(null, "Account does not exist.");
                 }
-
+            // catch exceptions
             } catch (NumberFormatException e) {
-                JOptionPane.showMessageDialog(null, "Error: Enter valid ID.");
+                JOptionPane.showMessageDialog(null, "Error: " + e.getMessage(), "Invalid ID", JOptionPane.ERROR_MESSAGE);
             } catch (SQLException e) {
-                JOptionPane.showMessageDialog(null, "Error: " + e.getMessage());
+                JOptionPane.showMessageDialog(null, "Error: " + e.getMessage(), "SQL Error", JOptionPane.ERROR_MESSAGE);
             }
-
+            // return to log in page
         }, backLoginEvent -> selectAccountPage.nextPageName(SelectAccount.SELECTACCPAGE)
 
         , backEvent -> {
+            // return to SQLConnect page and close connection.
             try {
                 connectPage.clearTextFields();
                 conn.close();
             } catch (SQLException e) {
-                JOptionPane.showMessageDialog(null, "Error:");
+                JOptionPane.showMessageDialog(null, "Error:" + e.getMessage(), "SQL Error", JOptionPane.ERROR_MESSAGE);
             }
             mainMenuPage.nextPageName(MainFrame.CONNECTPAGE);
         });
     }
 
+    // UserPage
     private void initUserListeners() {
         userPage.initSignUpListeners(submitSignUpEvent -> { // Action: Pressing the submit button in the sign-up page
 
@@ -163,15 +173,17 @@ public class MainController {
                 JOptionPane.showMessageDialog(null, "Please fill out the required fields:\nUsername\nFirst Name\nLast Name");
             } else {
 
-                if (!phoneChecker(user_phone_number)) {
+                if (!phoneChecker(user_phone_number)) { // checks if phone number is valid
                     JOptionPane.showMessageDialog(null, "Error: Invalid phone number format.");
                     return;
                 }
 
+                // sets Date based on current system time
                 Date user_creation_date = new Date(System.currentTimeMillis());
+                // verifies user if phone number and address are filled up, otherwise unverified
                 boolean user_verified_status = !user_phone_number.isEmpty() && !user_address.isEmpty();
 
-                try {
+                try { // inserts new user into DB
                     String query =
                     """
                     INSERT INTO users (user_id, user_name, user_phone_number, user_address, user_verified_status, user_creation_date, user_firstname, user_lastname)
@@ -190,6 +202,7 @@ public class MainController {
 
                     pstmt.executeUpdate();
 
+                    // new user ID is the highest value ID in the DB
                     query =
                     """
                     SELECT MAX(user_id)
@@ -204,11 +217,12 @@ public class MainController {
                         }
                     }
 
+                    // initializes account as User and goes to UserPage's Main page
                     this.account = new User(user_id, user_name, user_firstname, user_lastname, user_address, user_phone_number, user_creation_date);
                     userPage.nextPageName(AccountPage.MAINPAGE);
 
                 } catch (SQLException e){
-                    JOptionPane.showMessageDialog(null, "Error: " + e.getMessage());
+                    JOptionPane.showMessageDialog(null, "Error: " + e.getMessage(), "SQL Error", JOptionPane.ERROR_MESSAGE);
                 }
             }
         }, backSignUpEvent -> { // Action: Pressing the back button in the sign-up page
@@ -236,7 +250,7 @@ public class MainController {
                 }
 
             } catch (SQLException e) {
-                JOptionPane.showMessageDialog(null, "Error: " + e.getMessage());
+                JOptionPane.showMessageDialog(null, "Error: " + e.getMessage(), "SQL Error", JOptionPane.ERROR_MESSAGE);
             }
 
             // Update the JList for with the options
@@ -260,7 +274,7 @@ public class MainController {
                     userPage.updateReturnsList(returnList);
                 }
             } catch (SQLException e) {
-                JOptionPane.showMessageDialog(null, "Error: " + e.getMessage());
+                JOptionPane.showMessageDialog(null, "Error: " + e.getMessage(), "SQL Error", JOptionPane.ERROR_MESSAGE);
             }
 
         }, ordersViewChangeEvent -> { // Action: Changing the list view in orders
@@ -275,7 +289,7 @@ public class MainController {
                     userPage.updateReturnsList(returnList);
                 }
             } catch (SQLException e) {
-                JOptionPane.showMessageDialog(null, "Error: " + e.getMessage());
+                JOptionPane.showMessageDialog(null, "Error: " + e.getMessage(), "SQL Error", JOptionPane.ERROR_MESSAGE);
             }
             
         }, profileEvent -> { // Action: Pressing profile button
@@ -287,6 +301,7 @@ public class MainController {
             userPage.refreshUserPage(); // Labels of information disappear when clearInputs is called
             initUserListeners();
 
+            // Return to SelectAccount page
             mainMenuPage.nextPageName(MainFrame.SELECTACCPAGE);
             selectAccountPage.nextPageName(SelectAccount.SELECTACCPAGE);
             userPage.nextMainPageName(UserPage.SHOPPAGE);
@@ -294,18 +309,18 @@ public class MainController {
         }, addToCartEvent -> { // Action: Pressing the add button in the shop page
             User user = (User) account;
 
-            if (!(user.isVerified())) {
-                JOptionPane.showMessageDialog(null, "Account not verified. Unable to proceed with action.");
+            if (!(user.isVerified())) { // Unverified users are not allowed to order
+                JOptionPane.showMessageDialog(null, "Account not verified. Unable to proceed with action.", "Verification Error", JOptionPane.ERROR_MESSAGE);
                 return;
             }
-
+            // Get product and quantity ordered
             Product selectedProduct = userPage.getSelectedProduct();
             int orderQuantity = userPage.getQuantity();
 
-            if (selectedProduct == null) {
-                JOptionPane.showMessageDialog(null, "Error: Select a product.");
+            if (selectedProduct == null) { // No Product Selected
+                JOptionPane.showMessageDialog(null, "Error: Select a product.", "No Product Selected", JOptionPane.ERROR_MESSAGE);
                 return;
-            } else if (orderQuantity == 0) {
+            } else if (orderQuantity == 0) { // Cannot order a product with 0 quantity
                 return;
             }
 
@@ -315,10 +330,10 @@ public class MainController {
                     // Add to cart
                     user.addProductToCart(new OrderContent(selectedProduct.getProductID(), selectedProduct.getName(), orderQuantity, selectedProduct.getPrice()));
                 } else {
-                    JOptionPane.showMessageDialog(null, "Error: Only " + selectedProduct.getQuantity() + " are in stock.");
+                    JOptionPane.showMessageDialog(null, "Error: Only " + selectedProduct.getQuantity() + " are in stock.", "Product Quantity Exceeded", JOptionPane.ERROR_MESSAGE);
                 }
             } else {
-                JOptionPane.showMessageDialog(null, "Error: Product is not listed");
+                JOptionPane.showMessageDialog(null, "Error: Product is not listed", "Unavailable Product", JOptionPane.ERROR_MESSAGE);
             }
 
         }, browseChangeEvent -> { // Action: Changing the browse option in the shop page
@@ -332,33 +347,36 @@ public class MainController {
                     options.putAll(((User) account).browseByProductType(conn));
                 }
             } catch (SQLException e) {
-                JOptionPane.showMessageDialog(null, "Error: " + e.getMessage());
+                JOptionPane.showMessageDialog(null, "Error: " + e.getMessage(), "SQL Error", JOptionPane.ERROR_MESSAGE);
             }
             userPage.updateBrowseList(options);
 
         }, checkOutEvent -> { // Action: Pressing check out button in the shopping cart page
 
-            if (!(((User) account).isVerified())) {
-                JOptionPane.showMessageDialog(null, "Account not verified. Unable to proceed with action.");
+            if (!(((User) account).isVerified())) { // Unverified users are not allowed to check out
+                JOptionPane.showMessageDialog(null, "Account not verified. Unable to proceed with action.", "Verification Error", JOptionPane.ERROR_MESSAGE);
                 return;
             }
 
+            // Gets shopping cart and selected products from said shopping cart
             Set<OrderContent> shoppingCart = ((User) account).getShoppingCart();
             ArrayList<OrderContent> selectedProducts = userPage.getSelectedRecords(new ArrayList<>(shoppingCart));
 
-            if (selectedProducts.isEmpty()) {
-                JOptionPane.showMessageDialog(null, "Error: Select item to checkout.");
+            if (selectedProducts.isEmpty()) { // No selected products
+                JOptionPane.showMessageDialog(null, "Error: Select item to checkout.", "Invalid Selection", JOptionPane.ERROR_MESSAGE);
                 return;
             }
 
-            float totalPrice = 0f;
+            float totalPrice = 0f; // computes total price of order
             for (OrderContent product : selectedProducts) {
                 totalPrice += product.getPriceEach() * product.getQuantity();
             }
 
+            // confirm check out of selected products
             int choice = userPage.getCheckoutConfirmPage(selectedProducts);
 
             try {
+                // Attempts to insert order into DB
                 if (choice == JOptionPane.OK_OPTION) {
                     String query =
                     """
@@ -373,10 +391,12 @@ public class MainController {
                     if (rs.next()) {
                         order_id = rs.getInt("id");
                     }
+                    // No available couriers
                     if (Courier.assignCourier(conn) == -1) {
-                        JOptionPane.showMessageDialog(null, "No available couriers as of the moment.");
+                        JOptionPane.showMessageDialog(null, "No available couriers as of the moment.", "No Courier Error", JOptionPane.ERROR_MESSAGE);
                         return;
                     }
+                    // Creates new order
                     Order order = new Order(
                         order_id,
                         ((User) account).getID(),
@@ -386,7 +406,8 @@ public class MainController {
                         OrderStatus.BEING_PREPARED,
                         Date.valueOf("9999-12-31"));
 
-                    order.sendToDB(conn, shoppingCart);
+                    // send order to DB and insert shopping cart contents
+                    order.sendToDB(conn, selectedProducts);
 
                     // Remove all selected products in the shopping cart
                     shoppingCart.removeIf(cartProduct ->
@@ -395,35 +416,37 @@ public class MainController {
 
                     // Update in the page
                     userPage.updateCartTable(shoppingCart);
-                } else {
+                } else { // checkout canceled
                     JOptionPane.showMessageDialog(null, "Aborting Checkout...");
                 }
             } catch (SQLException e) {
-                JOptionPane.showMessageDialog(null, "Error: " + e.getMessage());
+                JOptionPane.showMessageDialog(null, "Error: " + e.getMessage(), "SQL Error", JOptionPane.ERROR_MESSAGE);
             }
 
         }, removeItemEvent -> { // Action: Pressing the remove item button in the shopping cart page
 
-            if (!(((User) account).isVerified())) {
-                JOptionPane.showMessageDialog(null, "Account not verified. Unable to proceed with action.");
+            if (!(((User) account).isVerified())) { // unverified account
+                JOptionPane.showMessageDialog(null, "Account not verified. Unable to proceed with action.", "Verification Error", JOptionPane.ERROR_MESSAGE);
                 return;
             }
 
+            // get shopping cart and selected products
             Set<OrderContent> shoppingCart = ((User) account).getShoppingCart();
             ArrayList<OrderContent> selectedProducts = userPage.getSelectedRecords(new ArrayList<>(shoppingCart));
 
-            if (selectedProducts.isEmpty()) {
-                JOptionPane.showMessageDialog(null, "Error: Select item to checkout.");
+            if (selectedProducts.isEmpty()) { // no selected product
+                JOptionPane.showMessageDialog(null, "Error: Select item to remove.", "Invalid Selection", JOptionPane.ERROR_MESSAGE);
                 return;
             }
 
             int choice = JOptionPane.showConfirmDialog(null, "Are you sure?", "Remove items", JOptionPane.YES_NO_OPTION);
 
+            // remove products
             if (choice == JOptionPane.OK_OPTION) {
                 ((User) account).getShoppingCart().removeIf(cartProduct ->
                 selectedProducts.stream()
                 .anyMatch(selectedProduct -> selectedProduct.getProductID() == cartProduct.getProductID()));
-            } else {
+            } else { // aborted
                 JOptionPane.showMessageDialog(null, "Aborting remove...");
             }
 
@@ -432,12 +455,12 @@ public class MainController {
             
         }, returnEvent -> { // Action: Pressing the return item button in the orders page
 
-            if (!(((User) account).isVerified())) {
-                JOptionPane.showMessageDialog(null, "Account not verified. Unable to proceed with action.");
+            if (!(((User) account).isVerified())) { // unverified
+                JOptionPane.showMessageDialog(null, "Account not verified. Unable to proceed with action.", "Verification Error", JOptionPane.ERROR_MESSAGE);
                 return;
             }
 
-            try {
+            try { // attempts to create a new Return record with the selected item from selected order to return
                 User user = (User) account;
                 ArrayList<OrderContent> itemsList = user.getOrderItems(conn, user.getID());
                 userPage.ordersListToProducts(itemsList);
@@ -457,26 +480,27 @@ public class MainController {
                             int order_id = Integer.parseInt(orderInp.trim());
                             int product_id = Integer.parseInt(productInp.trim());
 
+                            // return record created
                             if (Return.requestReturn(conn, product_id, order_id, ((User) account).getID(), reason, desc)) {
                                 JOptionPane.showMessageDialog(null, "Return request was successful.");
-                            } else {
-                                JOptionPane.showMessageDialog(null, "Return request was unsuccessful.");
+                            } else { // failed
+                                JOptionPane.showMessageDialog(null, "Return request was unsuccessful.", "Return Failed", JOptionPane.ERROR_MESSAGE);
                             }
                         } catch (NumberFormatException e) {
-                            JOptionPane.showMessageDialog(null, "Invalid ID input/s.");
+                            JOptionPane.showMessageDialog(null, "Invalid ID input/s.", "Invalid Arguments", JOptionPane.ERROR_MESSAGE);
                         }
                     }
                 } else {
                     JOptionPane.showMessageDialog(null, "Aborting return...");
                 }
             } catch (Exception e) {
-                JOptionPane.showMessageDialog(null, "Error: " + e);
+                JOptionPane.showMessageDialog(null, "Error: " + e, "Error", JOptionPane.ERROR_MESSAGE);
             }
 
-        }, rateEvent -> { // Action: Pressing the return item button in the orders page
+        }, rateEvent -> { // Action: Rating a product
 
             if (!(((User) account).isVerified())) {
-                JOptionPane.showMessageDialog(null, "Account not verified. Unable to proceed with action.");
+                JOptionPane.showMessageDialog(null, "Account not verified. Unable to proceed with action.", "Verification Error", JOptionPane.ERROR_MESSAGE);
                 return;
             }
 
@@ -494,7 +518,7 @@ public class MainController {
                     int rating = userPage.getSpinnerVal();
 
                     if (orderInp.trim().isEmpty() || productInp.trim().isEmpty()) { // When an input field is not filled up
-                        JOptionPane.showMessageDialog(null, "Please fill out the required input fields:\nOrder ID\nProduct ID");
+                        JOptionPane.showMessageDialog(null, "Please fill out the required input fields:\nOrder ID\nProduct ID", "Invalid Inputs", JOptionPane.ERROR_MESSAGE);
                     } else {
                         try {
                             int order_id = Integer.parseInt(orderInp.trim());
@@ -504,20 +528,20 @@ public class MainController {
                                 JOptionPane.showMessageDialog(null, "Rating was successful.");
                             }
                             else {
-                                JOptionPane.showMessageDialog(null, "Rating was unsuccessful.");
+                                JOptionPane.showMessageDialog(null, "Rating was unsuccessful.", "Rate Failed", JOptionPane.ERROR_MESSAGE);
                             }
                         } catch (NumberFormatException e) {
-                            JOptionPane.showMessageDialog(null, "Invalid ID input/s.");
+                            JOptionPane.showMessageDialog(null, "Invalid ID input/s.", "Invalid Input", JOptionPane.ERROR_MESSAGE);
                         }
                     }
                 } else {
                     JOptionPane.showMessageDialog(null, "Aborting Rate...");
                 }
             } catch (SQLException e) {
-                JOptionPane.showMessageDialog(null, "Error: " + e);
+                JOptionPane.showMessageDialog(null, "Error: " + e, "SQL Error", JOptionPane.ERROR_MESSAGE);
             }
 
-        }, receiveEvent -> { // Action: Pressing the receive item button in the orders page
+        }, receiveEvent -> { // Action: Pressing the "receive item" button in the orders page
 
             if (!(((User) account).isVerified())) {
                 JOptionPane.showMessageDialog(null, "Account not verified. Unable to proceed with action.");
@@ -535,7 +559,7 @@ public class MainController {
                     String orderInp = userPage.getOrderInp();
 
                     if (orderInp.trim().isEmpty()) { // When an input field is not filled up
-                        JOptionPane.showMessageDialog(null, "Please fill out the required input fields:\nOrder ID\nProduct ID");
+                        JOptionPane.showMessageDialog(null, "Please fill out the required input fields:\nOrder ID\nProduct ID",  "Invalid Inputs", JOptionPane.ERROR_MESSAGE);
                     } else {
                         try {
                             int order_id = Integer.parseInt(orderInp.trim());
@@ -543,16 +567,16 @@ public class MainController {
                             if (Order.receiveOrder(conn, order_id, user.getID())) {
                                 JOptionPane.showMessageDialog(null, "Order successfully received.");
                             } else {
-                                JOptionPane.showMessageDialog(null, "Failed to receive order.");
+                                JOptionPane.showMessageDialog(null, "Failed to receive order.", "Receive Error", JOptionPane.ERROR_MESSAGE);
                             }
 
                         } catch (NumberFormatException e) {
-                            JOptionPane.showMessageDialog(null, "Invalid ID input.");
+                            JOptionPane.showMessageDialog(null, "Invalid ID input.",  "Invalid Input", JOptionPane.ERROR_MESSAGE);
                         }
                     }
                 }
             } catch (SQLException e) {
-                JOptionPane.showMessageDialog(null, "Error: " + e);
+                JOptionPane.showMessageDialog(null, "Error: " + e,  "SQL Error", JOptionPane.ERROR_MESSAGE);
             }
         }, saveChangeEvent -> { // Action: Pressing the save changes button in the profile page
             User user = (User) account;
@@ -567,15 +591,15 @@ public class MainController {
                     String user_address = userPage.getEditedAddress();
                     String user_phone_number = userPage.getEditedPhone();
 
-                    if (user_name.isEmpty() || user_firstname.isEmpty() || user_lastname.isEmpty()) {
-                        JOptionPane.showMessageDialog(null, "Please fill out the required fields:\nUsername\nFirst Name\nLast Name");
+                    if (user_name.isEmpty() || user_firstname.isEmpty() || user_lastname.isEmpty()) { // required fields left empty
+                        JOptionPane.showMessageDialog(null, "Please fill out the required fields:\nUsername\nFirst Name\nLast Name",  "Invalid Inputs", JOptionPane.ERROR_MESSAGE);
                         return;
                     }
 
                     // Retrieve the edited fields and update in the database
                     if (!user_phone_number.isEmpty()) {
-                        if (!(phoneChecker(user_phone_number))) {
-                            JOptionPane.showMessageDialog(null, "Error: Invalid phone number format.");
+                        if (!(phoneChecker(user_phone_number))) { // invalid phone number
+                            JOptionPane.showMessageDialog(null, "Error: Invalid phone number format.",  "Invalid Input", JOptionPane.ERROR_MESSAGE);
                             return;
                         }
                     }
@@ -583,6 +607,7 @@ public class MainController {
 
                     if (user_address.isEmpty()) user_address = null;
 
+                    // updates user information and sends to DB
                     user.setName(user_name);
                     user.setFirstName(user_firstname);
                     user.setLastName(user_lastname);
@@ -593,7 +618,7 @@ public class MainController {
                     JOptionPane.showMessageDialog(null, "Profile changed...");
 
                 } catch (SQLException e) {
-                    JOptionPane.showMessageDialog(null, "Error: " + e.getMessage());
+                    JOptionPane.showMessageDialog(null, "Error: " + e.getMessage(),  "SQL Error", JOptionPane.ERROR_MESSAGE);
                 }
             } else {
                 JOptionPane.showMessageDialog(null, "Edit cancelled...");
@@ -636,7 +661,7 @@ public class MainController {
                     products.addAll(((User) account).getSelectedProductList(pstmt));
                 }
             } catch (SQLException e) {
-                JOptionPane.showMessageDialog(null, "Error: " + e.getMessage());
+                JOptionPane.showMessageDialog(null, "Error: " + e.getMessage(),  "SQL Error", JOptionPane.ERROR_MESSAGE);
             }
 
             // Update the list of products using the resulting list
@@ -662,7 +687,8 @@ public class MainController {
         }, orderSelectEvent -> { // Action: Pressing an order in the orders list in the orders page
             if (!orderSelectEvent.getValueIsAdjusting()) {
                 String val = userPage.getMappedValue(userPage.getSelectedOrder());
- 
+
+                // Order selected
                 if (userPage.getOrdersViewOption().equals("Orders") && val != null) {
                     int order_id = Integer.parseInt(val);
                     try {
@@ -679,7 +705,7 @@ public class MainController {
                         PreparedStatement ps = conn.prepareStatement(query);
                         ps.setInt(1, order_id);
                         ResultSet rs = ps.executeQuery();
-                        
+                        // formatting
                         SimpleDateFormat sdf = new SimpleDateFormat("MMMM dd yyyy");
                         
                         if (rs.next()) {
@@ -724,9 +750,10 @@ public class MainController {
                             userPage.setOrderInfoLbl(text.toString());
                         }
                     } catch (Exception e) {
-                        JOptionPane.showMessageDialog(null, "Error: " + e.getMessage());
+                        JOptionPane.showMessageDialog(null, "Error: " + e.getMessage(),  "Error", JOptionPane.ERROR_MESSAGE);
                     }
 
+                    // Return record selected
                 } else if (userPage.getOrdersViewOption().equals("Returns") && val != null) {
                     String[] ids = val.split(" ");
 
@@ -750,28 +777,29 @@ public class MainController {
                         ps.setInt(2, order_id);
                         ResultSet rs = ps.executeQuery();
                         
-                        if (rs.next())  {
+                        if (rs.next())  { // formatting
                             String text = "<html><b>Item:</b> " + rs.getString("p.product_name") + "<br><b>Seller:</b> " + rs.getString("s.seller_name");
                             text  += "<br><b>Courier:</b> " + rs.getString("c.courier_name") + "<br><b>Status:</b> " + rs.getString("r.return_status") +  "</html>";
                             
                             userPage.setOrderInfoLbl(text);
                         }
                     } catch (Exception e) {
-                        JOptionPane.showMessageDialog(null, "Error: " + e.getMessage());
+                        JOptionPane.showMessageDialog(null, "Error: " + e.getMessage(),  "SQL Error", JOptionPane.ERROR_MESSAGE);
                     }
                 }
             }
         });
     }
 
+    // SellerPage
     private void initSellerListeners() {
-        sellerPage.initSignUpListeners(submitSignUpEvent -> {
+        sellerPage.initSignUpListeners(submitSignUpEvent -> { // submit btn in sign up page
             String seller_name = sellerPage.getSellerName();
             String seller_address = sellerPage.getSellerAddress();
             String seller_phone_number = sellerPage.getSellerPhone();
             
             if (seller_name.isEmpty()) {
-                JOptionPane.showMessageDialog(null, "Please fill out the required fields:\nName");
+                JOptionPane.showMessageDialog(null, "Please fill out the required fields:\nName", "Invalid Inputs", JOptionPane.ERROR_MESSAGE);
             } else {
                 if (!phoneChecker(seller_phone_number)) {
                     JOptionPane.showMessageDialog(null, "Error: Invalid phone number format.");
@@ -796,6 +824,7 @@ public class MainController {
                     pstmt.setString(4, seller_phone_number);
                     pstmt.setTimestamp(5, new java.sql.Timestamp(seller_creation_date.getTime()));
 
+                    // send to DB
                     pstmt.executeUpdate();
 
                     query =
@@ -812,35 +841,36 @@ public class MainController {
                         }
                     }
 
+                    // initializes account as seller
                     account = new Seller(seller_id, seller_name, seller_address, seller_phone_number, seller_creation_date, seller_verified_status);
                     sellerPage.clearAccountField();
                     sellerPage.updateSellerProductList(((Seller) account).getProductList(conn));
                     sellerPage.nextPageName(AccountPage.MAINPAGE);
 
                 } catch (SQLException e) {
-                    JOptionPane.showMessageDialog(null, "Error: " + e.getMessage());
+                    JOptionPane.showMessageDialog(null, "Error: " + e.getMessage(),  "SQL Error", JOptionPane.ERROR_MESSAGE);
                 }
             }
 
-        }, backSignUpEvent -> {
+        }, backSignUpEvent -> { // exit out to select account page
             mainMenuPage.nextPageName(MainFrame.SELECTACCPAGE);
             selectAccountPage.nextPageName(SelectAccount.SELECTACCPAGE);
             sellerPage.nextPageName(AccountPage.SIGNUPPAGE);
 
         });
-        sellerPage.initMainListeners(generateEvent -> {
-            if (!(((Seller) account).isVerified())) {
-                JOptionPane.showMessageDialog(null, "Account not verified. Unable to proceed with action.");
+        sellerPage.initMainListeners(generateEvent -> { // generate reports
+            if (!(((Seller) account).isVerified())) { // unverified
+                JOptionPane.showMessageDialog(null, "Account not verified. Unable to proceed with action.", "Verification Error", JOptionPane.ERROR_MESSAGE);
                 return;
             }
             sellerPage.showGenerate();
             sellerPage.setDisableButtons();
-        }, editAccountEvent -> {
+        }, editAccountEvent -> { // edit account
             sellerPage.showEditAccount();
             sellerPage.updateEditAccount((Seller) account);
             sellerPage.setDisableButtons();
 
-        }, logoutEvent -> {
+        }, logoutEvent -> { // logout and return to select account
             mainMenuPage.nextPageName(MainFrame.SELECTACCPAGE);
             selectAccountPage.nextPageName(SelectAccount.SELECTACCPAGE);
             sellerPage.nextPageName(SellerPage.SIGNUP);
@@ -848,21 +878,21 @@ public class MainController {
             sellerPage.setBackSellerBox();
             sellerPage.setProductRefundInfo("");
 
-        }, listChangeEvent -> {
+        }, listChangeEvent -> { // product or refund request changed
             sellerPage.setInvisibleBtns(sellerPage.getSellerCRBox());
 
             try {
-                if (sellerPage.getSellerCRBox().equals("Products")) {
+                if (sellerPage.getSellerCRBox().equals("Products")) { // product
                     sellerPage.updateSellerProductList(((Seller) account).getProductList(this.conn));
-                } else if (sellerPage.getSellerCRBox().equals("Refunds")) {
+                } else if (sellerPage.getSellerCRBox().equals("Refunds")) { // return request
                     sellerPage.updateSellerRefundList(((Seller) account).refundList(this.conn));
                 }
             } catch (SQLException e) {
-                JOptionPane.showMessageDialog(null, "Error: " + e.getMessage());
+                JOptionPane.showMessageDialog(null, "Error: " + e.getMessage(),  "SQL Error", JOptionPane.ERROR_MESSAGE);
             }
 
-        }, listSelectEvent -> {
-            if (sellerPage.getSellerCRBox().equals("Products")) {
+        }, listSelectEvent -> { // product or refund request selected
+            if (sellerPage.getSellerCRBox().equals("Products")) { // product
                 if (sellerPage.getSelectedOption() != null) {
                     List<Integer> Ids =
                             Arrays.stream(sellerPage.getSelectedOption()
@@ -882,7 +912,7 @@ public class MainController {
 
                         Product product = ((Seller) account).getSellerProduct(pstmt);
 
-                        sellerPage.setProductRefundInfo(
+                        sellerPage.setProductRefundInfo( // show information about product
                             "<html><b> Product Info </b> <br>\n" +
                             "<b> Product ID: </b>" + product.getProductID() + "<br>" +
                             "<b> Product Name: </b>" + product.getName() + "<br>" +
@@ -895,11 +925,11 @@ public class MainController {
                         );
 
                     } catch (SQLException e) {
-                        JOptionPane.showMessageDialog(null, "Error: " + e.getMessage());
+                        JOptionPane.showMessageDialog(null, "Error: " + e.getMessage(),  "SQL Error", JOptionPane.ERROR_MESSAGE);
                     }
                 }
 
-            } else if (sellerPage.getSellerCRBox().equals("Refunds")) {
+            } else if (sellerPage.getSellerCRBox().equals("Refunds")) { // refund
                 if (sellerPage.getSelectedOption() != null) {
                     List<Integer> Ids =
                             Arrays.stream(sellerPage.getSelectedOption()
@@ -919,7 +949,7 @@ public class MainController {
                         pstmt.setInt(2, Ids.get(1));
                         Return refund = ((Seller) account).getSellerRefund(pstmt);
 
-                        sellerPage.setProductRefundInfo(
+                        sellerPage.setProductRefundInfo( // show refund request information
                                 "<html><b> Refund Info </b><br>\n" +
                                 "<b> Order ID: </b>" + refund.getOrderID() + "<br>" +
                                 "<b> Product ID: </b>" + refund.getProductID() + "<br>" +
@@ -931,35 +961,20 @@ public class MainController {
                         );
 
                     } catch (SQLException e) {
-                        JOptionPane.showMessageDialog(null, "Error: " + e.getMessage());
+                        JOptionPane.showMessageDialog(null, "Error: " + e.getMessage(),  "SQL Error", JOptionPane.ERROR_MESSAGE);
                     }
                 }
             }
         }, addEvent -> { // Add product
             if (!(((Seller) account).isVerified())) {
-                JOptionPane.showMessageDialog(null, "Account not verified. Unable to proceed with action.");
+                JOptionPane.showMessageDialog(null, "Account not verified. Unable to proceed with action.", "Verification Error", JOptionPane.ERROR_MESSAGE);
                 return;
             }
             sellerPage.showAddProduct();
             sellerPage.setDisableButtons();
-            /*
-            if (result==JOptionPane.OK_OPTION){
-                if (sellerPage.getSelectedOption()!=null) {
-                    Product product = new Product();
-                    product.setSellerID(((Seller)account).getID());
-                    product.setName(sellerPage.getProductName());
-                    product.setPrice(Float.parseFloat(sellerPage.getProductPrice()));
-                    product.setDescription(sellerPage.getProductDesc());
-                    product.setQuantity(Integer.parseInt(sellerPage.getProductQuantity()));
-                    product.setType(sellerPage.getProductType());
-                    product.isListed();
-                    product.sendToDB(conn);
-                }
-            }
-            */
-        }, editProdEvent -> {
+        }, editProdEvent -> { // edit product
             if (!(((Seller) account).isVerified())) {
-                JOptionPane.showMessageDialog(null, "Account not verified. Unable to proceed with action.");
+                JOptionPane.showMessageDialog(null, "Account not verified. Unable to proceed with action.", "Verification Error", JOptionPane.ERROR_MESSAGE);
                 return;
             }
             if (sellerPage.getSelectedOption()!=null) {
@@ -989,7 +1004,7 @@ public class MainController {
                     sellerPage.updateEditProduct(product);
 
                 } catch (SQLException e) {
-                    JOptionPane.showMessageDialog(null, "Error: " + e.getMessage());
+                    JOptionPane.showMessageDialog(null, "Error: " + e.getMessage(),  "SQL Error", JOptionPane.ERROR_MESSAGE);
                 }
 
             } else {
@@ -997,7 +1012,7 @@ public class MainController {
             }
         }, cancelEvent -> sellerPage.disposeNewWindow(),
 
-        saveProfileEvent -> {
+        saveProfileEvent -> { // profile edited
             int choice = JOptionPane.showConfirmDialog(null, "Are you sure?", "Prompt", JOptionPane.OK_CANCEL_OPTION);
 
             if (choice == JOptionPane.OK_OPTION) {
@@ -1029,14 +1044,14 @@ public class MainController {
                         seller.updateAccount(conn);
                         JOptionPane.showMessageDialog(null, "Profile edited...");
                     } catch (SQLException e) {
-                        JOptionPane.showMessageDialog(null, "Error: " + e.getMessage());
+                        JOptionPane.showMessageDialog(null, "Error: " + e.getMessage(),  "SQL Error", JOptionPane.ERROR_MESSAGE);
                     }
 
                     sellerPage.clearAccountField();
                     sellerPage.disposeNewWindow();
                 }
             }
-        }, addProductEvent -> {
+        }, addProductEvent -> { // add new product
             int choice = JOptionPane.showConfirmDialog(null, "Are you sure?", "Prompt", JOptionPane.OK_CANCEL_OPTION);
 
             if (choice == JOptionPane.OK_OPTION) {
@@ -1048,7 +1063,7 @@ public class MainController {
                     String prodType = sellerPage.getProductType();
                     
                     if (prodName.isEmpty() || prodType.isEmpty()) {
-                        JOptionPane.showMessageDialog(null, "Please fill out the required inputs:\nProduct Name\nProduct Type");
+                        JOptionPane.showMessageDialog(null, "Please fill out the required inputs:\nProduct Name\nProduct Type",  "Invalid Inputs", JOptionPane.ERROR_MESSAGE);
                         return;
                     }
                     
@@ -1066,13 +1081,13 @@ public class MainController {
                     sellerPage.updateSellerProductList(((Seller) account).getProductList(this.conn));
 
                 } catch (SQLException e) {
-                    JOptionPane.showMessageDialog(null, "Error: " + e.getMessage());
+                    JOptionPane.showMessageDialog(null, "Error: " + e.getMessage(),  "SQL Error", JOptionPane.ERROR_MESSAGE);
                 }
 
                 sellerPage.disposeNewWindow();
             }
 
-        }, saveProductEvent -> {
+        }, saveProductEvent -> { // save product
             int choice = JOptionPane.showConfirmDialog(null, "Are you sure?", "Prompt", JOptionPane.OK_CANCEL_OPTION);
 
             if (choice == JOptionPane.OK_OPTION){
@@ -1102,7 +1117,7 @@ public class MainController {
                     String prodType = sellerPage.getProductType();
                     
                     if (prodName.isEmpty() || prodType.isEmpty()) {
-                        JOptionPane.showMessageDialog(null, "Please fill out the required inputs:\nProduct Name\nProduct Type");
+                        JOptionPane.showMessageDialog(null, "Please fill out the required inputs:\nProduct Name\nProduct Type",  "Invalid Inputs", JOptionPane.ERROR_MESSAGE);
                         return;
                     }
                     
@@ -1120,14 +1135,14 @@ public class MainController {
                     JOptionPane.showMessageDialog(null, "Saved product!");
 
                 } catch (SQLException e) {
-                    JOptionPane.showMessageDialog(null, "Error: " + e.getMessage());
+                    JOptionPane.showMessageDialog(null, "Error: " + e.getMessage(),  "SQL Error", JOptionPane.ERROR_MESSAGE);
                 }
 
                 sellerPage.disposeNewWindow();
             }
-        }, removeProductEvent -> {
+        }, removeProductEvent -> { // remove product
             if (!(((Seller) account).isVerified())) {
-                JOptionPane.showMessageDialog(null, "Account not verified. Unable to proceed with action.");
+                JOptionPane.showMessageDialog(null, "Account not verified. Unable to proceed with action.", "Verification Error", JOptionPane.ERROR_MESSAGE);
                 return;
             }
             if (sellerPage.getSelectedOption() != null) {
@@ -1157,9 +1172,9 @@ public class MainController {
                 JOptionPane.showMessageDialog(null, "No Product Selected!", "Remove product", JOptionPane.ERROR_MESSAGE);
             }
 
-        }, approveReturnEvent -> {
+        }, approveReturnEvent -> { // return approved
             if (!(((Seller) account).isVerified())) {
-                JOptionPane.showMessageDialog(null, "Account not verified. Unable to proceed with action.");
+                JOptionPane.showMessageDialog(null, "Account not verified. Unable to proceed with action.", "Verification Error", JOptionPane.ERROR_MESSAGE);
                 return;
             }
             if (sellerPage.getSelectedOption() != null) {
@@ -1182,15 +1197,15 @@ public class MainController {
                         pstmt.executeUpdate();
                         sellerPage.updateSellerRefundList(((Seller) account).refundList(this.conn));
                     } catch (SQLException e) {
-                        JOptionPane.showMessageDialog(null, "Error: " + e.getMessage());
+                        JOptionPane.showMessageDialog(null, "Error: " + e.getMessage(),  "SQL Error", JOptionPane.ERROR_MESSAGE);
                     }
                 }
             } else {
                 JOptionPane.showMessageDialog(null, "No Refund Selected!", "Failure", JOptionPane.ERROR_MESSAGE);
             }
-        }, rejectReturnEvent -> {
+        }, rejectReturnEvent -> { // return request rejected
             if (!(((Seller) account).isVerified())) {
-                JOptionPane.showMessageDialog(null, "Account not verified. Unable to proceed with action.");
+                JOptionPane.showMessageDialog(null, "Account not verified. Unable to proceed with action.",  "Verification Error", JOptionPane.ERROR_MESSAGE);
                 return;
             }
             if (sellerPage.getSelectedOption() != null) {
@@ -1215,14 +1230,14 @@ public class MainController {
                         pstmt.executeUpdate();
                         sellerPage.updateSellerRefundList(((Seller) account).refundList(this.conn));
                     } catch (SQLException e) {
-                        JOptionPane.showMessageDialog(null, "Error: " + e.getMessage());
+                        JOptionPane.showMessageDialog(null, "Error: " + e.getMessage(),  "SQL Error", JOptionPane.ERROR_MESSAGE);
                     }
                 }
             } else {
                 JOptionPane.showMessageDialog(null, "No Refund Selected!", "Failure", JOptionPane.ERROR_MESSAGE);
             }
 
-        }, generateSelected -> {
+        }, generateSelected -> { // generate selected report
             try {
                 if (sellerPage.getSellerReportBox().equals("Sales Report")) {
                     int month = sellerPage.getDateMonth();
@@ -1353,7 +1368,7 @@ public class MainController {
                     sellerPage.setDisableTopButtons();
                 }
             } catch (SQLException e) {
-                JOptionPane.showMessageDialog(null, "Error: " + e.getMessage());
+                JOptionPane.showMessageDialog(null, "Error: " + e.getMessage(),  "SQL Error", JOptionPane.ERROR_MESSAGE);
             }
 
         }, listReportEvent -> {
@@ -1365,14 +1380,14 @@ public class MainController {
                 sellerPage.enableMonthTextField();
             }
 
-        }, backButtonEvent -> {
+        }, backButtonEvent -> { // return to product list
             sellerPage.nextMainPageName(SellerPage.PRODUCTLIST);
             sellerPage.setEnableTopButtons();
         });
     }
 
     private void initCourierListeners() {
-        courierPage.initSignUpListeners(submitSignUpEvent -> {
+        courierPage.initSignUpListeners(submitSignUpEvent -> { // sign up
             String courier_name = courierPage.getCourierName();
             String courier_email_address = courierPage.getCourierEmail();
             String courier_address = courierPage.getCourierAddress();
@@ -1404,7 +1419,7 @@ public class MainController {
                     pstmt.setString(3, courier_address);
                     pstmt.setBoolean(4, !(courier_address.isEmpty() || courier_email_address.isEmpty()));
                                                             // ^ verifies the courier
-                    pstmt.executeUpdate();
+                    pstmt.executeUpdate(); // new courier
 
                     query =
                     """
@@ -1420,21 +1435,22 @@ public class MainController {
                         }
                     }
 
+                    // account initialized as courier
                     account = new Courier(courier_id, courier_name, courier_email_address, courier_address, courier_verified_status);
                     courierPage.nextPageName(AccountPage.MAINPAGE);
 
                 } catch (SQLException e){
-                    JOptionPane.showMessageDialog(null, "Error: " + e.getMessage());
+                    JOptionPane.showMessageDialog(null, "Error: " + e.getMessage(),  "SQL Error", JOptionPane.ERROR_MESSAGE);
                 }
             }
-        }, backSignUpEvent -> {
+        }, backSignUpEvent -> { // return to select account
             courierPage.clearTextFields();
             mainMenuPage.nextPageName(MainFrame.SELECTACCPAGE);
             selectAccountPage.nextPageName(SelectAccount.SELECTACCPAGE);
             courierPage.nextPageName(AccountPage.SIGNUPPAGE);
         });
 
-        courierPage.initMainListeners(dateLtr -> {
+        courierPage.initMainListeners(dateLtr -> { // input year and month for activity report
                 try {
                     int year = Integer.parseInt(courierPage.getCourierYear());
                     int month = Integer.parseInt(courierPage.getCourierMonth());
@@ -1449,17 +1465,17 @@ public class MainController {
                     courierPage.nextMainPageName(CourierPage.ACTIVITYPAGE);
 
                 } catch (IllegalArgumentException e) {
-                    JOptionPane.showMessageDialog(null, "Error: Invalid Arguments");
+                    JOptionPane.showMessageDialog(null, "Error: Invalid Arguments",  "Invalid Inputs", JOptionPane.ERROR_MESSAGE);
                 }
 
-            }, orderLtr -> {
+            }, orderLtr -> { // show currently assigned orders and returns
                 courierPage.updateOOTable(((Courier)account).showOngoingOrders(conn));
                 courierPage.updateORTable(((Courier)account).showOngoingReturns(conn));
                 courierPage.nextMainPageName(CourierPage.ONGOINGORDERSPAGE);
 
             }, actEvent -> courierPage.nextMainPageName(CourierPage.DATEPAGE)
 
-            , deliverEvent -> {
+            , deliverEvent -> { // deliver an order (change order_status from being prepared to for delivery)
                 int update = courierPage.getRowToUpdate();
 
                 if (update != -1) {
@@ -1467,14 +1483,14 @@ public class MainController {
                     JOptionPane.showMessageDialog(null, "Delivery Successful");
                     courierPage.updateOOTable(((Courier) account).showOngoingOrders(conn));
                 } else {
-                    JOptionPane.showMessageDialog(null, "Error: Invalid or no row selected");
+                    JOptionPane.showMessageDialog(null, "Error: Invalid or no row selected",  "Invalid Input", JOptionPane.ERROR_MESSAGE);
                 }
 
-            }, editEvent -> {
+            }, editEvent -> { // edit account information
                 courierPage.nextMainPageName(CourierPage.EDITPAGE);
                 courierPage.updateProfilePage((Courier) account);
 
-            }, saveEvent -> {
+            }, saveEvent -> { // save changes
                 try {
                     Courier courier = (Courier) account;
 
@@ -1486,7 +1502,7 @@ public class MainController {
                         courier.setEmail(courierPage.getProfileCourierEmail());
                         courier.setAddress(courierPage.getProfileCourierAddress());
 
-                        courier.updateAccount(conn);
+                        courier.updateAccount(conn); // update DB
                         JOptionPane.showMessageDialog(null, "Profile changed...");
 
                     } else {
@@ -1494,16 +1510,16 @@ public class MainController {
                     }
 
                 } catch (SQLException | IllegalArgumentException e) {
-                    JOptionPane.showMessageDialog(null, "Error: " + e.getMessage());
+                    JOptionPane.showMessageDialog(null, "Error: " + e.getMessage(),  "Error", JOptionPane.ERROR_MESSAGE);
                 }
 
-                }, logOutEvent -> {
+                }, logOutEvent -> { // log out to main menu
                 mainMenuPage.nextPageName(MainFrame.SELECTACCPAGE);
                 selectAccountPage.nextPageName(SelectAccount.SELECTACCPAGE);
         });
     }
 
-    private boolean emailChecker(String courier_email_address) {
+    private boolean emailChecker(String courier_email_address) { // checks if email is valid
         String regex = "^[\\w!#$%&'*+/=?`{|}~^-]+(?:\\.[\\w!#$%&'*+/=?`{|}~^-]+)" +
                 "*@(?:[a-zA-Z0-9-]+\\.)+[a-zA-Z]{2,6}";
 
@@ -1513,14 +1529,14 @@ public class MainController {
         return matcher.matches();
     }
 
-    private boolean phoneChecker(String user_phone_number) {
+    private boolean phoneChecker(String user_phone_number) { // checks if phone number is valid or left empty
         Pattern pattern = Pattern.compile("^\\d{11}$");
         Matcher matcher = pattern.matcher(user_phone_number);
 
         return user_phone_number.isEmpty() || matcher.matches();
     }
 
-    private String singleQuoteHandler(String toCheck) {
+    private String singleQuoteHandler(String toCheck) { // handles single quotes for insertion into SQL
         return toCheck.replaceAll("'", "''");
     }
 }
