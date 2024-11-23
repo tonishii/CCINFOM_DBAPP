@@ -55,8 +55,7 @@ public class Seller implements Account {
     }
 
     public void updateStatus() {
-        if (this.seller_phone_number != null && this.seller_address != null)
-            this.seller_verified_status = true;
+        this.seller_verified_status = this.seller_phone_number != null && this.seller_address != null;
     }
 
     @Override
