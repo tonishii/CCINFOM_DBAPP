@@ -29,12 +29,12 @@ public class SellerPage extends JPanel implements AccountPage {
                        sellerPhoneField,
                        sellerAddressField,
                        productName,
-                       productPrice,
                        productType,
+                       productDesc;
+    private JSpinner   dateYear,
+                       dateMonth,
                        productQuantity,
-                       productDesc,
-                       dateYear,
-                       dateMonth;
+                       productPrice;
 
     private JTable     ProductPopTable;
 
@@ -43,7 +43,7 @@ public class SellerPage extends JPanel implements AccountPage {
 
     private Map<String, String> lists;
 
-    private JTextArea  productRefundInfo;
+    private JLabel  productRefundInfo;
 
     // Main page
     private JPanel     topPanel,
@@ -214,11 +214,13 @@ public class SellerPage extends JPanel implements AccountPage {
         sellerListPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
         sellerListPane.setPreferredSize(new Dimension(300, 350));
 
-        productRefundInfo = new JTextArea();
-        productRefundInfo.setEditable(false);
+        productRefundInfo = new JLabel();
         productRefundInfo.setBorder(new LineBorder(Color.BLACK, 6));
         productRefundInfo.setPreferredSize(new Dimension(390, 250));
         productRefundInfo.setFocusable(false);
+        productRefundInfo.setOpaque(true);
+        productRefundInfo.setBackground(Color.WHITE);
+        productRefundInfo.setVerticalAlignment(JLabel.TOP);
 
         addBtn = new JButton("Add");
         Colors.setButtonUI(addBtn);
@@ -344,11 +346,11 @@ public class SellerPage extends JPanel implements AccountPage {
         gbc.insets = new Insets(0, 4 ,5 ,4);
         productName = new JTextField();
         productName.setPreferredSize(new Dimension(200, 20));
-        productPrice = new JTextField();
+        productPrice = new JSpinner(new SpinnerNumberModel(0,0,Float.MAX_VALUE,1));
         productPrice.setPreferredSize(new Dimension(200, 20));
         productType = new JTextField();
         productType.setPreferredSize(new Dimension(200, 20));
-        productQuantity = new JTextField();
+        productQuantity = new JSpinner(new SpinnerNumberModel(0,0,Integer.MAX_VALUE,1));
         productQuantity.setPreferredSize(new Dimension(200, 20));
         productDesc = new JTextField();
         productDesc.setPreferredSize(new Dimension(200, 20));
@@ -396,11 +398,11 @@ public class SellerPage extends JPanel implements AccountPage {
         gbc.insets = new Insets(0, 4 ,5 ,4);
         productName = new JTextField();
         productName.setPreferredSize(new Dimension(200, 20));
-        productPrice = new JTextField();
+        productPrice = new JSpinner(new SpinnerNumberModel(0,0,Float.MAX_VALUE,1));
         productPrice.setPreferredSize(new Dimension(200, 20));
         productType = new JTextField();
         productType.setPreferredSize(new Dimension(200, 20));
-        productQuantity = new JTextField();
+        productQuantity = new JSpinner(new SpinnerNumberModel(0,0,Integer.MAX_VALUE,1));
         productQuantity.setPreferredSize(new Dimension(200, 20));
         productDesc = new JTextField();
         productDesc.setPreferredSize(new Dimension(200, 20));
@@ -446,9 +448,9 @@ public class SellerPage extends JPanel implements AccountPage {
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.anchor = GridBagConstraints.CENTER;
         gbc.insets = new Insets(0, 4 ,5 ,4);
-        dateYear = new JTextField();
+        dateYear = new JSpinner(new SpinnerNumberModel(2024,1,Integer.MAX_VALUE,1));
         dateYear.setPreferredSize(new Dimension(100, 20));
-        dateMonth = new JTextField();
+        dateMonth = new JSpinner(new SpinnerNumberModel(1,1,12,1));
         dateMonth.setPreferredSize(new Dimension(100, 20));
         sellerReportBox.setPreferredSize(new Dimension(200, 30));
         sellerReportBox.setSelectedIndex(0);
@@ -594,9 +596,9 @@ public class SellerPage extends JPanel implements AccountPage {
 
     public void updateEditProduct(Product product){
         productName.setText(product.getName());
-        productPrice.setText(Float.toString(product.getPrice()));
+        productPrice.setValue((float) product.getPrice());
         productType.setText(product.getType());
-        productQuantity.setText(Integer.toString(product.getQuantity()));
+        productQuantity.setValue((int) product.getQuantity());
         productDesc.setText(product.getDescription());
     }
 
@@ -680,16 +682,15 @@ public class SellerPage extends JPanel implements AccountPage {
     }
 
     public void enableMonthTextField(){
-        dateMonth.setEditable(true);
+        dateMonth.setEnabled(true);
     }
 
     public void disableMonthTextField(){
-        dateMonth.setEditable(false);
-        dateMonth.setText("");
+        dateMonth.setEnabled(false);
     }
 
-    public String getDateMonth(){ return dateMonth.getText().trim(); }
-    public String getDateYear(){ return dateYear.getText().trim(); }
+    public int getDateMonth(){ return (int) dateMonth.getValue(); }
+    public int getDateYear(){ return (int) dateYear.getValue(); }
     public String getSellerReportBox(){ return (String) this.sellerReportBox.getSelectedItem(); }
     public void setBackSellerBox(){ this.sellerCRBox.setSelectedIndex(0); }
     public String getSellerCRBox(){ return (String) this.sellerCRBox.getSelectedItem(); }
@@ -697,8 +698,8 @@ public class SellerPage extends JPanel implements AccountPage {
     public String getSellerAddress() { return sellerAddressField.getText().trim(); }
     public String getSellerPhone() { return sellerPhoneField.getText().trim(); }
     public String getProductName() { return productName.getText().trim(); }
-    public String getProductPrice() { return productPrice.getText().trim(); }
+    public float getProductPrice() { return (float) productPrice.getValue(); }
     public String getProductType() { return productType.getText().trim(); }
-    public String getProductQuantity() { return productQuantity.getText().trim(); }
+    public int getProductQuantity() { return (int) productQuantity.getValue(); }
     public String getProductDesc() { return productDesc.getText().trim(); }
 }

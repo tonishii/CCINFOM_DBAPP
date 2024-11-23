@@ -780,15 +780,15 @@ public class MainController {
                         product = ((Seller) account).getSellerProduct(pstmt);
 
                         sellerPage.setProductRefundInfo(
-                                " Product Info \n" +
-                                        "Product ID: " + product.getProductID() + "\n" +
-                                        "Product Name: " + product.getName() + "\n" +
-                                        "Product Price: " + product.getPrice() + "\n" +
-                                        "Product Quantity: " + product.getQuantity() + "\n" +
-                                        "Product Rating: " + product.getRating() + "\n" +
-                                        "Product Listed: " + product.isListed() + "\n" +
-                                        "Product Type: " + product.getDescription() + "\n" +
-                                        "Product Description: " + product.getType()
+                                 "<html><b> Product Info </b> <br>\n" +
+                                        "<b> Product ID: </b>" + product.getProductID() + "<br>" +
+                                        "<b> Product Name: </b>" + product.getName() + "<br>" +
+                                        "<b> Product Price: </b>" + product.getPrice() + "<br>" +
+                                        "<b> Product Quantity: </b>" + product.getQuantity() + "<br>" +
+                                        "<b> Product Rating: </b>" + product.getRating() + "<br>" +
+                                        "<b> Product Listed: </b>" + product.isListed() + "<br>" +
+                                        "<b> Product Type: </b>" + product.getDescription() + "<br>" +
+                                        "<b> Product Description: </b>" + product.getType() + "</html>"
                         );
 
                     } catch (SQLException e) {
@@ -817,14 +817,14 @@ public class MainController {
                         refund = ((Seller) account).getSellerRefund(pstmt);
 
                         sellerPage.setProductRefundInfo(
-                                "Refund Info \n" +
-                                        "Order ID: " + refund.getOrderID() + "\n" +
-                                        "Product ID: " + refund.getProductID() + "\n" +
-                                        "Courier ID: " + refund.getCourierID() + "\n" +
-                                        "Return Reason: " + refund.getReason() + "\n" +
-                                        "Product Rating: " + refund.getDescription() + "\n" +
-                                        "Product Listed: " + refund.getDate() + "\n" +
-                                        "Product Type: " + refund.getStatus() + "\n"
+                                "<html><b> Refund Info </b><br>\n" +
+                                        "<b> Order ID: </b>" + refund.getOrderID() + "<br>" +
+                                        "<b> Product ID: </b>" + refund.getProductID() + "<br>" +
+                                        "<b> Courier ID: </b>" + refund.getCourierID() + "<br>" +
+                                        "<b> Return Reason: </b>" + refund.getReason() + "<br>" +
+                                        "<b> Product Rating: </b>" + refund.getDescription() + "<br>" +
+                                        "<b> Product Listed: </b>" + refund.getDate() + "<br>" +
+                                        "<b> Product Type: </b>" + refund.getStatus() + "</html>"
                         );
 
                     } catch (SQLException e) {
@@ -886,11 +886,19 @@ public class MainController {
             switch (JOptionPane.showConfirmDialog(null, "Are you sure?", "Prompt", JOptionPane.OK_CANCEL_OPTION)){
                 case JOptionPane.OK_OPTION -> {
                     sellerPage.updateEditAccount((Seller) account);
-                    ((Seller) account).setName(sellerPage.getSellerName());
-                    ((Seller) account).setAddress(sellerPage.getSellerAddress());
-                    ((Seller) account).setPhoneNumber(sellerPage.getSellerPhone());
-                    ((Seller) account).updateAccount(conn);
-                    sellerPage.disposeNewWindow();
+                    if (sellerPage.getSellerName().isEmpty())
+                        JOptionPane.showMessageDialog(null, "Please fill out the required fields:\nName");
+                    else {
+                        if (!phoneChecker(sellerPage.getSellerPhone())) {
+                            JOptionPane.showMessageDialog(null, "Error: Invalid phone number format.");
+                            return;
+                        }
+                        ((Seller) account).setName(sellerPage.getSellerName());
+                        ((Seller) account).setAddress(sellerPage.getSellerAddress());
+                        ((Seller) account).setPhoneNumber(sellerPage.getSellerPhone());
+                        ((Seller) account).updateAccount(conn);
+                        sellerPage.disposeNewWindow();
+                    }
                 }
             }
         }, addProductEvent -> {
@@ -900,9 +908,9 @@ public class MainController {
                         Product product = new Product();
                         product.setSellerID(((Seller)account).getID());
                         product.setName(sellerPage.getProductName());
-                        product.setPrice(Float.parseFloat(sellerPage.getProductPrice()));
+                        product.setPrice(sellerPage.getProductPrice());
                         product.setDescription(sellerPage.getProductDesc());
-                        product.setQuantity(Integer.parseInt(sellerPage.getProductQuantity()));
+                        product.setQuantity(sellerPage.getProductQuantity());
                         product.setType(sellerPage.getProductType());
                         product.isListed();
                         product.sendToDB(conn);
@@ -936,11 +944,11 @@ public class MainController {
                                 LIMIT 1;
                                 """;
                         PreparedStatement pstmt = conn.prepareStatement(query);
-                        ((Product) account).setQuantity(Integer.parseInt(sellerPage.getProductQuantity()));
+                        ((Product) account).setQuantity(sellerPage.getProductQuantity());
                         pstmt.setString(1, sellerPage.getProductName());
-                        pstmt.setFloat(2, Float.parseFloat(sellerPage.getProductPrice()));
+                        pstmt.setFloat(2, sellerPage.getProductPrice());
                         pstmt.setString(3, sellerPage.getProductType());
-                        pstmt.setInt(4, Integer.parseInt(sellerPage.getProductQuantity()));
+                        pstmt.setInt(4, sellerPage.getProductQuantity());
                         pstmt.setString(5, sellerPage.getProductDesc());
                         pstmt.setBoolean(6, ((Product) account).isListed());
                         pstmt.setInt(7, Ids.get(0));
@@ -1040,8 +1048,8 @@ public class MainController {
         }, generateSelected -> {
             try {
                 if (sellerPage.getSellerReportBox().equals("Sales Report")) {
-                    int month = Integer.parseInt(sellerPage.getDateMonth());
-                    int year = Integer.parseInt(sellerPage.getDateYear());
+                    int month = sellerPage.getDateMonth();
+                    int year = sellerPage.getDateYear();
                     String query = """
                                                SELECT COUNT(DISTINCT o.order_id) AS count, SUM(oc.subtotal) AS total
                                                FROM order_contents oc
@@ -1071,9 +1079,9 @@ public class MainController {
                         } while(rs.next());
                     }
                     sellerPage.setProductRefundInfo(
-                            "Sales Report for " + year + ":\n" +
-                            "Total orders handled: " + transactions +"\n" +
-                            "Total earnings: Php " + sumOfEarnings + "\n");
+                            "<html><b>Sales Report for " + year + "</b><br>" +
+                            "<b>Total orders handled: </b>" + transactions +"<br>" +
+                            "<b>Total earnings: Php </b>" + sumOfEarnings + "</html>");
                     sellerPage.disposeNewWindow();
 
                 } else if (sellerPage.getSellerReportBox().equals("Credibility Report")) {
@@ -1082,7 +1090,7 @@ public class MainController {
                     float average = 0;
 
                     System.out.print("Enter year: ");
-                    year = Integer.parseInt(sellerPage.getDateYear());
+                    year = sellerPage.getDateYear();
 
                     String query =
                             """
@@ -1118,14 +1126,14 @@ public class MainController {
                     while (rstmt.next()) {
                         refunds = rstmt.getInt("numOfRefunds");
                     }
-                    sellerPage.setProductRefundInfo("Credibility Report for " + ((Seller)account).getName() + " on Year: " + year + "\n" +
-                            "Overall Average Rating of Products: " + average + "\n" +
-                            "Total number of Refunds: " + refunds);
+                    sellerPage.setProductRefundInfo("<html><b>Credibility Report for " + ((Seller)account).getName() + " on Year: " + year + "</b><br>" +
+                            "<b>Overall Average Rating of Products: </b>" + average + "<br>" +
+                            "<b>Total number of Refunds: </b>" + refunds + "</html");
                     sellerPage.disposeNewWindow();
 
                 } else if (sellerPage.getSellerReportBox().equals("Product Popularity Report")) {
-                    int month = Integer.parseInt(sellerPage.getDateMonth());
-                    int year = Integer.parseInt(sellerPage.getDateYear());
+                    int month = sellerPage.getDateMonth();
+                    int year = sellerPage.getDateYear();
 
                     String query = "SELECT p.product_name, SUM(oc.item_quantity) AS amt_sold, p.average_rating " +
                             "FROM order_contents oc " +
