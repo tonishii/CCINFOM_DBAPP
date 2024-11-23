@@ -12,9 +12,10 @@ public class Colors {
     public static final Color LIGHT_PINK = new Color(251, 195, 228);
     public static final Color GRAY = new Color(211, 211, 211);
     
+    
+    // Customizes the appearance of a JButton
     public static JButton setButtonUI(JButton button)  {
         JButton b = button;
-//        Border outline = BorderFactory.createLineBorder(Colors.DARK_PINK, 3);
 
         Border raised = BorderFactory.createRaisedBevelBorder();
         Border lowered = BorderFactory.createLoweredBevelBorder();
@@ -23,8 +24,6 @@ public class Colors {
         Border space = BorderFactory.createEmptyBorder(5,15,5,15);
         
         Border compound = BorderFactory.createCompoundBorder(frame, space);
-        
-//        Border compound = BorderFactory.createCompoundBorder(outline, inner);
         
         b.setBorder(compound);
         b.setBackground(Colors.WHITE);

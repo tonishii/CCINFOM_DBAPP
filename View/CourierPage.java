@@ -416,21 +416,6 @@ public class CourierPage extends JPanel implements AccountPage {
         return ongoingOrdersTable;
     }
 
-//    public ArrayList<Integer> getRowsToUpdate() {
-//        TableModel dtm = ongoingOrdersTable.getModel();
-//        int[] selection = ongoingOrdersTable.getSelectedRow();
-//        int colSize = dtm.getColumnCount();
-//        ArrayList<Integer> list = new ArrayList<>();
-//        for (int selected : selection) {
-//            for(int i = 0; i < colSize; i++) {
-//                list.add((Integer)dtm.getValueAt(selected, 0));
-//                System.out.println((Integer)dtm.getValueAt(selected, 0));
-//            }
-//        }
-//
-//        return list;
-//    }
-
     public int getRowToUpdate() {
         TableModel dtm = ongoingOrdersTable.getModel();
         int selection = ongoingOrdersTable.getSelectedRow();
