@@ -1157,6 +1157,7 @@ public class MainController {
                     sellerPage.nextMainPageName(SellerPage.PRODUCTPOPLIST);
                     sellerPage.updateProductPopTable(data);
                     sellerPage.disposeNewWindow();
+                    sellerPage.setDisableTopButtons();
                 }
             } catch (SQLException e) {
                 JOptionPane.showMessageDialog(null, "Error: " + e.getMessage());
@@ -1171,6 +1172,7 @@ public class MainController {
             }
         }, backButtonEvent -> {
             sellerPage.nextMainPageName(SellerPage.PRODUCTLIST);
+            sellerPage.setEnableTopButtons();
         });
     }
 

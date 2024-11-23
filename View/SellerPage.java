@@ -667,6 +667,18 @@ public class SellerPage extends JPanel implements AccountPage {
         ProductPopTable.setModel(model);
     }
 
+    public void setEnableTopButtons(){
+        genBtn.setEnabled(true);
+        editAccBtn.setEnabled(true);
+        logoutBtn.setEnabled(true);
+    }
+
+    public void setDisableTopButtons(){
+        genBtn.setEnabled(false);
+        editAccBtn.setEnabled(false);
+        logoutBtn.setEnabled(false);
+    }
+
     public void enableMonthTextField(){
         dateMonth.setEditable(true);
     }
