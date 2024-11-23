@@ -78,7 +78,6 @@ public class Seller implements Account {
         pstmt.setBoolean(4, this.seller_verified_status);
         pstmt.setInt(5, this.seller_id);
 
-        System.out.println(pstmt);
         pstmt.executeUpdate();
     }
 
