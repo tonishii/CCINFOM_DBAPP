@@ -995,9 +995,11 @@ public class MainController {
                     JOptionPane.showMessageDialog(null, "Please fill out the required fields:\nName");
                 } else {
 
-                    if (!phoneChecker(sellerPage.getEditSellerPhone())) {
-                        JOptionPane.showMessageDialog(null, "Error: Invalid phone number format.");
-                        return;
+                    if (!sellerPage.getEditSellerName().isEmpty()) {
+                        if (!phoneChecker(sellerPage.getEditSellerPhone())) {
+                            JOptionPane.showMessageDialog(null, "Error: Invalid phone number format.");
+                            return;
+                        }
                     }
 
                     seller.setName(sellerPage.getEditSellerName());
@@ -1006,7 +1008,6 @@ public class MainController {
 
                     try {
                         account.updateAccount(conn);
-                        JOptionPane.showMessageDialog(null, sellerPage.getEditSellerPhone());
                         JOptionPane.showMessageDialog(null, "Profile edited...");
                     } catch (SQLException e) {
                         JOptionPane.showMessageDialog(null, "Error: " + e.getMessage());
