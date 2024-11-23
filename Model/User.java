@@ -7,6 +7,8 @@ import java.sql.Date;
 import java.util.*;
 import java.sql.*;
 
+// User represents a user account in the database that can buy items and
+// perform operations on them like rate, refund, and receive
 public class User implements Account {
     private int    user_id;
     private String  user_name;
@@ -18,6 +20,7 @@ public class User implements Account {
     private Date    user_creation_date;
     private boolean user_verified_status;
 
+    // Current shopping cart of the user that cannot contain duplicate products
     private final Set<OrderContent> shoppingCart = new HashSet<>();
 
     public User(int user_id, String user_name, String user_firstname, String user_lastname,
@@ -60,6 +63,33 @@ public class User implements Account {
         return false;
     }
 
+    @Override
+    public void updateAccount(Connection conn) throws SQLException {
+        String update =
+                """
+                UPDATE users
+                SET user_name = ?,
+                    user_phone_number = ?,
+                    user_address = ?,
+                    user_firstname = ?,
+                    user_lastname = ?,
+                    user_verified_status = ?
+                WHERE user_id = ?;
+                """;
+        PreparedStatement pstmt = conn.prepareStatement(update);
+        pstmt.setString(1, this.user_name);
+        pstmt.setString(2, this.user_phone_number);
+        pstmt.setString(3, this.user_address);
+        pstmt.setString(4, this.user_firstname);
+        pstmt.setString(5, this.user_lastname);
+        updateStatus();
+        pstmt.setBoolean(6, this.user_verified_status);
+        pstmt.setInt(7, this.user_id);
+
+        pstmt.executeUpdate();
+    }
+
+    // Returns the mapping between the actual design text and the primary key of the shop
     public Map<String, String> browseByShops(Connection conn) throws SQLException {
         Map<String, String> shopOptionList = new LinkedHashMap<>();
 
@@ -85,6 +115,7 @@ public class User implements Account {
         return shopOptionList;
     }
 
+    // Returns the mapping between the actual design text and the identifier of the product type
     public Map<String, String> browseByProductType(Connection conn) throws SQLException {
         Map<String, String> productTypeOptionList = new LinkedHashMap<>();
 
@@ -117,7 +148,8 @@ public class User implements Account {
 
         if(resultSet.next()) {
             do {
-                productList.add(new Product(
+                productList.add(
+                    new Product(
                         resultSet.getInt("product_id"),
                         resultSet.getInt("seller_id"),
                         resultSet.getString("product_name"),
@@ -127,35 +159,12 @@ public class User implements Account {
                         resultSet.getInt("quantity_stocked"),
                         resultSet.getBoolean("listed_status"),
                         resultSet.getString("description")
-                ));
+                    )
+                );
             } while (resultSet.next());
         }
+
         return productList;
-    }
-
-    public void updateAccount(Connection conn) throws SQLException {
-        String update =
-            """
-            UPDATE users
-            SET user_name = ?,
-                user_phone_number = ?,
-                user_address = ?,
-                user_firstname = ?,
-                user_lastname = ?,
-                user_verified_status = ?
-            WHERE user_id = ?;
-            """;
-        PreparedStatement pstmt = conn.prepareStatement(update);
-        pstmt.setString(1, this.user_name);
-        pstmt.setString(2, this.user_phone_number);
-        pstmt.setString(3, this.user_address);
-        pstmt.setString(4, this.user_firstname);
-        pstmt.setString(5, this.user_lastname);
-        updateStatus();
-        pstmt.setBoolean(6, this.user_verified_status);
-        pstmt.setInt(7, this.user_id);
-
-        pstmt.executeUpdate();
     }
 
     public void updateStatus() {
@@ -174,22 +183,6 @@ public class User implements Account {
         shoppingCart.add(orderContent);
     }
 
-    public void setName(String user_name) { this.user_name = user_name; }
-    public void setFirstName(String user_firstname) { this.user_firstname = user_firstname; }
-    public void setLastName(String user_lastname) { this.user_lastname = user_lastname; }
-    public void setAddress(String user_address) { this.user_address = user_address; }
-    public void setPhoneNumber(String user_phone_number) { this.user_phone_number = user_phone_number; }
-
-
-    public int getID() { return this.user_id; }
-    public Set<OrderContent> getShoppingCart() { return this.shoppingCart; }
-    public String getUsername() { return this.user_name; }
-    public String getFirstName() { return this.user_firstname; }
-    public String getLastName() { return this.user_lastname; }
-    public String getAddress() { return this.user_address; }
-    public String getPhoneNumber() { return this.user_phone_number; }
-    public boolean isVerified() { return this.user_verified_status; }
-
     public ArrayList<Order> getOrdersView(Connection conn, int user_id) throws SQLException {
         ArrayList<Order> orders = new ArrayList<>();
 
@@ -205,13 +198,14 @@ public class User implements Account {
         ResultSet rs = ps.executeQuery();
 
         while (rs.next()) {
-            orders.add(new Order(rs.getInt("order_id"), user_id, rs.getInt("courier_id"), rs.getDate("purchase_date"), 
-                        rs.getFloat("total_price"), OrderStatus.valueOf(rs.getString("order_status")), rs.getDate("receive_date")));
+            orders.add(new Order(rs.getInt("order_id"), user_id, rs.getInt("courier_id"), rs.getDate("purchase_date"),
+                    rs.getFloat("total_price"), OrderStatus.valueOf(rs.getString("order_status")), rs.getDate("receive_date")));
         }
 
         return orders;
     }
-    
+
+    // Returns all the returns made by the user
     public ArrayList<Return> getReturnsView(Connection conn, int user_id) throws SQLException {
         ArrayList<Return> returns = new ArrayList<>();
 
@@ -229,33 +223,50 @@ public class User implements Account {
 
         while (rs.next()) {
             returns.add(new Return(rs.getInt("r.order_id"), rs.getInt("r.product_id"), rs.getInt("r.courier_id"), ReturnReason.convertVal(rs.getString("r.return_reason")),
-                        rs.getString("r.return_description"), rs.getDate("r.return_date"), ReturnStatus.valueOf(rs.getString("r.return_status"))));
+                    rs.getString("r.return_description"), rs.getDate("r.return_date"), ReturnStatus.valueOf(rs.getString("r.return_status"))));
         }
 
         return returns;
     }
-    
+
+    // Returns all the orders made by the user
     public ArrayList<OrderContent> getOrderItems(Connection conn, int user_id) throws SQLException {
         ArrayList<OrderContent> items = new ArrayList<>();
-        
+
         String query =
-                """
-                SELECT o.order_id, p.product_id, p.product_name
-                FROM orders o
-                JOIN order_contents oc ON o.order_id = oc.order_id
-                JOIN products p ON oc.product_id = p.product_id
-                JOIN sellers s ON s.seller_id = p.seller_id
-                WHERE o.user_id = ?;
-                """;
+            """
+            SELECT o.order_id, p.product_id, p.product_name
+            FROM orders o
+            JOIN order_contents oc ON o.order_id = oc.order_id
+            JOIN products p ON oc.product_id = p.product_id
+            JOIN sellers s ON s.seller_id = p.seller_id
+            WHERE o.user_id = ?;
+            """;
 
         PreparedStatement ps = conn.prepareStatement(query);
         ps.setInt(1, user_id);
         ResultSet rs = ps.executeQuery();
-        
+
         while (rs.next()) {
             items.add(new OrderContent(rs.getInt("o.order_id"), rs.getInt("p.product_id"), rs.getString("p.product_name")));
         }
-        
+
         return items;
     }
+
+    public void setName(String user_name) { this.user_name = user_name; }
+    public void setFirstName(String user_firstname) { this.user_firstname = user_firstname; }
+    public void setLastName(String user_lastname) { this.user_lastname = user_lastname; }
+    public void setAddress(String user_address) { this.user_address = user_address; }
+    public void setPhoneNumber(String user_phone_number) { this.user_phone_number = user_phone_number; }
+
+
+    public int getID() { return this.user_id; }
+    public Set<OrderContent> getShoppingCart() { return this.shoppingCart; }
+    public String getUsername() { return this.user_name; }
+    public String getFirstName() { return this.user_firstname; }
+    public String getLastName() { return this.user_lastname; }
+    public String getAddress() { return this.user_address; }
+    public String getPhoneNumber() { return this.user_phone_number; }
+    public boolean isVerified() { return this.user_verified_status; }
 }

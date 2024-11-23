@@ -2,18 +2,19 @@ package Model;
 
 import java.sql.*;
 
+// Product represents a product in the E-Commerce app containing relevant details
 public class Product {
-    private int     product_id;
-    private int     seller_id;
+    private int            product_id;
+    private int            seller_id;
 
-    private String   product_name;
-    private float    product_price;
-    private String   product_type;
+    private String         product_name;
+    private float          product_price;
+    private String         product_type;
 
-    private float    average_rating;
-    private int      quantity_stocked;
-    private boolean  listed_status;
-    private String   description;
+    private final float    average_rating;
+    private int            quantity_stocked;
+    private boolean        listed_status;
+    private String         description;
 
     public Product(int product_id, int seller_id, String product_name, float product_price, String product_type,
                    float average_rating, int quantity_stocked, boolean listed_status, String description) {
@@ -32,7 +33,9 @@ public class Product {
         average_rating = 0.0f;
     }
 
+    // Adds the current instance of the product in the database
     public void sendToDB(Connection conn) throws SQLException {
+
         String query =
         """
         INSERT INTO products (product_id, seller_id, product_name, product_price, product_type, average_rating, quantity_stocked, listed_status, description)
@@ -53,6 +56,7 @@ public class Product {
         pstmt.executeUpdate();
     }
 
+    // Updates the average rating of the product using the user ratings of the records seen in the order_contents table
     public static void updateRating(Connection conn, int productId) throws SQLException {
         String query =
                 """
@@ -63,22 +67,22 @@ public class Product {
         PreparedStatement pstmt = conn.prepareStatement(query);
         pstmt.setInt(1, productId);
         ResultSet resultSet = pstmt.executeQuery();
+
         float rating = 0.0f;
         if (resultSet.next()){
             rating = resultSet.getFloat("product_rating");
         }
 
         query =
-                """
-                UPDATE products
-                SET average_rating = ?
-                WHERE product_id = ?;
-                """;
+            """
+            UPDATE products
+            SET average_rating = ?
+            WHERE product_id = ?;
+            """;
         pstmt = conn.prepareStatement(query);
         pstmt.setFloat(1, rating);
         pstmt.setInt(2, productId);
         pstmt.executeUpdate();
-        System.out.println("Rating Success!!");
     }
 
     @Override

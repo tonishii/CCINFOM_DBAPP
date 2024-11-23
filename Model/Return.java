@@ -5,6 +5,9 @@ import java.sql.*;
 import Model.enums.ReturnReason;
 import Model.enums.ReturnStatus;
 
+import javax.swing.*;
+
+// Return represents a Request for Return made by a user
 public class Return {
     private final int          order_id;
     private final int          product_id;
@@ -32,13 +35,14 @@ public class Return {
         
         try {
             String query = 
-                    """
-                    SELECT 1
-                    FROM orders o
-                    JOIN order_contents oc ON o.order_id = oc.order_id
-                    WHERE o.user_id = ? AND o.order_status = 'DELIVERED'
-                    AND oc.product_id = ?
-                    """;
+                """
+                SELECT 1
+                FROM orders o
+                JOIN order_contents oc ON o.order_id = oc.order_id
+                WHERE o.user_id = ? AND o.order_status = 'DELIVERED'
+                AND oc.product_id = ?
+                """;
+
             PreparedStatement ps = conn.prepareStatement(query);
             ps.setInt(1, user_id);
             ps.setInt(2, product_id);
@@ -61,50 +65,12 @@ public class Return {
             ps.setString(7, ReturnStatus.PROCESSING.name());
             
             ps.executeUpdate();
-            } catch (Exception e) {
-                System.out.println("Error in requesting return: " + e);
-                return false;
-            }
+
+        } catch (SQLException e) {
+            JOptionPane.showMessageDialog(null, "Error in requesting return: " + e);
+            return false;
+        }
         return true;
-    }
-    
-    public void approveReturn(Connection conn, int product_id, int order_id) {
-        try {
-            String query = 
-                    """
-                    UPDATE `returns`
-                    SET return_status = 'REFUNDED',
-                    return_date = NOW()
-                    WHERE product_id = ?
-                    AND order_id = ?
-                    """;
-            PreparedStatement ps = conn.prepareStatement(query);
-            ps.setInt(1, product_id);
-            ps.setInt(2, order_id);
-            
-            ps.executeUpdate();
-        } catch (Exception e) {
-            System.out.println("Error: " + e);
-        }
-    }
-    
-    public void rejectReturn(Connection conn, int product_id, int order_id) {
-        try {
-            String query = 
-                    """
-                    UPDATE `returns`
-                    SET return_status = 'REJECTED'
-                    WHERE product_id = ?
-                    AND order_id = ?
-                    """;
-            PreparedStatement ps = conn.prepareStatement(query);
-            ps.setInt(1, product_id);
-            ps.setInt(2, order_id);
-            
-            ps.executeUpdate();
-        } catch (Exception e) {
-            System.out.println("Error: " + e);
-        }
     }
     
     public int getOrderID() {

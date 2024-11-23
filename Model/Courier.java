@@ -8,6 +8,7 @@ import javax.swing.*;
 import java.util.ArrayList;
 import java.sql.*;
 
+// Courier is a shallow representation of a Courier company in stored in a database
 public class Courier implements Account {
     private int     courier_id;
     private String   courier_name;
@@ -24,7 +25,8 @@ public class Courier implements Account {
         this.courier_verified_status = courier_verified_status;
     }
 
-    public Courier() {}
+    public Courier() {
+    }
 
     @Override
     public boolean login(int id, Connection conn) throws SQLException {
@@ -53,14 +55,14 @@ public class Courier implements Account {
     @Override
     public void updateAccount(Connection conn) throws SQLException {
         String update =
-                """
-                UPDATE couriers
-                SET courier_name = ?,
-                    courier_email_address = ?,
-                    courier_address = ?,
-                    courier_verified_status = ?
-                WHERE courier_id = ?;
-                """;
+            """
+            UPDATE couriers
+            SET courier_name = ?,
+                courier_email_address = ?,
+                courier_address = ?,
+                courier_verified_status = ?
+            WHERE courier_id = ?;
+            """;
 
         PreparedStatement pstmt = conn.prepareStatement(update);
         pstmt.setString(1, this.courier_name);
@@ -75,13 +77,16 @@ public class Courier implements Account {
 
     public ArrayList<Order> showCompletedOrders(Connection conn, int year, int month) {
         ArrayList<Order> orderList = new ArrayList<>();
+
         try {
-            String orderQuery = """
-                    SELECT *
-                    FROM orders
-                    WHERE courier_id = ? AND order_status IN ('Completed', 'Delivered')
-                    AND YEAR(receive_date) = ? AND MONTH(receive_date) = ?;
-                    """;
+            String orderQuery =
+                """
+                SELECT *
+                FROM orders
+                WHERE courier_id = ? AND order_status IN ('Completed', 'Delivered')
+                AND YEAR(receive_date) = ? AND MONTH(receive_date) = ?;
+                """;
+
             PreparedStatement ordersStmt = conn.prepareStatement(orderQuery);
             ordersStmt.setInt(1, this.courier_id);
             ordersStmt.setInt(2, year);
@@ -89,30 +94,36 @@ public class Courier implements Account {
             ResultSet rs = ordersStmt.executeQuery();
 
             while (rs.next()) {
-                orderList.add(new Order(rs.getInt("order_id"),
+                orderList.add(
+                    new Order(
+                        rs.getInt("order_id"),
                         this.courier_id,
                         rs.getInt("courier_id"),
                         rs.getDate("purchase_date"),
                         rs.getFloat("total_price"),
                         OrderStatus.valueOf(rs.getString("order_status")),
-                        rs.getDate("receive_date")));
+                        rs.getDate("receive_date")
+                    )
+                );
             }
-        } catch (Exception e) {
-            JOptionPane.showMessageDialog(null, "Error.");
+        } catch (SQLException e) {
+            JOptionPane.showMessageDialog(null, "Error: " + e.getMessage());
         }
+
         return orderList;
     }
 
     public ArrayList<Return> showCompletedReturns(Connection conn, int year, int month) {
         ArrayList<Return> returns = new ArrayList<>();
+
         try {
             String returnQuery =
-                    """
-                    SELECT *
-                    FROM returns r
-                    WHERE r.courier_id = ? AND r.return_status = 'REFUNDED'
-                    AND YEAR(r.return_date) = ? AND MONTH(r.return_date) = ?;
-                    """;
+                """
+                SELECT *
+                FROM returns r
+                WHERE r.courier_id = ? AND r.return_status = 'REFUNDED'
+                AND YEAR(r.return_date) = ? AND MONTH(r.return_date) = ?;
+                """;
 
             PreparedStatement returnsStmt = conn.prepareStatement(returnQuery);
             returnsStmt.setInt(1, this.courier_id);
@@ -121,42 +132,52 @@ public class Courier implements Account {
             ResultSet returnsResultSet = returnsStmt.executeQuery();
 
             while (returnsResultSet.next()) {
-                returns.add(new Return(
+                returns.add(
+                    new Return(
                         returnsResultSet.getInt("order_id"),
                         returnsResultSet.getInt("product_id"),
                         returnsResultSet.getInt("courier_id"),
                         ReturnReason.convertVal(returnsResultSet.getString("return_reason")),
                         returnsResultSet.getString("return_description"),
                         returnsResultSet.getDate("return_date"),
-                        ReturnStatus.valueOf(returnsResultSet.getString("return_status"))
+                        ReturnStatus.valueOf(returnsResultSet.getString("return_status")
+                    )
                 ));
             }
         } catch (SQLException e) {
-            throw new RuntimeException(e);
+            JOptionPane.showMessageDialog(null, "Error: " + e.getMessage());
         }
+
         return returns;
     }
 
     public ArrayList<Order> showOngoingOrders(Connection conn) {
         ArrayList<Order> orderList = new ArrayList<>();
+
         try {
-            String orderQuery = """
-                            SELECT *
-                            FROM orders
-                            WHERE courier_id = ? AND order_status NOT IN ('Completed', 'Delivered');
-                    """;
+            String orderQuery =
+                """
+                SELECT *
+                FROM orders
+                WHERE courier_id = ? AND order_status NOT IN ('Completed', 'Delivered');
+                """;
+
             PreparedStatement ordersStmt = conn.prepareStatement(orderQuery);
             ordersStmt.setInt(1, this.courier_id);
             ResultSet rs = ordersStmt.executeQuery();
 
             while (rs.next()) {
-                orderList.add(new Order(rs.getInt("order_id"),
+                orderList.add(
+                    new Order(
+                        rs.getInt("order_id"),
                         this.courier_id,
                         rs.getInt("courier_id"),
                         rs.getDate("purchase_date"),
                         rs.getFloat("total_price"),
                         OrderStatus.valueOf(rs.getString("order_status")),
-                        rs.getDate("receive_date")));
+                        rs.getDate("receive_date")
+                    )
+                );
             }
         } catch (Exception e) {
             JOptionPane.showMessageDialog(null, "Error.");
@@ -168,31 +189,34 @@ public class Courier implements Account {
         ArrayList<Return> returns = new ArrayList<>();
         try {
             String returnQuery =
-                    """
-                    SELECT *
-                    FROM returns r
-                    WHERE r.courier_id = ?
-                    AND r.return_status = 'PROCESSING';
-                    """;
+                """
+                SELECT *
+                FROM returns r
+                WHERE r.courier_id = ?
+                AND r.return_status = 'PROCESSING';
+                """;
 
             PreparedStatement returnsStmt = conn.prepareStatement(returnQuery);
             returnsStmt.setInt(1, this.courier_id);
             ResultSet returnsResultSet = returnsStmt.executeQuery();
 
             while (returnsResultSet.next()) {
-                returns.add(new Return(
-                    returnsResultSet.getInt("order_id"),
-                    returnsResultSet.getInt("product_id"),
-                    returnsResultSet.getInt("courier_id"),
-                    ReturnReason.convertVal(returnsResultSet.getString("return_reason")),
-                    returnsResultSet.getString("return_description"),
-                    returnsResultSet.getDate("return_date"),
-                    ReturnStatus.valueOf(returnsResultSet.getString("return_status"))
+                returns.add(
+                    new Return(
+                        returnsResultSet.getInt("order_id"),
+                        returnsResultSet.getInt("product_id"),
+                        returnsResultSet.getInt("courier_id"),
+                        ReturnReason.convertVal(returnsResultSet.getString("return_reason")),
+                        returnsResultSet.getString("return_description"),
+                        returnsResultSet.getDate("return_date"),
+                        ReturnStatus.valueOf(returnsResultSet.getString("return_status")
+                    )
                 ));
             }
         } catch (SQLException e) {
-            throw new RuntimeException(e);
+            JOptionPane.showMessageDialog(null, "Error: " + e.getMessage());
         }
+
         return returns;
     }
 
@@ -208,16 +232,13 @@ public class Courier implements Account {
             PreparedStatement ps = conn.prepareStatement(query);
             ps.setInt(1, item);
             ps.executeUpdate();
-        } catch (Exception e) {
-            JOptionPane.showMessageDialog(null, "Error");
+
+        } catch (SQLException e) {
+            JOptionPane.showMessageDialog(null, "Error: " + e.getMessage());
         }
     }
 
-    public void updateStatus() {
-        if (this.courier_address != null && this.courier_email_address != null)
-            this.courier_verified_status = true;
-    }
-
+    // assignCourier finds the courier with the least amount of orders to process
     public static int assignCourier(Connection conn) {
         try {
             String query = """
@@ -246,7 +267,6 @@ public class Courier implements Account {
             if (rs != null && rs.next()) {
                 return rs.getInt("c.courier_id");
             }
-
         } catch (SQLException e) {
             JOptionPane.showMessageDialog(null, "Error in assigning courier: " + e);
         }
@@ -257,6 +277,10 @@ public class Courier implements Account {
     @Override
     public String toString() {
         return "courier";
+    }
+
+    public void updateStatus() {
+        this.courier_verified_status = this.courier_email_address != null && this.courier_address != null;
     }
 
     public void setName(String courier_name) { this.courier_name = courier_name; }

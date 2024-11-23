@@ -8,6 +8,8 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+// Seller represents an account in the E-Commerce app that is verified to sell products
+
 public class Seller implements Account {
     private int    seller_id;
     private String  seller_name;
@@ -26,7 +28,8 @@ public class Seller implements Account {
         this.seller_verified_status = seller_verified_status;
     }
 
-    public Seller() {}
+    public Seller() {
+    }
 
     @Override
     public boolean login(int id, Connection conn) throws SQLException {
@@ -81,7 +84,8 @@ public class Seller implements Account {
         pstmt.executeUpdate();
     }
 
-    public ArrayList<Product> productList(Connection conn) throws SQLException {
+    // Returns the products sold by the seller as seen in the products table
+    public ArrayList<Product> getProductList(Connection conn) throws SQLException {
         ArrayList<Product> productLists = new ArrayList<>();
 
         String query = """
@@ -104,22 +108,26 @@ public class Seller implements Account {
             int quantity = resultSet.getInt("quantity_stocked");
             boolean status = resultSet.getBoolean("listed_status");
             String desc = resultSet.getString("description");
+
             productLists.add(new Product(prodId,sellerId,seller,price,type,rating,quantity,status,desc));
         }
+
         return productLists;
     }
 
+    // Returns the mapping of the actual display text and the primary composite key/identifier
     public Map<String,String> refundList(Connection conn) throws SQLException {
         Map<String,String> refundLists = new LinkedHashMap<>();
 
-        String query = """
-        SELECT r.order_id, r.product_id, u.user_id, u.user_name, p.product_name
-        FROM returns r
-        LEFT JOIN products p ON r.product_id = p.product_id
-        LEFT JOIN orders o ON r.order_id = o.order_id
-        LEFT JOIN users u ON o.user_id = u.user_id
-        WHERE p.seller_id = ? AND r.return_status = 'PROCESSING';
-        """;
+        String query =
+            """
+            SELECT r.order_id, r.product_id, u.user_id, u.user_name, p.product_name
+            FROM returns r
+            LEFT JOIN products p ON r.product_id = p.product_id
+            LEFT JOIN orders o ON r.order_id = o.order_id
+            LEFT JOIN users u ON o.user_id = u.user_id
+            WHERE p.seller_id = ? AND r.return_status = 'PROCESSING';
+            """;
 
         PreparedStatement pstmt = conn.prepareStatement(query);
         pstmt.setInt(1, this.seller_id);
@@ -134,6 +142,7 @@ public class Seller implements Account {
 
             refundLists.put("Order Id: " + orderId + " Product Id: " + prodId, orderId + " " + prodId);
         }
+
         return refundLists;
     }
 
@@ -143,15 +152,16 @@ public class Seller implements Account {
         ResultSet rstmt = pstmt.executeQuery();
 
         if (rstmt.next()){
-            product = new Product(rstmt.getInt("product_id"),
-                    rstmt.getInt("seller_id"),
-                    rstmt.getString("product_name"),
-                    rstmt.getFloat("product_price"),
-                    rstmt.getString("product_type"),
-                    rstmt.getFloat("average_rating"),
-                    rstmt.getInt("quantity_stocked"),
-                    rstmt.getBoolean("listed_status"),
-                    rstmt.getString("description"));
+            product = new Product(
+                rstmt.getInt("product_id"),
+                rstmt.getInt("seller_id"),
+                rstmt.getString("product_name"),
+                rstmt.getFloat("product_price"),
+                rstmt.getString("product_type"),
+                rstmt.getFloat("average_rating"),
+                rstmt.getInt("quantity_stocked"),
+                rstmt.getBoolean("listed_status"),
+                rstmt.getString("description"));
         }
 
         return product;
@@ -163,13 +173,17 @@ public class Seller implements Account {
         ResultSet rstmt = pstmt.executeQuery();
 
         if (rstmt.next()){
-            refund = new Return(rstmt.getInt("order_id"),
+            refund =
+                new Return(
+                    rstmt.getInt("order_id"),
                     rstmt.getInt("product_id"),
                     rstmt.getInt("courier_id"),
                     ReturnReason.convertVal(rstmt.getString("return_reason")),
                     rstmt.getString("return_description"),
                     rstmt.getDate("return_date"),
-                    ReturnStatus.valueOf(rstmt.getString("return_status")));
+                    ReturnStatus.valueOf(rstmt.getString("return_status")
+                )
+            );
         }
 
         return refund;

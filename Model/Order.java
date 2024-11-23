@@ -3,9 +3,11 @@ import java.sql.Date;
 import java.sql.*;
 
 import Model.enums.OrderStatus;
-import java.util.ArrayList;
+
+import javax.swing.*;
 import java.util.Set;
 
+// Order represents an order made in the E-Commerce app
 public class Order {
     private final int        order_id;
     private final int        user_id;
@@ -14,7 +16,7 @@ public class Order {
     private final Date        purchase_date;
     private final float       total_price;
     private final OrderStatus order_status;
-    private Date        receive_date;
+    private final Date        receive_date;
     
     public Order(int order_id, int user_id, int courier_id, Date purchase_date, float total_price, OrderStatus order_status, Date receive_date) {
         this.order_id = order_id;
@@ -25,7 +27,9 @@ public class Order {
         this.order_status = order_status;
         this.receive_date = receive_date;
     }
-    
+
+    // Adds a new record of an Order to the orders table with its attributes as values
+    // while also adding all the contents of the cart (selected items specifically) to the order_contents table
     public void sendToDB(Connection conn, Set<OrderContent> cart) throws SQLException {
         String query =
         """
@@ -44,6 +48,7 @@ public class Order {
 
         ps.executeUpdate();
 
+        // Query for checking the current quantity of the current product
         query =
         """
         SELECT quantity_stocked
@@ -51,6 +56,7 @@ public class Order {
         WHERE product_id = ?
         """;
 
+        // Query for updating the new quantity and if the product is still listed
         String update =
         """
         UPDATE products
@@ -71,6 +77,7 @@ public class Order {
             }
 
             if (currQty - product.getQuantity()  < 0) {
+                // Throw an error when the most recent quantity minus the users quantity causes an error
                 throw new SQLException("Only " + currQty + " are in stock.");
             }
 
@@ -82,49 +89,18 @@ public class Order {
             pstmt.executeUpdate();
         }
     }
-    
-    public static void displayOrderContents(Connection conn, int order_id) {
-        ArrayList<OrderContent> oc = getOrderContents(conn, order_id);
-        System.out.println("Product ID | Product Name | Quantity Purchased | Subtotal");
-        for (OrderContent item : oc) {
-            System.out.printf("%d | %s | %d | %f\n", item.getProductID(), item.getProductName(), item.getQuantity(), item.getPriceEach() * item.getQuantity());
-        }
-    }
-    
-    public static ArrayList<OrderContent> getOrderContents(Connection conn, int order_id) {
-        ArrayList<OrderContent> oc = new ArrayList<>();
-        try {
-            String query = 
-                """
-                SELECT p.product_id, p.product_name, oc.item_quantity, oc.subtotal
-                FROM order_contents oc
-                JOIN products p ON oc.product_id = p.product_id
-                WHERE oc.order_id = ?
-                """;
-            PreparedStatement ps = conn.prepareStatement(query);
-            ps.setInt(1, order_id);
-            ResultSet rs = ps.executeQuery();
-            
-            while (rs.next()) {
-                oc.add(new OrderContent(rs.getInt("p.product_id"), rs.getString("p.product_name"), rs.getInt("oc.item_quantity"), rs.getFloat("oc.subtotal")));
-            }
-        } catch (Exception e) {
-            System.out.println("Error in fetching order contents: " + e);
-        }      
-        return oc;
-    }
 
-    public String toString() { return order_id + " " + purchase_date.toString() + " " + total_price; }
-
+    // Updates the selected order made by the user to be in delivery
     public static boolean receiveOrder(Connection conn, int order_id, int user_id) {
         try {
             String query = 
-                    """
-                    SELECT 1
-                    FROM orders
-                    WHERE order_id = ? AND user_id = ?
-                    AND order_status = 'FOR_DELIVERY'
-                    """;
+                """
+                SELECT 1
+                FROM orders
+                WHERE order_id = ? AND user_id = ?
+                AND order_status = 'FOR_DELIVERY'
+                """;
+
             PreparedStatement ps = conn.prepareStatement(query);
             ps.setInt(1, order_id);
             ps.setInt(2, user_id);
@@ -133,23 +109,26 @@ public class Order {
             if (!(rs.next())) return false;
             
             query = 
-                    """
-                    UPDATE orders
-                    SET order_status = 'DELIVERED',
-                    receive_date = NOW()
-                    WHERE order_id = ?
-                    """;
+                """
+                UPDATE orders
+                SET order_status = 'DELIVERED',
+                receive_date = NOW()
+                WHERE order_id = ?
+                """;
             ps = conn.prepareStatement(query);
             ps.setInt(1, order_id);
             
             ps.executeUpdate();
-        } catch (Exception e) {
-            System.out.println("Error while receiving order: " + e);
+
+        } catch (SQLException e) {
+            JOptionPane.showMessageDialog(null, "Error while receiving order: " + e);
             return false;
         }
         
         return true;
     }
+
+    public String toString() { return order_id + " " + purchase_date.toString() + " " + total_price; }
 
     public int getOrderID() {
         return this.order_id;

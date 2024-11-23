@@ -16,6 +16,7 @@ import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+// MainController controls most of the logic and functionality in the E-Commerce app
 public class MainController {
     private final MainFrame mainMenuPage;
     private final SQLConnect connectPage;
@@ -123,7 +124,7 @@ public class MainController {
                     if (account instanceof User) {
                         userPage.updateBrowseList(((User) account).browseByShops(conn));
                     } else if (account instanceof Seller){
-                        sellerPage.updateSellerProductList(((Seller) account).productList(this.conn));
+                        sellerPage.updateSellerProductList(((Seller) account).getProductList(this.conn));
                     }
 
                 } else {
@@ -813,7 +814,7 @@ public class MainController {
 
                     account = new Seller(seller_id, seller_name, seller_address, seller_phone_number, seller_creation_date, seller_verified_status);
                     sellerPage.clearAccountField();
-                    sellerPage.updateSellerProductList(((Seller)account).productList(conn));
+                    sellerPage.updateSellerProductList(((Seller) account).getProductList(conn));
                     sellerPage.nextPageName(AccountPage.MAINPAGE);
 
                 } catch (SQLException e) {
@@ -848,7 +849,7 @@ public class MainController {
 
             try {
                 if (sellerPage.getSellerCRBox().equals("Products")) {
-                    sellerPage.updateSellerProductList(((Seller) account).productList(this.conn));
+                    sellerPage.updateSellerProductList(((Seller) account).getProductList(this.conn));
                 } else if (sellerPage.getSellerCRBox().equals("Refunds")) {
                     sellerPage.updateSellerRefundList(((Seller) account).refundList(this.conn));
                 }
@@ -1035,7 +1036,7 @@ public class MainController {
                     product.sendToDB(conn);
                     JOptionPane.showMessageDialog(null, "Added product!");
 
-                    sellerPage.updateSellerProductList(((Seller) account).productList(this.conn));
+                    sellerPage.updateSellerProductList(((Seller) account).getProductList(this.conn));
 
                 } catch (SQLException e) {
                     JOptionPane.showMessageDialog(null, "Error: " + e.getMessage());
@@ -1079,7 +1080,7 @@ public class MainController {
 
                     pstmt.executeUpdate();
 
-                    sellerPage.updateSellerProductList(((Seller) account).productList(conn));
+                    sellerPage.updateSellerProductList(((Seller) account).getProductList(conn));
                     JOptionPane.showMessageDialog(null, "Saved product!");
 
                 } catch (SQLException e) {
@@ -1106,72 +1107,73 @@ public class MainController {
                     pstmt.setInt(2, Ids.get(0));
                     pstmt.setInt(3, Ids.get(1));
                     pstmt.executeUpdate();
-                    sellerPage.updateSellerProductList(((Seller) account).productList(this.conn));
+                    sellerPage.updateSellerProductList(((Seller) account).getProductList(this.conn));
                     JOptionPane.showMessageDialog(null, "Removed product!");
 
                 } catch (SQLException e) {
-                    JOptionPane.showMessageDialog(null, "Error: " + e.getMessage());
+                    JOptionPane.showMessageDialog(null, "Error: " + e.getMessage(), "Remove product", JOptionPane.ERROR_MESSAGE);
                 }
             } else {
-                JOptionPane.showMessageDialog(null, "No Product Selected!", "Failure", JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(null, "No Product Selected!", "Remove product", JOptionPane.ERROR_MESSAGE);
             }
+
         }, approveReturnEvent -> {
             if (sellerPage.getSelectedOption() != null) {
-                switch (JOptionPane.showConfirmDialog(null, "Are you sure?", "Prompt", JOptionPane.OK_CANCEL_OPTION)){
-                    case JOptionPane.OK_OPTION -> {
-                        List<Integer> Ids = Arrays.stream(sellerPage.getSelectedOption()
-                                        .split(" "))
-                                        .map(Integer::parseInt)
-                                        .toList();
-                        try {
-                            String query = """
-                                    UPDATE returns
-                                    SET return_status = ?
-                                    WHERE order_id = ? AND product_id = ?;
-                                    """;
-                            PreparedStatement pstmt = conn.prepareStatement(query);
-                            pstmt.setString(1, ReturnStatus.REFUNDED.toString());
-                            pstmt.setInt(2, Ids.get(0));
-                            pstmt.setInt(3, Ids.get(1));
-                            pstmt.executeUpdate();
-                            sellerPage.updateSellerRefundList(((Seller) account).refundList(this.conn));
-                        } catch (SQLException e) {
-                            JOptionPane.showMessageDialog(null, "Error: " + e.getMessage());
-                        }
+                int choice = JOptionPane.showConfirmDialog(null, "Are you sure?", "Return product", JOptionPane.OK_CANCEL_OPTION);
+                if (choice == JOptionPane.OK_OPTION) {
+                    List<Integer> Ids = Arrays.stream(sellerPage.getSelectedOption()
+                                    .split(" "))
+                                    .map(Integer::parseInt)
+                                    .toList();
+                    try {
+                        String query = """
+                                UPDATE returns
+                                SET return_status = ?
+                                WHERE order_id = ? AND product_id = ?;
+                                """;
+                        PreparedStatement pstmt = conn.prepareStatement(query);
+                        pstmt.setString(1, ReturnStatus.REFUNDED.toString());
+                        pstmt.setInt(2, Ids.get(0));
+                        pstmt.setInt(3, Ids.get(1));
+                        pstmt.executeUpdate();
+                        sellerPage.updateSellerRefundList(((Seller) account).refundList(this.conn));
+                    } catch (SQLException e) {
+                        JOptionPane.showMessageDialog(null, "Error: " + e.getMessage());
                     }
                 }
             } else {
                 JOptionPane.showMessageDialog(null, "No Refund Selected!", "Failure", JOptionPane.ERROR_MESSAGE);
             }
         }, rejectReturnEvent -> {
-            if (sellerPage.getSelectedOption()!=null) {
-                switch (JOptionPane.showConfirmDialog(null, "Are you sure?", "Prompt", JOptionPane.OK_CANCEL_OPTION)){
-                    case JOptionPane.OK_OPTION -> {
-                        List<Integer> Ids = Arrays.stream(sellerPage.getSelectedOption()
-                                        .split(" "))
-                                .map(Integer::parseInt)
-                                .toList();
-                        try {
-                            String query = """
-                                    UPDATE returns
-                                    SET return_status = ?
-                                        return_date = '9999-12-31'
-                                    WHERE order_id = ? AND product_id = ?;
-                                    """;
-                            PreparedStatement pstmt = conn.prepareStatement(query);
-                            pstmt.setString(1, ReturnStatus.REJECTED.toString());
-                            pstmt.setInt(2, Ids.get(0));
-                            pstmt.setInt(3, Ids.get(1));
-                            pstmt.executeUpdate();
-                            sellerPage.updateSellerRefundList(((Seller) account).refundList(this.conn));
-                        }catch (SQLException e) {
-                            JOptionPane.showMessageDialog(null, "Error: " + e.getMessage());
-                        }
+            if (sellerPage.getSelectedOption() != null) {
+                int choice = JOptionPane.showConfirmDialog(null, "Are you sure?", "Return", JOptionPane.OK_CANCEL_OPTION);
+
+                if (choice == JOptionPane.OK_OPTION) {
+                    List<Integer> Ids = Arrays.stream(sellerPage.getSelectedOption()
+                                    .split(" "))
+                            .map(Integer::parseInt)
+                            .toList();
+                    try {
+                        String query = """
+                                UPDATE returns
+                                SET return_status = ?
+                                    return_date = '9999-12-31'
+                                WHERE order_id = ? AND product_id = ?;
+                                """;
+                        PreparedStatement pstmt = conn.prepareStatement(query);
+                        pstmt.setString(1, ReturnStatus.REJECTED.toString());
+                        pstmt.setInt(2, Ids.get(0));
+                        pstmt.setInt(3, Ids.get(1));
+                        pstmt.executeUpdate();
+                        sellerPage.updateSellerRefundList(((Seller) account).refundList(this.conn));
+                    } catch (SQLException e) {
+                        JOptionPane.showMessageDialog(null, "Error: " + e.getMessage());
                     }
                 }
             } else {
                 JOptionPane.showMessageDialog(null, "No Refund Selected!", "Failure", JOptionPane.ERROR_MESSAGE);
             }
+
         }, generateSelected -> {
             try {
                 if (sellerPage.getSellerReportBox().equals("Sales Report")) {
@@ -1221,7 +1223,6 @@ public class MainController {
                     int refunds = 0;
                     float average = 0;
 
-                    System.out.print("Enter year: ");
                     year = sellerPage.getDateYear();
 
                     String query =
