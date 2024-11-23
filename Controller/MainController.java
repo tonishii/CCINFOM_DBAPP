@@ -1002,24 +1002,31 @@ public class MainController {
 
             if (choice == JOptionPane.OK_OPTION) {
                 Seller seller = (Seller) account;
-
-                if (sellerPage.getEditSellerName().isEmpty()) {
+                
+                String name = sellerPage.getEditSellerName();
+                String phone = sellerPage.getEditSellerPhone();
+                String address = sellerPage.getEditSellerAddress();
+                
+                if (name.isEmpty()) {
                     JOptionPane.showMessageDialog(null, "Please fill out the required fields:\nName");
                 } else {
 
-                    if (!sellerPage.getEditSellerName().isEmpty()) {
-                        if (!phoneChecker(sellerPage.getEditSellerPhone())) {
+                    if (!name.isEmpty()) {
+                        if (!phoneChecker(phone)) {
                             JOptionPane.showMessageDialog(null, "Error: Invalid phone number format.");
                             return;
                         }
-                    }
+                    } 
+                    else name = null;
+                    
+                    if (address.isEmpty()) address = null;
 
-                    seller.setName(sellerPage.getEditSellerName());
-                    seller.setAddress(sellerPage.getEditSellerAddress());
-                    seller.setPhoneNumber(sellerPage.getEditSellerPhone());
+                    seller.setName(name);
+                    seller.setAddress(address);
+                    seller.setPhoneNumber(phone);
 
                     try {
-                        account.updateAccount(conn);
+                        seller.updateAccount(conn);
                         JOptionPane.showMessageDialog(null, "Profile edited...");
                     } catch (SQLException e) {
                         JOptionPane.showMessageDialog(null, "Error: " + e.getMessage());
@@ -1036,12 +1043,21 @@ public class MainController {
                 try {
                     Product product = new Product();
 
+                    String prodName = sellerPage.getProductName();
+                    float prodPrice = sellerPage.getProductPrice();
+                    String prodType = sellerPage.getProductType();
+                    
+                    if (prodName.isEmpty() || prodType.isEmpty()) {
+                        JOptionPane.showMessageDialog(null, "Please fill out the required inputs:\nProduct Name\nProduct Type");
+                        return;
+                    }
+                    
                     product.setSellerID(((Seller) account).getID());
-                    product.setName(sellerPage.getProductName());
-                    product.setPrice(sellerPage.getProductPrice());
+                    product.setName(prodName);
+                    product.setPrice(prodPrice);
                     product.setDescription(sellerPage.getProductDesc());
                     product.setQuantity(sellerPage.getProductQuantity());
-                    product.setType(sellerPage.getProductType());
+                    product.setType(prodType);
                     product.updateListedStatus();
 
                     product.sendToDB(conn);
@@ -1081,9 +1097,18 @@ public class MainController {
 
                     PreparedStatement pstmt = conn.prepareStatement(query);
 
-                    pstmt.setString(1, sellerPage.getProductName());
-                    pstmt.setFloat(2, sellerPage.getProductPrice());
-                    pstmt.setString(3, sellerPage.getProductType());
+                    String prodName = sellerPage.getProductName();
+                    float prodPrice = sellerPage.getProductPrice();
+                    String prodType = sellerPage.getProductType();
+                    
+                    if (prodName.isEmpty() || prodType.isEmpty()) {
+                        JOptionPane.showMessageDialog(null, "Please fill out the required inputs:\nProduct Name\nProduct Type");
+                        return;
+                    }
+                    
+                    pstmt.setString(1, prodName);
+                    pstmt.setFloat(2, prodPrice);
+                    pstmt.setString(3, prodType);
                     pstmt.setInt(4, sellerPage.getProductQuantity());
                     pstmt.setString(5, singleQuoteHandler(sellerPage.getProductDesc()));
                     pstmt.setBoolean(6, sellerPage.getProductQuantity() != 0);
