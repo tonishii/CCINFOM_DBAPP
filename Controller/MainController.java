@@ -292,6 +292,12 @@ public class MainController {
 
         }, addToCartEvent -> { // Action: Pressing the add button in the shop page
             User user = (User) account;
+            
+            if (!(user.isVerified())) {
+                JOptionPane.showMessageDialog(null, "Account not verified. Unable to proceed with action.");
+                return;
+            }
+            
             Product selectedProduct = userPage.getSelectedProduct();
             int orderQuantity = userPage.getQuantity();
 
@@ -330,6 +336,12 @@ public class MainController {
             userPage.updateBrowseList(options);
 
         }, checkOutEvent -> { // Action: Pressing check out button in the shopping cart page
+            
+            if (!(((User) account).isVerified())) {
+                JOptionPane.showMessageDialog(null, "Account not verified. Unable to proceed with action.");
+                return;
+            }
+            
             Set<OrderContent> shoppingCart = ((User) account).getShoppingCart();
             ArrayList<OrderContent> selectedProducts = userPage.getSelectedRecords(new ArrayList<>(shoppingCart));
 
@@ -387,6 +399,12 @@ public class MainController {
             }
 
         }, removeItemEvent -> { // Action: Pressing the remove item button in the shopping cart page
+
+            if (!(((User) account).isVerified())) {
+                JOptionPane.showMessageDialog(null, "Account not verified. Unable to proceed with action.");
+                return;
+            }
+            
             Set<OrderContent> shoppingCart = ((User) account).getShoppingCart();
             ArrayList<OrderContent> selectedProducts = userPage.getSelectedRecords(new ArrayList<>(shoppingCart));
 
@@ -409,6 +427,12 @@ public class MainController {
             userPage.updateCartTable(shoppingCart);
             
         }, returnEvent -> { // Action: Pressing the return item button in the orders page
+            
+            if (!(((User) account).isVerified())) {
+                JOptionPane.showMessageDialog(null, "Account not verified. Unable to proceed with action.");
+                return;
+            }
+            
             try {
                 User user = (User) account;
                 ArrayList<OrderContent> itemsList = user.getOrderItems(conn, user.getID());
@@ -446,6 +470,12 @@ public class MainController {
             }
 
         }, rateEvent -> { // Action: Pressing the return item button in the orders page
+            
+            if (!(((User) account).isVerified())) {
+                JOptionPane.showMessageDialog(null, "Account not verified. Unable to proceed with action.");
+                return;
+            }
+            
             try {
                 User user = (User) account;
 
@@ -484,6 +514,12 @@ public class MainController {
             }
 
         }, receiveEvent -> { // Action: Pressing the receive item button in the orders page
+            
+            if (!(((User) account).isVerified())) {
+                JOptionPane.showMessageDialog(null, "Account not verified. Unable to proceed with action.");
+                return;
+            }
+            
             try {
                 ArrayList<OrderContent> itemsList = ((User) account).getOrderItems(conn, ((User) account).getID());
                 userPage.ordersListToProducts(itemsList);
@@ -518,19 +554,33 @@ public class MainController {
 
             if (option == JOptionPane.OK_OPTION) {
                 try {
+                    String user_name = userPage.getEditedName();
+                    String user_firstname = userPage.getEditedFirstName();
+                    String user_lastname = userPage.getEditedLastName();
+                    String user_address = userPage.getEditedAddress();
+                    String user_phone_number = userPage.getEditedPhone();
+
+                    if (user_name.isEmpty() || user_firstname.isEmpty() || user_lastname.isEmpty()) {
+                        JOptionPane.showMessageDialog(null, "Please fill out the required fields:\nUsername\nFirst Name\nLast Name");
+                        return;
+                    }
+                    
                     // Retrieve the edited fields and update in the database
-                    if (!userPage.getEditedPhone().isEmpty()) {
-                        if (!(phoneChecker(userPage.getEditedPhone()))) {
+                    if (!user_phone_number.isEmpty()) {
+                        if (!(phoneChecker(user_phone_number))) {
                             JOptionPane.showMessageDialog(null, "Error: Invalid phone number format.");
                             return;
                         }
                     }
-
-                    user.setName(userPage.getEditedName());
-                    user.setFirstName(userPage.getEditedFirstName());
-                    user.setLastName(userPage.getEditedLastName());
-                    user.setAddress(userPage.getEditedAddress());
-                    user.setPhoneNumber(userPage.getEditedPhone());
+                    else user_phone_number = null;
+                    
+                    if (user_address.isEmpty()) user_address = null;
+                    
+                    user.setName(user_name);
+                    user.setFirstName(user_firstname);
+                    user.setLastName(user_lastname);
+                    user.setAddress(user_address);
+                    user.setPhoneNumber(user_phone_number);
 
                     user.updateAccount(conn);
                     JOptionPane.showMessageDialog(null, "Profile changed...");

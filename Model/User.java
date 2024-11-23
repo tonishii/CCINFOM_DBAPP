@@ -61,51 +61,6 @@ public class User implements Account {
         return false;
     }
 
-    public boolean displayPurchaseHistory(Connection conn) {
-        ArrayList<Order> ph = this.getPurchaseHistory(conn);
-        if (!(ph.isEmpty())) {
-            System.out.println("Order ID | Courier ID | Date Purchased | Total | Date Received");
-            for (Order order : ph) {
-                System.out.printf("%d | %d | %s | %f | %s\n", order.getOrderID(), order.getCourierID(), formatDate(order.getPurchaseDate()),
-                        order.getTotalPrice(), formatDate(order.getReceiveDate()));
-            }
-        }
-        else {
-            System.out.println("No purchase history.");
-            return false;
-        }
-        return true;
-    }
-
-    private String formatDate(Date date) {
-        String pattern = "yyyy-MM-dd";
-        SimpleDateFormat sdf = new SimpleDateFormat(pattern);
-        return sdf.format(date);
-    }
-
-    public ArrayList<Order> getPurchaseHistory(Connection conn) {
-        ArrayList<Order> ph = new ArrayList<>();
-        try {
-            String query = 
-            """
-            SELECT order_id, courier_id, purchase_date, total_price, order_status, receive_date
-            FROM orders
-            WHERE user_id =  ?
-            AND order_status = "DELIVERED"
-            """;
-            PreparedStatement ps = conn.prepareStatement(query);
-            ps.setInt(1, this.user_id);
-            ResultSet rs = ps.executeQuery();
-            while (rs.next()) {
-                ph.add(new Order(rs.getInt("order_id"), this.user_id, rs.getInt("courier_id"), rs.getDate("purchase_date"), 
-                        rs.getFloat("total_price"), OrderStatus.valueOf(rs.getString("order_status")), rs.getDate("receive_date")));
-            }
-        } catch (Exception e) {
-            System.out.println("Error while getting purchase history: " + e);
-        }
-        return ph;
-    }
-
     public Map<String, String> browseByShops(Connection conn) throws SQLException {
         Map<String, String> shopOptionList = new LinkedHashMap<>();
 
@@ -187,7 +142,8 @@ public class User implements Account {
                 user_phone_number = ?,
                 user_address = ?,
                 user_firstname = ?,
-                user_lastname = ?
+                user_lastname = ?,
+                user_verified_status = ?
             WHERE user_id = ?;
             """;
         PreparedStatement pstmt = conn.prepareStatement(update);
@@ -205,6 +161,7 @@ public class User implements Account {
     public void updateStatus() {
         if (this.user_phone_number != null && this.user_address != null)
             this.user_verified_status = true;
+        else this.user_verified_status = false;
     }
 
     public String toString() {
@@ -233,6 +190,7 @@ public class User implements Account {
     public String getLastName() { return this.user_lastname; }
     public String getAddress() { return this.user_address; }
     public String getPhoneNumber() { return this.user_phone_number; }
+    public boolean isVerified() { return this.user_verified_status; } 
     
     public ArrayList<Order> getOrdersView(Connection conn, int user_id) throws SQLException {
         ArrayList<Order> orders = new ArrayList<>();
