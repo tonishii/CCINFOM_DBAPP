@@ -659,7 +659,7 @@ public class MainController {
 
                             text.append(
                                 String.format(
-                                    "<br><br><b>TOTAL:</b> PHP %.2f </html",
+                                    "<br><br><b>TOTAL:</b> ₱ %.2f </html",
                                     total
                                 )
                             );
@@ -1150,7 +1150,7 @@ public class MainController {
                     sellerPage.setProductRefundInfo(
                         "<html><b>Sales Report for " + year + "</b><br>" +
                         "<b>Total orders handled: </b>" + transactions +"<br>" +
-                        "<b>Total earnings: Php </b>" + sumOfEarnings + "</html>"
+                        "<b>Total earnings: ₱ </b>" + sumOfEarnings + "</html>"
                     );
                     sellerPage.disposeNewWindow();
 
