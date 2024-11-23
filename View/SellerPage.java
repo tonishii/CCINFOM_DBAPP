@@ -17,7 +17,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 public class SellerPage extends JPanel implements AccountPage {
-    private CardLayout sellerCardLayout;
+    private final CardLayout sellerCardLayout;
     private GridBagLayout newWindowLayout;
 
     public static final String SIGNUP = "signup";
@@ -31,6 +31,7 @@ public class SellerPage extends JPanel implements AccountPage {
                        productName,
                        productType,
                        productDesc;
+
     private JSpinner   dateYear,
                        dateMonth,
                        productQuantity,
@@ -162,7 +163,6 @@ public class SellerPage extends JPanel implements AccountPage {
 
         bottomPanel.add(getProductListPage(), PRODUCTLIST);
         bottomPanel.add(showProductPop(), PRODUCTPOPLIST);
-
 
         panel.add(topPanel);
         panel.add(bottomPanel);
@@ -344,33 +344,44 @@ public class SellerPage extends JPanel implements AccountPage {
 
         JPanel panel = new JPanel( new GridBagLayout());
         GridBagConstraints gbc = new GridBagConstraints();
+
         gbc.insets = new Insets(0, 4 ,5 ,4);
         productName = new JTextField();
         productName.setPreferredSize(new Dimension(200, 20));
+
         productPrice = new JSpinner(new SpinnerNumberModel(0,0,Float.MAX_VALUE,1));
         productPrice.setPreferredSize(new Dimension(200, 20));
+
         productType = new JTextField();
         productType.setPreferredSize(new Dimension(200, 20));
+
         productQuantity = new JSpinner(new SpinnerNumberModel(0,0,Integer.MAX_VALUE,1));
         productQuantity.setPreferredSize(new Dimension(200, 20));
+
         productDesc = new JTextField();
         productDesc.setPreferredSize(new Dimension(200, 20));
-        gbc.gridy=0;
+
+        gbc.gridy = 0;
         panel.add(new JLabel("Product Name: "),gbc);
         panel.add(productName, gbc);
-        gbc.gridy=1;
+
+        gbc.gridy = 1;
         panel.add(new JLabel("Product Price: "),gbc);
         panel.add(productPrice, gbc);
-        gbc.gridy=2;
+
+        gbc.gridy = 2;
         panel.add(new JLabel("Product Type: "),gbc);
         panel.add(productType, gbc);
-        gbc.gridy=3;
+
+        gbc.gridy = 3;
         panel.add(new JLabel("Product Quantity: "),gbc);
         panel.add(productQuantity, gbc);
-        gbc.gridy=4;
+
+        gbc.gridy = 4;
         panel.add(new JLabel("Product Description: "),gbc);
         panel.add(productDesc, gbc);
-        gbc.gridy=5;
+
+        gbc.gridy = 5;
         panel.add(addProductBtn, gbc);
         panel.add(cancelBtn, gbc);
 
@@ -378,8 +389,6 @@ public class SellerPage extends JPanel implements AccountPage {
         newWindow.setResizable(false);
         newWindow.setLocationRelativeTo(null);
         newWindow.setVisible(true);
-
-        //return JOptionPane.showConfirmDialog(null, panel, "Add Product", JOptionPane.OK_CANCEL_OPTION);
     }
 
     public void showEditProduct(){
@@ -598,9 +607,9 @@ public class SellerPage extends JPanel implements AccountPage {
 
     public void updateEditProduct(Product product){
         productName.setText(product.getName());
-        productPrice.setValue((float) product.getPrice());
+        productPrice.setValue(product.getPrice());
         productType.setText(product.getType());
-        productQuantity.setValue((int) product.getQuantity());
+        productQuantity.setValue(product.getQuantity());
         productDesc.setText(product.getDescription());
     }
 
@@ -700,7 +709,7 @@ public class SellerPage extends JPanel implements AccountPage {
     public String getSellerAddress() { return sellerAddressField.getText().trim(); }
     public String getSellerPhone() { return sellerPhoneField.getText().trim(); }
     public String getProductName() { return productName.getText().trim(); }
-    public float getProductPrice() { return (float) productPrice.getValue(); }
+    public float getProductPrice() { return ((Number) productPrice.getValue()).floatValue(); }
     public String getProductType() { return productType.getText().trim(); }
     public int getProductQuantity() { return (int) productQuantity.getValue(); }
     public String getProductDesc() { return productDesc.getText().trim(); }

@@ -6,10 +6,7 @@ import Model.enums.ReturnStatus;
 
 import javax.swing.*;
 import java.util.ArrayList;
-import java.util.Scanner;
 import java.sql.*;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 public class Courier implements Account {
     private int     courier_id;
@@ -54,69 +51,26 @@ public class Courier implements Account {
     }
 
     @Override
-    public void displayView(Scanner scn, Connection conn) {
-        while (true) {
-            System.out.print(
-            """
-            [1] Ongoing Orders
-            [2] Generate Activity Report
-            [3] Edit Account
-            [4] Exit
-            Select option:\s""");
+    public void updateAccount(Connection conn) throws SQLException {
+        String update =
+                """
+                UPDATE couriers
+                SET courier_name = ?,
+                    courier_email_address = ?,
+                    courier_address = ?,
+                    courier_verified_status = ?
+                WHERE courier_id = ?;
+                """;
 
-            switch (scn.nextLine().trim()) {
-                case "3" -> {
-                    boolean goBack = true;
-                    while (goBack) {
-                        System.out.printf("Courier Details:\n[1] Name: %s\n[2] Email Address: %s\n[3] Address %s\n[4] Go back",
-                                courier_name, courier_email_address, courier_email_address);
-                        System.out.print("Enter option to edit: ");
+        PreparedStatement pstmt = conn.prepareStatement(update);
+        pstmt.setString(1, this.courier_name);
+        pstmt.setString(2, this.courier_email_address);
+        pstmt.setString(3, this.courier_address);
+        updateStatus();
+        pstmt.setBoolean(4, !(this.courier_email_address.isEmpty() || this.courier_address.isEmpty()));
+        pstmt.setInt(5, this.courier_id);
 
-                        switch (scn.nextLine()) {
-                            case "1":
-                                System.out.print("Enter new courier name: ");
-                                this.courier_name = scn.nextLine();
-                                updateAccount(conn);
-                                break;
-                            case "2":
-                                System.out.print("Enter new email address: ");
-                                this.courier_email_address = scn.nextLine();
-                                if (!courier_email_address.isEmpty()) {
-                                    String regex = "^[\\w!#$%&'*+/=?`{|}~^-]+(?:\\.[\\w!#$%&'*+/=?`{|}~^-]+)" +
-                                            "*@(?:[a-zA-Z0-9-]+\\.)+[a-zA-Z]{2,6}";
-
-                                    Pattern pattern = Pattern.compile(regex);
-                                    Matcher matcher = pattern.matcher(courier_email_address);
-
-                                    while (!matcher.matches()) {
-                                        System.out.print("Invalid Email!\n Re-Enter email address:  ");
-                                        courier_email_address = scn.nextLine();
-                                        matcher = pattern.matcher(courier_email_address);
-                                    }
-                                }
-                                updateStatus();
-                                updateAccount(conn);
-                                break;
-                            case "3":
-                                System.out.print("Enter new courier address: ");
-                                this.courier_address = scn.nextLine();
-                                updateStatus();
-                                updateAccount(conn);
-                                break;
-                            case "4":
-                                goBack = false;
-                            default:
-                                System.out.print("Error: Enter valid option.");
-                        }
-                    }
-                }
-                case "4" -> {
-                    return;
-                }
-
-                default -> System.out.println("Error: Enter valid option.");
-            }
-        }
+        pstmt.executeUpdate();
     }
 
     public ArrayList<Order> showCompletedOrders(Connection conn, int year, int month) {
@@ -245,11 +199,11 @@ public class Courier implements Account {
     public void deliverOrder (Connection conn, int item) {
         try {
             String query =
-                        """
-                        UPDATE orders
-                        SET order_status = 'FOR_DELIVERY'
-                        WHERE order_id = ?;
-                        """;
+            """
+            UPDATE orders
+            SET order_status = 'FOR_DELIVERY'
+            WHERE order_id = ?;
+            """;
 
             PreparedStatement ps = conn.prepareStatement(query);
             ps.setInt(1, item);
@@ -293,58 +247,11 @@ public class Courier implements Account {
                 return rs.getInt("c.courier_id");
             }
 
-        } catch (Exception e) {
-            System.out.println("Error in assigning courier: " + e);
+        } catch (SQLException e) {
+            JOptionPane.showMessageDialog(null, "Error in assigning courier: " + e);
         }
+
         return -1;
-    }
-
-    public void updateCourierAccount(Connection conn, String newName, String newEmail, String newAddress) {
-        try {
-            String update =
-                    """
-                    UPDATE couriers
-                    SET courier_name = ?,
-                        courier_email_address = ?,
-                        courier_address = ?,
-                        courier_verified_status = ?
-                    WHERE courier_id = ?;
-                    """;
-            PreparedStatement pstmt = conn.prepareStatement(update);
-            pstmt.setString(1, newName);
-            pstmt.setString(2, newEmail);
-            pstmt.setString(3, newAddress);
-            pstmt.setBoolean(4, !(newEmail.isEmpty() || newAddress.isEmpty()));
-            pstmt.setInt(5, this.courier_id);
-            pstmt.executeUpdate();
-        } catch (Exception e){
-            JOptionPane.showMessageDialog(null,"Error updating name: ");
-        }
-    }
-
-    @Override
-    public void updateAccount(Connection conn) {
-        try {
-            String update =
-                    """
-                    UPDATE couriers
-                    SET courier_name = ?,
-                        courier_email_address = ?,
-                        courier_address = ?,
-                        courier_verified_status = ?
-                    WHERE courier_id = ?;
-                    """;
-            PreparedStatement pstmt = conn.prepareStatement(update);
-            pstmt.setString(1, this.courier_name);
-            pstmt.setString(2, this.courier_email_address);
-            pstmt.setString(3, this.courier_address);
-            updateStatus();
-            pstmt.setBoolean(4, this.courier_verified_status);
-            pstmt.setInt(5, this.courier_id);
-            pstmt.executeUpdate();
-        } catch (Exception e){
-            System.out.println("Error updating name: " + e);
-        }
     }
 
     @Override
@@ -353,6 +260,9 @@ public class Courier implements Account {
     }
 
     public void setName(String courier_name) { this.courier_name = courier_name; }
+    public void setEmail(String courier_email_address) { this.courier_email_address = courier_email_address; }
+    public void setAddress(String courier_address) { this.courier_address = courier_address; }
+
     public String getName() { return this.courier_name; }
     public String getEmailAddress() { return this.courier_email_address; }
     public String getAddress() { return this.courier_address; }

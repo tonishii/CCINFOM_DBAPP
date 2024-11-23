@@ -32,30 +32,25 @@ public class Product {
         average_rating = 0.0f;
     }
 
-    public void sendToDB(Connection conn) {
-        try {
-            String query =
-            """
-            INSERT INTO products (product_id, seller_id, product_name, product_price, product_type, average_rating, quantity_stocked, listed_status, description)
-            SELECT IFNULL(MAX(product_id), 0) + 1, ?, ?, ?, ?, ?, ?, ?, ?
-            FROM products
-            """;
+    public void sendToDB(Connection conn) throws SQLException {
+        String query =
+        """
+        INSERT INTO products (product_id, seller_id, product_name, product_price, product_type, average_rating, quantity_stocked, listed_status, description)
+        SELECT IFNULL(MAX(product_id), 0) + 1, ?, ?, ?, ?, ?, ?, ?, ?
+        FROM products
+        """;
 
-            try (PreparedStatement pstmt = conn.prepareStatement(query)) {
-                pstmt.setInt(1, seller_id);
-                pstmt.setString(2, product_name);
-                pstmt.setFloat(3, product_price);
-                pstmt.setString(4, product_type);
-                pstmt.setFloat(5, average_rating);
-                pstmt.setInt(6, quantity_stocked);
-                pstmt.setBoolean(7, listed_status);
-                pstmt.setString(8, description);
+        PreparedStatement pstmt = conn.prepareStatement(query);
+        pstmt.setInt(1, seller_id);
+        pstmt.setString(2, product_name);
+        pstmt.setFloat(3, product_price);
+        pstmt.setString(4, product_type);
+        pstmt.setFloat(5, average_rating);
+        pstmt.setInt(6, quantity_stocked);
+        pstmt.setBoolean(7, listed_status);
+        pstmt.setString(8, description);
 
-                pstmt.executeUpdate();
-            }
-        } catch (Exception e) {
-            System.out.println("Error while sending to DB: " + e.getMessage());
-        }
+        pstmt.executeUpdate();
     }
 
     public static void updateRating(Connection conn, int productId) throws SQLException {

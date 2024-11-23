@@ -283,12 +283,15 @@ public class UserPage extends JPanel implements AccountPage {
         productInfoArea = new JTextArea();
         productInfoArea.setEditable(false);
         productInfoArea.setFocusable(false);
-        productInfoArea.setPreferredSize(new Dimension(400, 200));
-        productInfoArea.setBorder(BorderFactory.createTitledBorder(BorderFactory.createLineBorder(Color.BLACK, 2),
+
+        JScrollPane pane = new JScrollPane(productInfoArea);
+        pane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
+        pane.setPreferredSize(new Dimension(400, 200));
+        pane.setBorder(BorderFactory.createTitledBorder(BorderFactory.createLineBorder(Color.BLACK, 2),
                 "Product details", TitledBorder.LEFT, TitledBorder.TOP, new Font("Montserrat", Font.PLAIN, 12)));
 
         gbc.gridx = 1;
-        panel.add(productInfoArea, gbc);
+        panel.add(pane, gbc);
 
         addToCartBtn = new JButton("Add to Cart");
         Colors.setButtonUI(addToCartBtn);
@@ -311,8 +314,8 @@ public class UserPage extends JPanel implements AccountPage {
 
         final String[] columnNames = {"Select", "Product Name", "-", "Qty", "+", "Price"};
         DefaultTableModel model = new DefaultTableModel(columnNames, 0);
-        cartTable = new JTable(model);
 
+        cartTable = new JTable(model);
         JScrollPane cartTablePane = new JScrollPane(cartTable, JScrollPane.VERTICAL_SCROLLBAR_ALWAYS, JScrollPane.HORIZONTAL_SCROLLBAR_ALWAYS);
         cartTablePane.setPreferredSize(new Dimension(550, 400));
         gbc.gridx = 0;
@@ -333,11 +336,6 @@ public class UserPage extends JPanel implements AccountPage {
         gbc.gridwidth = 1;
         removeBtn.setFocusable(false);
         panel.add(removeBtn, gbc);
-
-        JLabel lbl = new JLabel("<html><b>TOTAL: </b></html>");
-        gbc.gridx = 0;
-        gbc.gridy = 1;
-        panel.add(lbl, gbc);
 
         return panel;
     }
@@ -843,14 +841,35 @@ public class UserPage extends JPanel implements AccountPage {
         
         return receiveOrd;
     }
-    
-    public int getSpinnerVal() {
-        return (int) this.spinner.getValue();
-    }
 
-    // CAN CAUSE A NPE
-    public int getIntComboBoxVal() {
-        return (int) this.intComboBox.getSelectedItem();
+    public int getCheckoutConfirmPage(ArrayList<OrderContent> selectedItems) {
+        DefaultListModel<String> listModel = new DefaultListModel<>();
+        double totalOrderPrice = 0.0;
+
+        for (OrderContent order : selectedItems) {
+            double totalPrice = order.getQuantity() * order.getPriceEach();
+            listModel.addElement(String.format("%s - Qty: %d, Price Each: ₱%.2f, Total: ₱%.2f",
+            order.getProductName(), order.getQuantity(), order.getPriceEach(), totalPrice));
+            totalOrderPrice += totalPrice;
+        }
+
+        JList<String> breakdownList = new JList<>(listModel);
+        breakdownList.setVisibleRowCount(10);
+
+        JScrollPane scrollPane = new JScrollPane(breakdownList, ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS, ScrollPaneConstants.HORIZONTAL_SCROLLBAR_ALWAYS);
+        JLabel lbl = new JLabel(String.format("Total Order Price: ₱%.2f", totalOrderPrice));
+
+        JPanel panel = new JPanel(new BorderLayout());
+        panel.add(scrollPane, BorderLayout.CENTER);
+        panel.add(lbl, BorderLayout.SOUTH);
+
+        return JOptionPane.showConfirmDialog(
+            null,
+            panel,
+            "Order Summary",
+            JOptionPane.OK_CANCEL_OPTION,
+            JOptionPane.INFORMATION_MESSAGE
+        );
     }
 
     @Override
@@ -864,7 +883,6 @@ public class UserPage extends JPanel implements AccountPage {
     }
 
     public void setProductInfo(String text) { this.productInfoArea.setText(text); }
-    public void setOrderInfo(String text) { this.orderInfoLbl.setText(text); }
 
     public ArrayList<OrderContent> getSelectedRecords(ArrayList<OrderContent> shoppingCart) {
         ArrayList<OrderContent> selectedRecords = new ArrayList<>();
@@ -878,6 +896,7 @@ public class UserPage extends JPanel implements AccountPage {
         return selectedRecords;
     }
 
+    public int getSpinnerVal() { return (int) this.spinner.getValue(); }
     public String getUserName() { return userNameField.getText().trim(); }
     public String getUserFirstName() { return userFirstNameField.getText().trim(); }
     public String getUserLastName() { return userLastNameField.getText().trim(); }
@@ -901,7 +920,7 @@ public class UserPage extends JPanel implements AccountPage {
 
         @Override
         public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
-            setBackground(isSelected ? table.getSelectionBackground() : UIManager.getColor("Button.background"));
+            setBackground((isSelected || hasFocus) ? table.getSelectionBackground() : UIManager.getColor("Button.background"));
             return this;
         }
     }

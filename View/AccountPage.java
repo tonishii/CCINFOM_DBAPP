@@ -4,7 +4,6 @@ import javax.swing.*;
 import java.awt.event.ActionListener;
 
 public interface AccountPage {
-
     // Constants used for switching between the main account page and the account's signup page
     String MAINPAGE = "main";
     String SIGNUPPAGE = "signup";

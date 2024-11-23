@@ -11,7 +11,6 @@ import java.awt.event.WindowEvent;
 import java.sql.*;
 import java.sql.Date;
 import java.text.SimpleDateFormat;
-import java.time.Instant;
 import java.time.Year;
 import java.util.*;
 import java.util.regex.Matcher;
@@ -29,28 +28,27 @@ public class MainController {
     private Connection conn;
     private Account account;
 
-    public MainController() {
-        mainMenuPage = new MainFrame();
+    public MainController(MainFrame mainFrame, SQLConnect sqlConnect, SelectAccount selectAccount,
+                          UserPage userPage, SellerPage sellerPage, CourierPage courierPage) {
 
-        connectPage = new SQLConnect();
-        mainMenuPage.addToCenterPanel(connectPage, MainFrame.CONNECTPAGE);
+        mainMenuPage = mainFrame;
+        connectPage = sqlConnect;
+        selectAccountPage = selectAccount;
+        this.userPage = userPage;
+        this.sellerPage = sellerPage;
+        this.courierPage = courierPage;
+
         initConnectionListeners();
-
-        selectAccountPage = new SelectAccount();
-        mainMenuPage.addToCenterPanel(selectAccountPage, MainFrame.SELECTACCPAGE);
         initSelectListeners();
-
-        userPage = new UserPage();
-        mainMenuPage.addToCenterPanel(userPage, MainFrame.USERPAGE);
         initUserListeners();
-
-        sellerPage = new SellerPage();
-        mainMenuPage.addToCenterPanel(sellerPage, MainFrame.SELLERPAGE);
         initSellerListeners();
-
-        courierPage = new CourierPage();
-        mainMenuPage.addToCenterPanel(courierPage, MainFrame.COURIERPAGE);
         initCourierListeners();
+
+        mainMenuPage.addToCenterPanel(connectPage, MainFrame.CONNECTPAGE);
+        mainMenuPage.addToCenterPanel(selectAccountPage, MainFrame.SELECTACCPAGE);
+        mainMenuPage.addToCenterPanel(userPage, MainFrame.USERPAGE);
+        mainMenuPage.addToCenterPanel(sellerPage, MainFrame.SELLERPAGE);
+        mainMenuPage.addToCenterPanel(courierPage, MainFrame.COURIERPAGE);
 
         mainMenuPage.addWindowListener(new WindowAdapter() {
             @Override
@@ -73,23 +71,23 @@ public class MainController {
                 String password = connectPage.getPassword();
 
                 Class.forName("com.mysql.cj.jdbc.Driver");
-                this.conn = DriverManager.getConnection(url, username, password);
+                conn = DriverManager.getConnection(url, username, password);
 
-                this.selectAccountPage.nextPageName(SelectAccount.SELECTACCPAGE);
-                this.mainMenuPage.nextPageName(MainFrame.SELECTACCPAGE);
+                selectAccountPage.nextPageName(SelectAccount.SELECTACCPAGE);
+                mainMenuPage.nextPageName(MainFrame.SELECTACCPAGE);
 
-            } catch (Exception e) {
+            } catch (SQLException | ClassNotFoundException e) {
                 JOptionPane.showMessageDialog(null, "Error: " + e.getMessage());
             }
 
         }, exitEvent -> {
             try {
                 if (conn != null) {
-                    this.conn.close();
+                    conn.close();
                 }
                 System.exit(0);
 
-            } catch (Exception e) {
+            } catch (SQLException e) {
                 JOptionPane.showMessageDialog(null, "Error: " + e.getMessage());
             }
         });
@@ -98,9 +96,9 @@ public class MainController {
     private void initSelectListeners() {
         selectAccountPage.initSelectListeners(loginEvent -> {
             selectAccountPage.clearText();
-            this.account = selectAccountPage.getAccountType();
             selectAccountPage.nextPageName(SelectAccount.LOGINPAGE);
 
+            this.account = selectAccountPage.getAccountType();
         }, signUpEvent -> {
             this.account = selectAccountPage.getAccountType();
 
@@ -108,24 +106,30 @@ public class MainController {
             account instanceof Seller ? sellerPage :
             courierPage).nextPageName(AccountPage.SIGNUPPAGE);
 
+            // Go to their SIGNUP page
             mainMenuPage.nextPageName(account.toString());
 
         }, submitLoginEvent -> {
             try {
                 if (account.login(Integer.parseInt(selectAccountPage.getID()), conn)) {
+
                     (account instanceof User ? userPage :
                     account instanceof Seller ? sellerPage :
                     courierPage).nextPageName(AccountPage.MAINPAGE);
+
+                    // Go to their respective MAIN page
                     mainMenuPage.nextPageName(account.toString());
 
                     if (account instanceof User) {
                         userPage.updateBrowseList(((User) account).browseByShops(conn));
-                    }
-                    else if (account instanceof Seller){
+                    } else if (account instanceof Seller){
                         sellerPage.updateSellerProductList(((Seller) account).productList(this.conn));
                     }
+
+                } else {
+                    JOptionPane.showMessageDialog(null, "Account does not exist.");
                 }
-                else JOptionPane.showMessageDialog(null, "Account does not exist.");
+
             } catch (NumberFormatException e) {
                 JOptionPane.showMessageDialog(null, "Error: Enter valid ID.");
             } catch (SQLException e) {
@@ -133,6 +137,7 @@ public class MainController {
             }
 
         }, backLoginEvent -> selectAccountPage.nextPageName(SelectAccount.SELECTACCPAGE)
+
         , backEvent -> {
             try {
                 connectPage.clearTextFields();
@@ -146,16 +151,17 @@ public class MainController {
 
     private void initUserListeners() {
         userPage.initSignUpListeners(submitSignUpEvent -> { // Action: Pressing the submit button in the sign-up page
+
             String user_name = userPage.getUserName();
             String user_firstname = userPage.getUserFirstName();
             String user_lastname = userPage.getUserLastName();
             String user_address = userPage.getUserAddress();
-
             String user_phone_number = userPage.getUserPhone();
             
-            if (user_name.isEmpty() || user_firstname.isEmpty() || user_lastname.isEmpty())
+            if (user_name.isEmpty() || user_firstname.isEmpty() || user_lastname.isEmpty()) {
                 JOptionPane.showMessageDialog(null, "Please fill out the required fields:\nUsername\nFirst Name\nLast Name");
-            else {
+            } else {
+
                 if (!phoneChecker(user_phone_number)) {
                     JOptionPane.showMessageDialog(null, "Error: Invalid phone number format.");
                     return;
@@ -172,17 +178,16 @@ public class MainController {
                     FROM users
                     """;
 
-                    try (PreparedStatement pstmt = conn.prepareStatement(query)) {
-                        pstmt.setString(1, user_name);
-                        pstmt.setString(2, user_phone_number);
-                        pstmt.setString(3, user_address);
-                        pstmt.setBoolean(4, user_verified_status);
-                        pstmt.setTimestamp(5, new java.sql.Timestamp(user_creation_date.getTime()));
-                        pstmt.setString(6, user_firstname);
-                        pstmt.setString(7, user_lastname);
+                    PreparedStatement pstmt = conn.prepareStatement(query);
+                    pstmt.setString(1, user_name);
+                    pstmt.setString(2, user_phone_number);
+                    pstmt.setString(3, user_address);
+                    pstmt.setBoolean(4, user_verified_status);
+                    pstmt.setTimestamp(5, new java.sql.Timestamp(user_creation_date.getTime()));
+                    pstmt.setString(6, user_firstname);
+                    pstmt.setString(7, user_lastname);
 
-                        pstmt.executeUpdate();
-                    }
+                    pstmt.executeUpdate();
 
                     query =
                     """
@@ -206,9 +211,11 @@ public class MainController {
                 }
             }
         }, backSignUpEvent -> { // Action: Pressing the back button in the sign-up page
+
             mainMenuPage.nextPageName(MainFrame.SELECTACCPAGE);
             selectAccountPage.nextPageName(SelectAccount.SELECTACCPAGE);
             userPage.nextPageName(AccountPage.SIGNUPPAGE);
+
         });
 
         userPage.initMainListeners(shopEvent -> { // Action: Pressing shop button
@@ -226,6 +233,7 @@ public class MainController {
                 } else if (userPage.getBrowseByOption().equals("By product type")) {
                     options.putAll(((User) account).browseByProductType(conn));
                 }
+
             } catch (SQLException e) {
                 JOptionPane.showMessageDialog(null, "Error: " + e.getMessage());
             }
@@ -277,29 +285,28 @@ public class MainController {
             MainFrame.clearInputs(userPage);
             userPage.refreshUserPage(); // Labels of information disappear when clearInputs is called
             initUserListeners();
+
             mainMenuPage.nextPageName(MainFrame.SELECTACCPAGE);
             selectAccountPage.nextPageName(SelectAccount.SELECTACCPAGE);
             userPage.nextMainPageName(UserPage.SHOPPAGE);
+
         }, addToCartEvent -> { // Action: Pressing the add button in the shop page
             User user = (User) account;
             Product selectedProduct = userPage.getSelectedProduct();
+            int orderQuantity = userPage.getQuantity();
 
             if (selectedProduct == null) {
                 JOptionPane.showMessageDialog(null, "Error: Select a product.");
+                return;
+            } else if (orderQuantity == 0) {
                 return;
             }
 
             if (selectedProduct.isListed()) {
                 // Show a pop-up asking for the order quantity
-                int orderQuantity = userPage.getQuantity();
-
-                if (orderQuantity == 0) {
-                    return;
-                }
-
                 if (orderQuantity <= selectedProduct.getQuantity()) {
                     // Add to cart
-                    user.addProductToCart(new OrderContent(selectedProduct.getProductID(), selectedProduct.getName(),orderQuantity, selectedProduct.getPrice()));
+                    user.addProductToCart(new OrderContent(selectedProduct.getProductID(), selectedProduct.getName(), orderQuantity, selectedProduct.getPrice()));
                 } else {
                     JOptionPane.showMessageDialog(null, "Error: Only " + selectedProduct.getQuantity() + " are in stock.");
                 }
@@ -308,7 +315,6 @@ public class MainController {
             }
 
         }, browseChangeEvent -> { // Action: Changing the browse option in the shop page
-
             // See shopEvent for explanation
             Map<String, String> options = new LinkedHashMap<>();
 
@@ -322,8 +328,10 @@ public class MainController {
                 JOptionPane.showMessageDialog(null, "Error: " + e.getMessage());
             }
             userPage.updateBrowseList(options);
+
         }, checkOutEvent -> { // Action: Pressing check out button in the shopping cart page
-            ArrayList<OrderContent> selectedProducts = userPage.getSelectedRecords(new ArrayList<>(((User) account).getShoppingCart()));
+            Set<OrderContent> shoppingCart = ((User) account).getShoppingCart();
+            ArrayList<OrderContent> selectedProducts = userPage.getSelectedRecords(new ArrayList<>(shoppingCart));
 
             if (selectedProducts.isEmpty()) {
                 JOptionPane.showMessageDialog(null, "Error: Select item to checkout.");
@@ -335,13 +343,10 @@ public class MainController {
                 totalPrice += product.getPriceEach() * product.getQuantity();
             }
 
-            int choice = JOptionPane.showConfirmDialog(null,
-    "Total: " + totalPrice + " PHP. Proceed? ", "Checkout", JOptionPane.YES_NO_OPTION);
+            int choice = userPage.getCheckoutConfirmPage(selectedProducts);
 
             try {
                 if (choice == JOptionPane.OK_OPTION) {
-                    Set<OrderContent> shoppingCart = ((User) account).getShoppingCart();
-
                     String query =
                     """
                     SELECT IFNULL(MAX(order_id), 0) + 1 AS id
@@ -374,7 +379,6 @@ public class MainController {
 
                     // Update in the page
                     userPage.updateCartTable(shoppingCart);
-
                 } else {
                     JOptionPane.showMessageDialog(null, "Aborting Checkout...");
                 }
@@ -383,7 +387,8 @@ public class MainController {
             }
 
         }, removeItemEvent -> { // Action: Pressing the remove item button in the shopping cart page
-            ArrayList<OrderContent> selectedProducts = userPage.getSelectedRecords(new ArrayList<>(((User) account).getShoppingCart()));
+            Set<OrderContent> shoppingCart = ((User) account).getShoppingCart();
+            ArrayList<OrderContent> selectedProducts = userPage.getSelectedRecords(new ArrayList<>(shoppingCart));
 
             if (selectedProducts.isEmpty()) {
                 JOptionPane.showMessageDialog(null, "Error: Select item to checkout.");
@@ -392,7 +397,6 @@ public class MainController {
 
             int choice = JOptionPane.showConfirmDialog(null, "Are you sure?", "Remove items", JOptionPane.YES_NO_OPTION);
 
-            Set<OrderContent> shoppingCart = ((User) account).getShoppingCart();
             if (choice == JOptionPane.OK_OPTION) {
                 ((User) account).getShoppingCart().removeIf(cartProduct ->
                 selectedProducts.stream()
@@ -406,33 +410,36 @@ public class MainController {
             
         }, returnEvent -> { // Action: Pressing the return item button in the orders page
             try {
-                ArrayList<OrderContent> itemsList = ((User) account).getOrderItems(conn, ((User) account).getID());
+                User user = (User) account;
+                ArrayList<OrderContent> itemsList = user.getOrderItems(conn, user.getID());
                 userPage.ordersListToProducts(itemsList);
+
                 int option = JOptionPane.showConfirmDialog(null, userPage.getRequestReturnPanel(), "Request Return", JOptionPane.OK_CANCEL_OPTION);
+
                 if (option == JOptionPane.OK_OPTION) {
                     String orderInp = userPage.getOrderInp();
                     String productInp = userPage.getProdInp();
                     String reason = userPage.getComboBoxVal();
                     String desc = userPage.getReturnDesc();
-                    
+
                     if (orderInp.trim().isEmpty() || productInp.trim().isEmpty()) { // When an input field is not filled up
                         JOptionPane.showMessageDialog(null, "Please fill out the required input fields:\nOrder ID\nProduct ID");
-                    }
-                    else {
+                    } else {
                         try {
                             int order_id = Integer.parseInt(orderInp.trim());
                             int product_id = Integer.parseInt(productInp.trim());
-                            
+
                             if (Return.requestReturn(conn, product_id, order_id, ((User) account).getID(), reason, desc)) {
                                 JOptionPane.showMessageDialog(null, "Return request was successful.");
-                            }
-                            else {
+                            } else {
                                 JOptionPane.showMessageDialog(null, "Return request was unsuccessful.");
                             }
                         } catch (NumberFormatException e) {
                             JOptionPane.showMessageDialog(null, "Invalid ID input/s.");
                         }
                     }
+                } else {
+                    JOptionPane.showMessageDialog(null, "Aborting return...");
                 }
             } catch (Exception e) {
                 JOptionPane.showMessageDialog(null, "Error: " + e);
@@ -440,9 +447,13 @@ public class MainController {
 
         }, rateEvent -> { // Action: Pressing the return item button in the orders page
             try {
-                ArrayList<OrderContent> itemsList = ((User) account).getOrderItems(conn, ((User) account).getID());
+                User user = (User) account;
+
+                ArrayList<OrderContent> itemsList = user.getOrderItems(conn, user.getID());
                 userPage.ordersListToProducts(itemsList);
+
                 int option = JOptionPane.showConfirmDialog(null, userPage.getRatingPanel(), "Rate a Product", JOptionPane.OK_CANCEL_OPTION);
+
                 if (option == JOptionPane.OK_OPTION) {
                     String orderInp = userPage.getOrderInp();
                     String productInp = userPage.getProdInp();
@@ -455,7 +466,7 @@ public class MainController {
                             int order_id = Integer.parseInt(orderInp.trim());
                             int product_id = Integer.parseInt(productInp.trim());
 
-                            if (OrderContent.rateProduct(conn, order_id, product_id, ((User) account).getID(), rating)) {
+                            if (OrderContent.rateProduct(conn, order_id, product_id, user.getID(), rating)) {
                                 JOptionPane.showMessageDialog(null, "Rating was successful.");
                             }
                             else {
@@ -465,11 +476,13 @@ public class MainController {
                             JOptionPane.showMessageDialog(null, "Invalid ID input/s.");
                         }
                     }
+                } else {
+                    JOptionPane.showMessageDialog(null, "Aborting Rate...");
                 }
             } catch (Exception e) {
                 JOptionPane.showMessageDialog(null, "Error: " + e);
             }
-            
+
         }, receiveEvent -> { // Action: Pressing the receive item button in the orders page
             try {
                 ArrayList<OrderContent> itemsList = ((User) account).getOrderItems(conn, ((User) account).getID());
@@ -508,19 +521,20 @@ public class MainController {
                     // Retrieve the edited fields and update in the database
                     if (!userPage.getEditedPhone().isEmpty()) {
                         if (!(phoneChecker(userPage.getEditedPhone()))) {
-                            JOptionPane.showMessageDialog(null, "Invalid phone number format.");
+                            JOptionPane.showMessageDialog(null, "Error: Invalid phone number format.");
                             return;
                         }
                     }
-                    user.updateUser(
-                        userPage.getEditedName(),
-                        userPage.getEditedFirstName(),
-                        userPage.getEditedLastName(),
-                        userPage.getEditedAddress(),
-                        userPage.getEditedPhone(),
-                        conn
-                    );
+
+                    user.setName(userPage.getEditedName());
+                    user.setFirstName(userPage.getEditedFirstName());
+                    user.setLastName(userPage.getEditedLastName());
+                    user.setAddress(userPage.getEditedAddress());
+                    user.setPhoneNumber(userPage.getEditedPhone());
+
+                    user.updateAccount(conn);
                     JOptionPane.showMessageDialog(null, "Profile changed...");
+
                 } catch (SQLException e) {
                     JOptionPane.showMessageDialog(null, "Error: " + e.getMessage());
                 }
@@ -579,13 +593,13 @@ public class MainController {
             }
 
             userPage.setProductInfo(
-            "Product info: " + selectedProduct.getProductID() + "\n" +
+            "Product info: (" + selectedProduct.getProductID() + ")\n" +
             "Name: " + selectedProduct.getName() + "\n" +
-            "Price: " + selectedProduct.getPrice() + "\n" +
+            "Price: ₱" + selectedProduct.getPrice() + "\n" +
             "Type: " + selectedProduct.getType() + "\n" +
             "Rating: " + selectedProduct.getRating() + "\n" +
             "Quantity in Stock: " + selectedProduct.getQuantity() + "\n" +
-//            "Listed: " + ((selectedProduct.isListed()) ? "Yes" : "No") + "\n" +
+            "Availability: " + ((selectedProduct.isListed()) ? "Yes" : "No") + "\n" +
             "Description: " + selectedProduct.getDescription());
 
         }, orderSelectEvent -> { // Action: Pressing an order in the orders list in the orders page
@@ -613,29 +627,55 @@ public class MainController {
                         
                         if (rs.next()) {
                             float total = 0.0f;
-                            String text = "<html><b>Order Status:</b> " + rs.getString("o.order_status") + "<br><b>Courier:</b> " + rs.getString("c.courier_name");
-                            text += "<br><b>Date of Purchase:</b> " + sdf.format(rs.getDate("o.purchase_date"));
-                            text += "<br><br><b>[ITEMS ORDERED]</b>";
+                            StringBuilder text = new StringBuilder();
+
+                            text.append(
+                                String.format(
+                                    "<html><b>Order Status:</b> %s<br><b>Courier:</b> %s",
+
+                                    rs.getString("o.order_status"),
+                                    rs.getString("c.courier_name")
+                                )
+                            );
+                            text.append(
+                                String.format(
+                                    "<br><b>Date of Purchase:</b> %s<br><br><b>[ITEMS ORDERED]</b>",
+                                    sdf.format(rs.getDate("o.purchase_date"))
+                                )
+                            );
                             
                             do {
-                                text += "<br><br>" + rs.getString("p.product_name") + " from " + rs.getString("s.seller_name") + "<br><b>Quantity:</b> " + rs.getInt("oc.item_quantity");
+                                text.append(
+                                    String.format(
+                                        "<br><br>%s from %s" + "<br><b>Quantity:</b> %d",
+                                        rs.getString("p.product_name"),
+                                        rs.getString("s.seller_name"),
+                                        rs.getInt("oc.item_quantity")
+                                    )
+                                );
                                 total += rs.getFloat("oc.subtotal");
+
                             } while (rs.next());
+
+                            text.append(
+                                String.format(
+                                    "<br><br><b>TOTAL:</b> PHP %.2f </html",
+                                    total
+                                )
+                            );
                             
-                            text += "<br><br><b>TOTAL:</b> PHP " + String.format("%.2f", total) + "</html>";
-                            
-                            userPage.setOrderInfoLbl(text);
+                            userPage.setOrderInfoLbl(text.toString());
                         }
                     } catch (Exception e) {
                         JOptionPane.showMessageDialog(null, "Error: " + e.getMessage());
                     }
-                    
-                    
-                }
-                else if (userPage.getOrdersViewOption().equals("Returns") && val != null) {
+
+                } else if (userPage.getOrdersViewOption().equals("Returns") && val != null) {
                     String[] ids = val.split(" ");
+
                     int order_id = Integer.parseInt(ids[0]);
                     int product_id = Integer.parseInt(ids[1]);
+
                     try {
                         String query = 
                             """
@@ -673,9 +713,9 @@ public class MainController {
             String seller_address = sellerPage.getSellerAddress();
             String seller_phone_number = sellerPage.getSellerPhone();
             
-            if (seller_name.isEmpty())
+            if (seller_name.isEmpty()) {
                 JOptionPane.showMessageDialog(null, "Please fill out the required fields:\nName");
-            else {
+            } else {
                 if (!phoneChecker(seller_phone_number)) {
                     JOptionPane.showMessageDialog(null, "Error: Invalid phone number format.");
                     return;
@@ -692,15 +732,14 @@ public class MainController {
                     FROM sellers
                     """;
 
-                    try (PreparedStatement pstmt = conn.prepareStatement(query)) {
-                        pstmt.setString(1, seller_name);
-                        pstmt.setString(2, seller_address);
-                        pstmt.setBoolean(3, seller_verified_status);
-                        pstmt.setString(4, seller_phone_number);
-                        pstmt.setTimestamp(5, new java.sql.Timestamp(seller_creation_date.getTime()));
+                    PreparedStatement pstmt = conn.prepareStatement(query);
+                    pstmt.setString(1, seller_name);
+                    pstmt.setString(2, seller_address);
+                    pstmt.setBoolean(3, seller_verified_status);
+                    pstmt.setString(4, seller_phone_number);
+                    pstmt.setTimestamp(5, new java.sql.Timestamp(seller_creation_date.getTime()));
 
-                        pstmt.executeUpdate();
-                    }
+                    pstmt.executeUpdate();
 
                     query =
                     """
@@ -715,17 +754,20 @@ public class MainController {
                             seller_id = rs.getInt(1);
                         }
                     }
-                    this.account = new Seller(seller_id, seller_name, seller_address, seller_phone_number, seller_creation_date, seller_verified_status);
+
+                    account = new Seller(seller_id, seller_name, seller_address, seller_phone_number, seller_creation_date, seller_verified_status);
                     sellerPage.nextPageName(AccountPage.MAINPAGE);
 
                 } catch (SQLException e) {
                     JOptionPane.showMessageDialog(null, "Error: " + e.getMessage());
                 }
             }
+
         }, backSignUpEvent -> {
             mainMenuPage.nextPageName(MainFrame.SELECTACCPAGE);
             selectAccountPage.nextPageName(SelectAccount.SELECTACCPAGE);
             sellerPage.nextPageName(AccountPage.SIGNUPPAGE);
+
         });
         sellerPage.initMainListeners(generateEvent -> {
             sellerPage.showGenerate();
@@ -734,24 +776,18 @@ public class MainController {
             sellerPage.showEditAccount();
             sellerPage.updateEditAccount((Seller) account);
             sellerPage.setDisableButtons();
-            /*
-            int result = sellerPage.showEditAccountOptionPane();
-            sellerPage.updateEditAccount((Seller) account);
-            if (result==JOptionPane.OK_OPTION){
-                ((Seller) account).setName(sellerPage.getSellerName());
-                ((Seller) account).setAddress(sellerPage.getSellerAddress());
-                ((Seller) account).setPhoneNumber(sellerPage.getSellerPhone());
-                ((Seller) account).updateAccount(conn);
-            }
-             */
+
         }, logoutEvent -> {
             mainMenuPage.nextPageName(MainFrame.SELECTACCPAGE);
             selectAccountPage.nextPageName(SelectAccount.SELECTACCPAGE);
             sellerPage.nextPageName(SellerPage.SIGNUP);
+
             sellerPage.setBackSellerBox();
             sellerPage.setProductRefundInfo("");
+
         }, listChangeEvent -> {
             sellerPage.setInvisibleBtns(sellerPage.getSellerCRBox());
+
             try {
                 if (sellerPage.getSellerCRBox().equals("Products")) {
                     sellerPage.updateSellerProductList(((Seller) account).productList(this.conn));
@@ -761,16 +797,15 @@ public class MainController {
             } catch (SQLException e) {
                 JOptionPane.showMessageDialog(null, "Error: " + e.getMessage());
             }
+
         }, listSelectEvent -> {
             if (sellerPage.getSellerCRBox().equals("Products")) {
                 if (sellerPage.getSelectedOption() != null) {
-                    List<Integer> Ids = Arrays.stream(sellerPage.getSelectedOption()
-                                    .split(" "))
+                    List<Integer> Ids =
+                            Arrays.stream(sellerPage.getSelectedOption()
+                            .split(" "))
                             .map(Integer::parseInt)
                             .toList();
-
-                    Product product;
-
                     try {
                         String query = """
                                 SELECT *
@@ -781,32 +816,35 @@ public class MainController {
                         PreparedStatement pstmt = conn.prepareStatement(query);
                         pstmt.setInt(1, Ids.get(0));
                         pstmt.setInt(2, Ids.get(1));
-                        product = ((Seller) account).getSellerProduct(pstmt);
+
+                        Product product = ((Seller) account).getSellerProduct(pstmt);
 
                         sellerPage.setProductRefundInfo(
-                                 "<html><b> Product Info </b> <br>\n" +
-                                        "<b> Product ID: </b>" + product.getProductID() + "<br>" +
-                                        "<b> Product Name: </b>" + product.getName() + "<br>" +
-                                        "<b> Product Price: </b>" + product.getPrice() + "<br>" +
-                                        "<b> Product Quantity: </b>" + product.getQuantity() + "<br>" +
-                                        "<b> Product Rating: </b>" + product.getRating() + "<br>" +
-                                        "<b> Product Listed: </b>" + product.isListed() + "<br>" +
-                                        "<b> Product Type: </b>" + product.getDescription() + "<br>" +
-                                        "<b> Product Description: </b>" + product.getType() + "</html>"
+                            "<html><b> Product Info </b> <br>\n" +
+                            "<b> Product ID: </b>" + product.getProductID() + "<br>" +
+                            "<b> Product Name: </b>" + product.getName() + "<br>" +
+                            "<b> Product Price: </b>" + product.getPrice() + "<br>" +
+                            "<b> Product Quantity: </b>" + product.getQuantity() + "<br>" +
+                            "<b> Product Rating: </b>" + product.getRating() + "<br>" +
+                            "<b> Product Listed: </b>" + product.isListed() + "<br>" +
+                            "<b> Product Type: </b>" + product.getDescription() + "<br>" +
+                            "<b> Product Description: </b>" + product.getType() + "</html>"
                         );
 
                     } catch (SQLException e) {
                         JOptionPane.showMessageDialog(null, "Error: " + e.getMessage());
                     }
+                } else {
+                    JOptionPane.showMessageDialog(null, "Error: Select a product first.");
                 }
+
             } else if (sellerPage.getSellerCRBox().equals("Refunds")) {
                 if (sellerPage.getSelectedOption() != null) {
-                    List<Integer> Ids = Arrays.stream(sellerPage.getSelectedOption()
-                                    .split(" "))
+                    List<Integer> Ids =
+                            Arrays.stream(sellerPage.getSelectedOption()
+                            .split(" "))
                             .map(Integer::parseInt)
                             .toList();
-
-                    Return refund;
 
                     try {
                         String query = """
@@ -818,7 +856,7 @@ public class MainController {
                         PreparedStatement pstmt = conn.prepareStatement(query);
                         pstmt.setInt(1, Ids.get(0));
                         pstmt.setInt(2, Ids.get(1));
-                        refund = ((Seller) account).getSellerRefund(pstmt);
+                        Return refund = ((Seller) account).getSellerRefund(pstmt);
 
                         sellerPage.setProductRefundInfo(
                                 "<html><b> Refund Info </b><br>\n" +
@@ -834,6 +872,8 @@ public class MainController {
                     } catch (SQLException e) {
                         JOptionPane.showMessageDialog(null, "Error: " + e.getMessage());
                     }
+                } else {
+                    JOptionPane.showMessageDialog(null, "Error: Select a refund first.");
                 }
             }
         }, addEvent -> { // Add product
@@ -857,11 +897,14 @@ public class MainController {
         }, editProdEvent -> {
 
             if (sellerPage.getSelectedOption()!=null) {
+
                 sellerPage.showEditProduct();
                 sellerPage.setDisableButtons();
+
                 try {
-                    List<Integer> Ids = Arrays.stream(sellerPage.getSelectedOption()
-                                    .split(" "))
+                    List<Integer> Ids =
+                            Arrays.stream(sellerPage.getSelectedOption()
+                            .split(" "))
                             .map(Integer::parseInt)
                             .toList();
 
@@ -881,99 +924,118 @@ public class MainController {
                 } catch (SQLException e) {
                     JOptionPane.showMessageDialog(null, "Error: " + e.getMessage());
                 }
-            }else{
-                JOptionPane.showMessageDialog(null, "No Product Selected!", "Failure", JOptionPane.ERROR_MESSAGE);
+
+            } else {
+                JOptionPane.showMessageDialog(null, "Error: No Product Selected!", "Error", JOptionPane.ERROR_MESSAGE);
             }
         }, cancelEvent -> sellerPage.disposeNewWindow(),
 
         saveProfileEvent -> {
-            switch (JOptionPane.showConfirmDialog(null, "Are you sure?", "Prompt", JOptionPane.OK_CANCEL_OPTION)){
-                case JOptionPane.OK_OPTION -> {
-                    sellerPage.updateEditAccount((Seller) account);
-                    if (sellerPage.getSellerName().isEmpty())
-                        JOptionPane.showMessageDialog(null, "Please fill out the required fields:\nName");
-                    else {
-                        if (!phoneChecker(sellerPage.getSellerPhone())) {
-                            JOptionPane.showMessageDialog(null, "Error: Invalid phone number format.");
-                            return;
-                        }
-                        ((Seller) account).setName(sellerPage.getSellerName());
-                        ((Seller) account).setAddress(sellerPage.getSellerAddress());
-                        ((Seller) account).setPhoneNumber(sellerPage.getSellerPhone());
-                        ((Seller) account).updateAccount(conn);
-                        sellerPage.disposeNewWindow();
+            int choice = JOptionPane.showConfirmDialog(null, "Are you sure?", "Prompt", JOptionPane.OK_CANCEL_OPTION);
+
+            if (choice == JOptionPane.OK_OPTION) {
+                Seller seller = (Seller) account;
+
+                sellerPage.updateEditAccount(seller);
+
+                if (sellerPage.getSellerName().isEmpty()) {
+                    JOptionPane.showMessageDialog(null, "Please fill out the required fields:\nName");
+                } else {
+
+                    if (!phoneChecker(sellerPage.getSellerPhone())) {
+                        JOptionPane.showMessageDialog(null, "Error: Invalid phone number format.");
+                        return;
                     }
+
+                    seller.setName(sellerPage.getSellerName());
+                    seller.setAddress(sellerPage.getSellerAddress());
+                    seller.setPhoneNumber(sellerPage.getSellerPhone());
+
+                    try {
+                        account.updateAccount(conn);
+                    } catch (SQLException e) {
+                        JOptionPane.showMessageDialog(null, "Error: " + e.getMessage());
+                    }
+
+                    sellerPage.disposeNewWindow();
                 }
             }
         }, addProductEvent -> {
-            switch (JOptionPane.showConfirmDialog(null, "Are you sure?", "Prompt", JOptionPane.OK_CANCEL_OPTION)){
-                case JOptionPane.OK_OPTION -> {
-                    if (sellerPage.getSelectedOption()!=null) {
+            int choice = JOptionPane.showConfirmDialog(null, "Are you sure?", "Prompt", JOptionPane.OK_CANCEL_OPTION);
+
+            if (choice == JOptionPane.OK_OPTION) {
+                try {
+                    if (sellerPage.getSelectedOption() != null) {
                         Product product = new Product();
-                        product.setSellerID(((Seller)account).getID());
+
+                        product.setSellerID(((Seller) account).getID());
                         product.setName(sellerPage.getProductName());
                         product.setPrice(sellerPage.getProductPrice());
                         product.setDescription(sellerPage.getProductDesc());
                         product.setQuantity(sellerPage.getProductQuantity());
                         product.setType(sellerPage.getProductType());
-                        product.isListed();
+                        product.updateListedStatus();
+
                         product.sendToDB(conn);
                     }
-                    try {
-                        sellerPage.updateSellerProductList(((Seller) account).productList(this.conn));
-                    } catch (SQLException e) {
-                        throw new RuntimeException(e);
-                    }
-                    sellerPage.disposeNewWindow();
+
+                    sellerPage.updateSellerProductList(((Seller) account).productList(this.conn));
+
+                } catch (SQLException e) {
+                    JOptionPane.showMessageDialog(null, "Error: " + e.getMessage());
                 }
+
+                sellerPage.disposeNewWindow();
             }
         }, saveProductEvent -> {
-            switch (JOptionPane.showConfirmDialog(null, "Are you sure?", "Prompt", JOptionPane.OK_CANCEL_OPTION)){
-                case JOptionPane.OK_OPTION -> {
-                    List<Integer> Ids = Arrays.stream(sellerPage.getSelectedOption()
-                                    .split(" "))
-                            .map(Integer::parseInt)
-                            .toList();
+            int choice = JOptionPane.showConfirmDialog(null, "Are you sure?", "Prompt", JOptionPane.OK_CANCEL_OPTION);
+            if (choice == JOptionPane.OK_OPTION){
+                List<Integer> Ids =
+                    Arrays.stream(sellerPage.getSelectedOption()
+                    .split(" "))
+                    .map(Integer::parseInt)
+                    .toList();
 
-                    try {
-                        String query = """
-                                UPDATE products
-                                SET product_name = ?
-                                    product_price = ?
-                                    product_type = ?
-                                    quantity_stocked = ?
-                                    description = ?
-                                    listed_status = ?
-                                WHERE product_id = ? AND seller_id = ?
-                                LIMIT 1;
-                                """;
-                        PreparedStatement pstmt = conn.prepareStatement(query);
-                        ((Product) account).setQuantity(sellerPage.getProductQuantity());
-                        pstmt.setString(1, sellerPage.getProductName());
-                        pstmt.setFloat(2, sellerPage.getProductPrice());
-                        pstmt.setString(3, sellerPage.getProductType());
-                        pstmt.setInt(4, sellerPage.getProductQuantity());
-                        pstmt.setString(5, sellerPage.getProductDesc());
-                        pstmt.setBoolean(6, ((Product) account).isListed());
-                        pstmt.setInt(7, Ids.get(0));
-                        pstmt.setInt(8, Ids.get(1));
-                        pstmt.executeUpdate();
-                        sellerPage.updateSellerProductList(((Seller) account).productList(this.conn));
-                    }catch (SQLException e) {
-                        JOptionPane.showMessageDialog(null, "Error: " + e.getMessage());
-                    }
-                    sellerPage.disposeNewWindow();
+                try {
+                    String query =
+                    """
+                    UPDATE products
+                    SET product_name = ?
+                        product_price = ?
+                        product_type = ?
+                        quantity_stocked = ?
+                        description = ?
+                        listed_status = ?
+                    WHERE product_id = ? AND seller_id = ?
+                    LIMIT 1;
+                    """;
+                    PreparedStatement pstmt = conn.prepareStatement(query);
+                    ((Product) account).setQuantity(sellerPage.getProductQuantity());
+
+                    pstmt.setString(1, sellerPage.getProductName());
+                    pstmt.setFloat(2, sellerPage.getProductPrice());
+                    pstmt.setString(3, sellerPage.getProductType());
+                    pstmt.setInt(4, sellerPage.getProductQuantity());
+                    pstmt.setString(5, sellerPage.getProductDesc());
+                    pstmt.setBoolean(6, ((Product) account).isListed());
+                    pstmt.setInt(7, Ids.get(0));
+                    pstmt.setInt(8, Ids.get(1));
+
+                    pstmt.executeUpdate();
+                    sellerPage.updateSellerProductList(((Seller) account).productList(this.conn));
+
+                } catch (SQLException e) {
+                    JOptionPane.showMessageDialog(null, "Error: " + e.getMessage());
                 }
+                sellerPage.disposeNewWindow();
             }
         }, removeProductEvent -> {
-            if (sellerPage.getSelectedOption()!=null) {
+            if (sellerPage.getSelectedOption() != null) {
                 try {
                     List<Integer> Ids = Arrays.stream(sellerPage.getSelectedOption()
                                     .split(" "))
                             .map(Integer::parseInt)
                             .toList();
-
-                    Product product;
 
                     String query = """
                             UPDATE products
@@ -989,11 +1051,11 @@ public class MainController {
                 } catch (SQLException e) {
                     JOptionPane.showMessageDialog(null, "Error: " + e.getMessage());
                 }
-            }else{
+            } else {
                 JOptionPane.showMessageDialog(null, "No Product Selected!", "Failure", JOptionPane.ERROR_MESSAGE);
             }
         }, approveReturnEvent -> {
-            if (sellerPage.getSelectedOption()!=null) {
+            if (sellerPage.getSelectedOption() != null) {
                 switch (JOptionPane.showConfirmDialog(null, "Are you sure?", "Prompt", JOptionPane.OK_CANCEL_OPTION)){
                     case JOptionPane.OK_OPTION -> {
                         List<Integer> Ids = Arrays.stream(sellerPage.getSelectedOption()
@@ -1012,12 +1074,12 @@ public class MainController {
                             pstmt.setInt(3, Ids.get(1));
                             pstmt.executeUpdate();
                             sellerPage.updateSellerRefundList(((Seller) account).refundList(this.conn));
-                        }catch (SQLException e) {
+                        } catch (SQLException e) {
                             JOptionPane.showMessageDialog(null, "Error: " + e.getMessage());
                         }
                     }
                 }
-            }else{
+            } else {
                 JOptionPane.showMessageDialog(null, "No Refund Selected!", "Failure", JOptionPane.ERROR_MESSAGE);
             }
         }, rejectReturnEvent -> {
@@ -1046,7 +1108,7 @@ public class MainController {
                         }
                     }
                 }
-            }else{
+            } else {
                 JOptionPane.showMessageDialog(null, "No Refund Selected!", "Failure", JOptionPane.ERROR_MESSAGE);
             }
         }, generateSelected -> {
@@ -1054,19 +1116,21 @@ public class MainController {
                 if (sellerPage.getSellerReportBox().equals("Sales Report")) {
                     int month = sellerPage.getDateMonth();
                     int year = sellerPage.getDateYear();
-                    String query = """
-                                               SELECT COUNT(DISTINCT o.order_id) AS count, SUM(oc.subtotal) AS total
-                                               FROM order_contents oc
-                                               JOIN products p ON oc.product_id = p.product_id
-                                               JOIN orders o ON o.order_id = oc.order_id
-                                               LEFT JOIN `returns` r ON r.order_id = oc.order_id AND r.product_id = oc.product_id
-                                               WHERE p.seller_id = ?
-                                               AND YEAR(o.purchase_date) = ?
-                                               AND MONTH(o.purchase_date) = ?
-                                               AND o.order_status = 'DELIVERED'
-                                               AND (r.return_status IS NULL OR r.return_status != 'REFUNDED')
-                                               GROUP BY o.order_id;
-                                            """;
+
+                    String query =
+                    """
+                    SELECT COUNT(DISTINCT o.order_id) AS count, SUM(oc.subtotal) AS total
+                    FROM order_contents oc
+                    JOIN products p ON oc.product_id = p.product_id
+                    JOIN orders o ON o.order_id = oc.order_id
+                    LEFT JOIN `returns` r ON r.order_id = oc.order_id AND r.product_id = oc.product_id
+                    WHERE p.seller_id = ?
+                    AND YEAR(o.purchase_date) = ?
+                    AND MONTH(o.purchase_date) = ?
+                    AND o.order_status = 'DELIVERED'
+                    AND (r.return_status IS NULL OR r.return_status != 'REFUNDED')
+                    GROUP BY o.order_id;
+                    """;
 
                     PreparedStatement ps = conn.prepareStatement(query);
                     ps.setInt(1, ((Seller)account).getID());
@@ -1082,10 +1146,12 @@ public class MainController {
                             sumOfEarnings += rs.getInt("total");
                         } while(rs.next());
                     }
+
                     sellerPage.setProductRefundInfo(
-                            "<html><b>Sales Report for " + year + "</b><br>" +
-                            "<b>Total orders handled: </b>" + transactions +"<br>" +
-                            "<b>Total earnings: Php </b>" + sumOfEarnings + "</html>");
+                        "<html><b>Sales Report for " + year + "</b><br>" +
+                        "<b>Total orders handled: </b>" + transactions +"<br>" +
+                        "<b>Total earnings: Php </b>" + sumOfEarnings + "</html>"
+                    );
                     sellerPage.disposeNewWindow();
 
                 } else if (sellerPage.getSellerReportBox().equals("Credibility Report")) {
@@ -1112,15 +1178,15 @@ public class MainController {
                     }
 
                     query =
-                            """
-                            SELECT COUNT(product_id) AS numOfRefunds
-                            FROM returns r
-                            WHERE 	r.return_status = 'REFUNDED' AND
-                                    YEAR(r.return_date) = ? AND
-                                    product_id IN (SELECT product_id
-                                    FROM products p
-                                    WHERE seller_id = ?);
-                            """;
+                        """
+                        SELECT COUNT(product_id) AS numOfRefunds
+                        FROM returns r
+                        WHERE 	r.return_status = 'REFUNDED' AND
+                                YEAR(r.return_date) = ? AND
+                                product_id IN (SELECT product_id
+                                FROM products p
+                                WHERE seller_id = ?);
+                        """;
 
                     pstmt = conn.prepareStatement(query);
                     pstmt.setInt(1, year);
@@ -1130,9 +1196,12 @@ public class MainController {
                     while (rstmt.next()) {
                         refunds = rstmt.getInt("numOfRefunds");
                     }
-                    sellerPage.setProductRefundInfo("<html><b>Credibility Report for " + ((Seller)account).getName() + " on Year: " + year + "</b><br>" +
+
+                    sellerPage.setProductRefundInfo(
+                            "<html><b>Credibility Report for " + ((Seller) account).getName() + " on Year: " + year + "</b><br>" +
                             "<b>Overall Average Rating of Products: </b>" + average + "<br>" +
-                            "<b>Total number of Refunds: </b>" + refunds + "</html");
+                            "<b>Total number of Refunds: </b>" + refunds + "</html"
+                    );
                     sellerPage.disposeNewWindow();
 
                 } else if (sellerPage.getSellerReportBox().equals("Product Popularity Report")) {
@@ -1175,6 +1244,7 @@ public class MainController {
             } catch (SQLException e) {
                 JOptionPane.showMessageDialog(null, "Error: " + e.getMessage());
             }
+
         }, listReportEvent -> {
             if (sellerPage.getSellerReportBox().equals("Sales Report")) {
                 sellerPage.enableMonthTextField();
@@ -1183,6 +1253,7 @@ public class MainController {
             } else if (sellerPage.getSellerReportBox().equals("Product Popularity Report")) {
                 sellerPage.enableMonthTextField();
             }
+
         }, backButtonEvent -> {
             sellerPage.nextMainPageName(SellerPage.PRODUCTLIST);
             sellerPage.setEnableTopButtons();
@@ -1194,57 +1265,55 @@ public class MainController {
             String courier_name = courierPage.getCourierName();
             String courier_email_address = courierPage.getCourierEmail();
             String courier_address = courierPage.getCourierAddress();
-            boolean noError = true;
 
-            if (courier_name.isEmpty())
+            if (courier_name.isEmpty()) {
                 JOptionPane.showMessageDialog(null, "Please fill out the required fields:\nName");
-            else {
+            } else {
+
                 if (!courier_email_address.isEmpty()) {
-                    noError = emailChecker(courier_email_address);
+                    if(!emailChecker(courier_email_address)) {
+                        JOptionPane.showMessageDialog(null, "Error: Invalid email format.");
+                    }
                 }
 
                 boolean courier_verified_status = !courier_email_address.isEmpty() && !courier_address.isEmpty();
 
-                if (noError) {
-                    try {
-                        String query =
-                        """
-                        INSERT INTO couriers (courier_id, courier_name, courier_email_address, courier_address, courier_verified_status)
-                        SELECT IFNULL(MAX(courier_id), 0) + 1, ?, ?, ?, ?
-                        FROM couriers
-                        """;
+                try {
+                    String query =
+                    """
+                    INSERT INTO couriers (courier_id, courier_name, courier_email_address, courier_address, courier_verified_status)
+                    SELECT IFNULL(MAX(courier_id), 0) + 1, ?, ?, ?, ?
+                    FROM couriers
+                    """;
 
-                        try (PreparedStatement pstmt = conn.prepareStatement(query)) {
-                            pstmt.setString(1, courier_name);
-                            pstmt.setString(2, courier_email_address);
-                            pstmt.setString(3, courier_address);
-                            pstmt.setBoolean(4, !(courier_address.isEmpty() || courier_email_address.isEmpty()));
-                                                                    // ^ verifies the courier
-                            pstmt.executeUpdate();
+                    PreparedStatement pstmt = conn.prepareStatement(query);
+                    pstmt.setString(1, courier_name);
+                    pstmt.setString(2, courier_email_address);
+                    pstmt.setString(3, courier_address);
+                    pstmt.setBoolean(4, !(courier_address.isEmpty() || courier_email_address.isEmpty()));
+                                                            // ^ verifies the courier
+                    pstmt.executeUpdate();
+
+                    query =
+                    """
+                    SELECT MAX(courier_id)
+                    FROM couriers
+                    """;
+
+                    int courier_id = 1;
+                    try (PreparedStatement selectStmt = conn.prepareStatement(query);
+                         ResultSet rs = selectStmt.executeQuery()) {
+                        if (rs.next()) {
+                            courier_id = rs.getInt(1);
                         }
-
-                        query =
-                        """
-                        SELECT MAX(courier_id)
-                        FROM couriers
-                        """;
-
-                        int courier_id = 1;
-                        try (PreparedStatement selectStmt = conn.prepareStatement(query);
-                             ResultSet rs = selectStmt.executeQuery()) {
-                            if (rs.next()) {
-                                courier_id = rs.getInt(1);
-                            }
-                        }
-
-                        this.account = new Courier(courier_id, courier_name, courier_email_address, courier_address, courier_verified_status);
-                        courierPage.nextPageName(AccountPage.MAINPAGE);
-
-                    } catch (SQLException e){
-                        JOptionPane.showMessageDialog(null, "Error: " + e.getMessage());
                     }
+
+                    account = new Courier(courier_id, courier_name, courier_email_address, courier_address, courier_verified_status);
+                    courierPage.nextPageName(AccountPage.MAINPAGE);
+
+                } catch (SQLException e){
+                    JOptionPane.showMessageDialog(null, "Error: " + e.getMessage());
                 }
-                else JOptionPane.showMessageDialog(null, "Error: Invalid email format.");
             }
         }, backSignUpEvent -> {
             courierPage.clearTextFields();
@@ -1258,47 +1327,65 @@ public class MainController {
                     int year = Integer.parseInt(courierPage.getCourierYear());
                     int month = Integer.parseInt(courierPage.getCourierMonth());
                     courierPage.clearCourierDates();
-                    if(year > Integer.parseInt(Year.now().toString()) || month < 1 || month > 12)
+
+                    if (year > Integer.parseInt(Year.now().toString()) || month < 1 || month > 12) {
                         throw new IllegalArgumentException();
+                    }
+
                     courierPage.updateAOTable(((Courier) account).showCompletedOrders(conn, year, month));
                     courierPage.updateARTable(((Courier) account).showCompletedReturns(conn, year, month));
                     courierPage.nextMainPageName(CourierPage.ACTIVITYPAGE);
-                } catch (Exception e) {
+
+                } catch (IllegalArgumentException e) {
                     JOptionPane.showMessageDialog(null, "Error: Invalid Arguments");
                 }
+
             }, orderLtr -> {
                 courierPage.updateOOTable(((Courier)account).showOngoingOrders(conn));
                 courierPage.updateORTable(((Courier)account).showOngoingReturns(conn));
                 courierPage.nextMainPageName(CourierPage.ONGOINGORDERSPAGE);
-            }, actEvent -> {
-                courierPage.nextMainPageName(CourierPage.DATEPAGE);
-            }, deliverEvent -> {
+
+            }, actEvent -> courierPage.nextMainPageName(CourierPage.DATEPAGE)
+
+            , deliverEvent -> {
                 int update = courierPage.getRowToUpdate();
-                if(update != -1) {
+
+                if (update != -1) {
                     ((Courier) account).deliverOrder(conn, update);
                     JOptionPane.showMessageDialog(null, "Delivery Successful");
                     courierPage.updateOOTable(((Courier) account).showOngoingOrders(conn));
+                } else {
+                    JOptionPane.showMessageDialog(null, "Error: Invalid or no row selected");
                 }
-                else JOptionPane.showMessageDialog(null, "Error: Invalid or no row selected");
+
             }, editEvent -> {
                 courierPage.nextMainPageName(CourierPage.EDITPAGE);
                 courierPage.updateProfilePage((Courier) account);
+
             }, saveEvent -> {
                 try {
+                    Courier courier = (Courier) account;
+
                     String updName = courierPage.getProfileCourierName();
                     String updEmail = courierPage.getProfileCourierEmail();
-                    String updAddress = courierPage.getProfileCourierAddress();
 
-                    if(!updName.isEmpty() && (updEmail.isEmpty() || emailChecker(updEmail))) {
-                        ((Courier) account).updateCourierAccount(conn, updName, updEmail, updAddress);
-                        JOptionPane.showMessageDialog(null, "Success: Account information changed.");
-                    }
-                    else
+                    if (!updName.isEmpty() && (updEmail.isEmpty() || emailChecker(updEmail))) {
+                        courier.setName(courierPage.getProfileCourierName());
+                        courier.setEmail(courierPage.getProfileCourierEmail());
+                        courier.setAddress(courierPage.getProfileCourierAddress());
+
+                        courier.updateAccount(conn);
+                        JOptionPane.showMessageDialog(null, "Profile changed...");
+
+                    } else {
                         throw new IllegalArgumentException("Invalid arguments.");
-                } catch (Exception e) {
+                    }
+
+                } catch (SQLException | IllegalArgumentException e) {
                     JOptionPane.showMessageDialog(null, "Error: " + e.getMessage());
                 }
-            }, logOutEvent -> {
+
+                }, logOutEvent -> {
                 mainMenuPage.nextPageName(MainFrame.SELECTACCPAGE);
                 selectAccountPage.nextPageName(SelectAccount.SELECTACCPAGE);
         });
@@ -1311,8 +1398,6 @@ public class MainController {
         Pattern pattern = Pattern.compile(regex);
         Matcher matcher = pattern.matcher(courier_email_address);
 
-        //            courier_email_address = courierPage.getCourierEmail();
-        //            matcher = pattern.matcher(courier_email_address);
         return matcher.matches();
     }
 
