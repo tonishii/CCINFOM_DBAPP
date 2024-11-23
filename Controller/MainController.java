@@ -1278,6 +1278,7 @@ public class MainController {
                 if (!courier_email_address.isEmpty()) {
                     if(!emailChecker(courier_email_address)) {
                         JOptionPane.showMessageDialog(null, "Error: Invalid email format.");
+                        return;
                     }
                 }
 
@@ -1333,7 +1334,7 @@ public class MainController {
                     int month = Integer.parseInt(courierPage.getCourierMonth());
                     courierPage.clearCourierDates();
 
-                    if (year > Integer.parseInt(Year.now().toString()) || month < 1 || month > 12) {
+                    if (year > Integer.parseInt(Year.now().toString()) || !(year >= 1000 && year < 9999) || month < 1 || month > 12) {
                         throw new IllegalArgumentException();
                     }
 
